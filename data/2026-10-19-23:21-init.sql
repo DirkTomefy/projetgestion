@@ -276,3 +276,48 @@ CREATE TABLE traitement_detail (
     id_user                         INT NULL REFERENCES "user"(id),
     score                           NUMERIC(5,2) NULL
 );
+
+
+-- =====================================================================
+-- BLOC 3 : SÉLECTION ET EMBAUCHE
+-- =====================================================================
+
+CREATE TABLE point_condition (
+    id      SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+            CHECK (libelle IN ('SALAIRE', 'DATE_DEBUT', 'HORAIRE', 'LIEU',
+                               'CONDITIONS', 'TYPE_CONTRAT'))
+);
+
+CREATE TABLE proposition_embauche (
+    id                    SERIAL PRIMARY KEY,
+    id_candidature        INT NOT NULL REFERENCES candidatures(id),
+    id_statut_actuel      VARCHAR(20) NOT NULL DEFAULT 'PROPOSER'
+                          CHECK (id_statut_actuel IN ('PROPOSER', 'REFUSER', 'ACCEPTER')),
+    id_besoin_poste       INT NOT NULL REFERENCES besoin_poste(id),
+    date_limite_reponse   DATE NULL
+);
+
+CREATE TABLE proposition_condition (
+    id                 SERIAL PRIMARY KEY,
+    id_proposition     INT NOT NULL REFERENCES proposition_embauche(id),
+    id_point_condition INT NOT NULL REFERENCES point_condition(id),
+    valeur             TEXT NULL,
+    accepte            BOOLEAN NULL,
+    UNIQUE (id_proposition, id_point_condition)
+);
+
+CREATE TABLE relance_condition (
+    id                        SERIAL PRIMARY KEY,
+    id_proposition_condition  INT NOT NULL REFERENCES proposition_condition(id),
+    nouvelle_valeur           TEXT NULL,
+    statut                    VARCHAR(30) NULL
+);
+
+CREATE TABLE histo_proposition_embauche (
+    id                        SERIAL PRIMARY KEY,
+    id_proposition_embauche   INT NOT NULL REFERENCES proposition_embauche(id),
+    id_statut                 VARCHAR(20) NOT NULL
+                              CHECK (id_statut IN ('PROPOSER', 'REFUSER', 'ACCEPTER')),
+    date                      TIMESTAMP NOT NULL DEFAULT NOW()
+);
