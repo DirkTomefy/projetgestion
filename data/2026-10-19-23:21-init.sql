@@ -402,3 +402,13 @@ CREATE TABLE onboarding_details (
     date_realisation      DATE NULL,
     commentaire           TEXT NULL
 );
+
+-- =====================================================================
+-- INDEX UTILES
+-- =====================================================================
+CREATE INDEX idx_unite_mere        ON unite_orga(id_unite_mere);
+CREATE INDEX idx_poste_unite       ON poste(id_unite_orga);
+CREATE INDEX idx_affectation_poste ON affectation(id_poste);
+CREATE INDEX idx_besoin_unite      ON besoin(id_unite_orga);
+CREATE INDEX idx_candidature_offre ON candidatures(id_offre_emploi);
+CREATE INDEX idx_contrat_affect    ON contrat(id_affectation);
