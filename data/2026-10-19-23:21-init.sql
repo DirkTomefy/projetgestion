@@ -321,3 +321,84 @@ CREATE TABLE histo_proposition_embauche (
                               CHECK (id_statut IN ('PROPOSER', 'REFUSER', 'ACCEPTER')),
     date                      TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+
+-- =====================================================================
+-- BLOC 4 : CONTRAT ET ONBOARDING
+-- =====================================================================
+
+CREATE TABLE contrat (
+    id                   SERIAL PRIMARY KEY,
+    reference            VARCHAR(50) NOT NULL UNIQUE,
+    id_affectation       INT NOT NULL REFERENCES affectation(id),
+    id_proposition       INT NULL REFERENCES proposition_embauche(id),
+    id_type              INT NOT NULL REFERENCES type_contrat(id),
+    date_debut           DATE NOT NULL,
+    date_fin_prevue      DATE NULL,
+    date_fin_effective   DATE NULL,   -- NULL pour CDI, mise à jour en cas de rupture
+    statut_actuel        VARCHAR(30) NOT NULL,
+    id_contrat_precedent INT NULL REFERENCES contrat(id),
+    id_document          INT NULL REFERENCES document(id)
+);
+
+CREATE TABLE contrat_details (
+    id                   SERIAL PRIMARY KEY,
+    id_contrat           INT NOT NULL REFERENCES contrat(id),
+    id_point_condition   INT NOT NULL REFERENCES point_condition(id),
+    valeur               TEXT NULL
+);
+
+CREATE TABLE contrat_remuneration (
+    id          SERIAL PRIMARY KEY,
+    id_contrat  INT NOT NULL REFERENCES contrat(id),
+    date_effet  DATE NOT NULL,
+    salaire     NUMERIC(15,2) NOT NULL,
+    id_echelon  INT NULL REFERENCES echelon_metier(id)
+);
+
+CREATE TABLE etat_contrat (
+    id         SERIAL PRIMARY KEY,
+    id_contrat INT NOT NULL REFERENCES contrat(id),
+    statut     VARCHAR(30) NOT NULL,
+    date       TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE workflow_onboarding (
+    id      SERIAL PRIMARY KEY,
+    libelle VARCHAR(150) NOT NULL,
+    statut  VARCHAR(30) NULL
+);
+
+CREATE TABLE workflow_onboarding_details (
+    id                    SERIAL PRIMARY KEY,
+    id_workflow           INT NOT NULL REFERENCES workflow_onboarding(id),
+    ordre                 INT NOT NULL,
+    type_tache            VARCHAR(100) NOT NULL,
+    id_poste_responsable  INT NULL REFERENCES poste(id),
+    delai_jours           INT NULL,
+    obligatoire           BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE (id_workflow, ordre)
+);
+
+CREATE TABLE onboarding (
+    id          SERIAL PRIMARY KEY,
+    id_contrat  INT NOT NULL REFERENCES contrat(id),
+    id_workflow INT NOT NULL REFERENCES workflow_onboarding(id),
+    statut      VARCHAR(30) NOT NULL,
+    date_debut  DATE NULL,
+    date_fin    DATE NULL
+);
+
+CREATE TABLE onboarding_details (
+    id                    SERIAL PRIMARY KEY,
+    id_onboarding         INT NOT NULL REFERENCES onboarding(id),
+    id_workflow_details   INT NOT NULL REFERENCES workflow_onboarding_details(id),
+    ordre                 INT NOT NULL,
+    libelle               VARCHAR(255),
+    type_tache            VARCHAR(100),
+    id_poste_responsable  INT NULL REFERENCES poste(id),
+    statut                VARCHAR(30) NOT NULL,
+    id_user_realisateur   INT NULL REFERENCES "user"(id),
+    date_realisation      DATE NULL,
+    commentaire           TEXT NULL
+);
