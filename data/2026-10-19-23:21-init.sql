@@ -121,3 +121,54 @@ CREATE TABLE user_role (
     UNIQUE (id_user, id_role)
 );
 
+-- =====================================================================
+-- BLOC 1 : EXPRESSION DU BESOIN
+-- =====================================================================
+
+CREATE TABLE motif (
+    id      SERIAL PRIMARY KEY,
+    libelle VARCHAR(150) NOT NULL
+);
+
+CREATE TABLE besoin (
+    id              SERIAL PRIMARY KEY,
+    reference       VARCHAR(50) NOT NULL UNIQUE,
+    type_besoin     VARCHAR(50) NOT NULL,
+    id_motif        INT NOT NULL REFERENCES motif(id),
+    id_unite_orga   INT NOT NULL REFERENCES unite_orga(id),
+    date_souhaitee  DATE NULL,
+    id_user         INT NOT NULL REFERENCES "user"(id),
+    effectif        INT NOT NULL CHECK (effectif > 0),
+    etat_actuel     VARCHAR(20) NOT NULL DEFAULT 'EN_ATTENTE'
+                    CHECK (etat_actuel IN ('EN_ATTENTE', 'OUVERT', 'POURVU', 'ANNULE')),
+    budget_estime   NUMERIC(15,2) NULL,
+    precision_motif VARCHAR(100) NULL
+);
+
+-- id_candidature_retenue : FK ajoutée après création de candidatures
+CREATE TABLE besoin_poste (
+    id                      SERIAL PRIMARY KEY,
+    id_besoin               INT NOT NULL REFERENCES besoin(id),
+    id_poste                INT NOT NULL REFERENCES poste(id),
+    etat                    VARCHAR(20) NOT NULL DEFAULT 'EN_ATTENTE'
+                            CHECK (etat IN ('EN_ATTENTE', 'OUVERT', 'POURVU', 'ANNULE')),
+    id_candidature_retenue  INT NULL
+);
+
+CREATE TABLE workflow_validation (
+    id       SERIAL PRIMARY KEY,
+    id_poste INT NOT NULL REFERENCES poste(id),   -- poste validateur
+    ordre    INT NOT NULL,
+    UNIQUE (id_poste, ordre)
+);
+
+CREATE TABLE validation (
+    id                      SERIAL PRIMARY KEY,
+    id_user                 INT NOT NULL REFERENCES "user"(id),
+    id_besoin               INT NOT NULL REFERENCES besoin(id),
+    id_workflow_validation  INT NOT NULL REFERENCES workflow_validation(id),
+    decision                VARCHAR(30) NOT NULL,
+    date                    TIMESTAMP NOT NULL DEFAULT NOW(),
+    commentaire             TEXT NULL
+);
+
