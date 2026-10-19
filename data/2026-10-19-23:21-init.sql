@@ -172,3 +172,107 @@ CREATE TABLE validation (
     commentaire             TEXT NULL
 );
 
+
+-- =====================================================================
+-- BLOC 2 : RECRUTEMENT
+-- =====================================================================
+
+CREATE TABLE type_document (
+    id      SERIAL PRIMARY KEY,
+    libelle VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE document (
+    id               SERIAL PRIMARY KEY,
+    id_type_document INT NOT NULL REFERENCES type_document(id),
+    lien             VARCHAR(500) NOT NULL
+);
+
+CREATE TABLE type_contrat (
+    id                   SERIAL PRIMARY KEY,
+    libelle              VARCHAR(50) NOT NULL UNIQUE,   -- CDI, CDD, ...
+    duree_max            INT NULL,                      -- en mois, NULL si illimitée
+    renouvellement_max   INT NULL
+);
+
+CREATE TABLE offre_emploi (
+    id                       SERIAL PRIMARY KEY,
+    id_besoin                INT NOT NULL REFERENCES besoin(id),
+    ref                      VARCHAR(50) NOT NULL UNIQUE,
+    id_type_contrat          INT NOT NULL REFERENCES type_contrat(id),
+    date_publication         DATE NULL,
+    date_limite_candidature  DATE NULL,
+    id_document              INT NULL REFERENCES document(id),
+    etat                     VARCHAR(20) NOT NULL DEFAULT 'BROUILLON'
+                             CHECK (etat IN ('BROUILLON', 'PUBLIEE', 'CLOTUREE'))
+);
+
+CREATE TABLE candidat (
+    id             SERIAL PRIMARY KEY,
+    nom            VARCHAR(100) NOT NULL,
+    prenom         VARCHAR(150),
+    date_naissance DATE NULL,
+    adresse        VARCHAR(255),
+    email          VARCHAR(150),
+    numero         VARCHAR(30),
+    id_document    INT NULL REFERENCES document(id)    -- CV principal
+);
+
+CREATE TABLE candidatures (
+    id              SERIAL PRIMARY KEY,
+    id_candidat     INT NOT NULL REFERENCES candidat(id),
+    id_offre_emploi INT NOT NULL REFERENCES offre_emploi(id),
+    date_depot      DATE NOT NULL DEFAULT CURRENT_DATE,
+    etat            VARCHAR(20) NOT NULL DEFAULT 'DEPOSEE'
+                    CHECK (etat IN ('DEPOSEE', 'PRESELECTIONNER', 'REFUSE', 'DESISTE')),
+    UNIQUE (id_candidat, id_offre_emploi)
+);
+
+ALTER TABLE besoin_poste
+    ADD CONSTRAINT fk_besoin_poste_candidature
+    FOREIGN KEY (id_candidature_retenue) REFERENCES candidatures(id);
+
+CREATE TABLE document_candidat (
+    id             SERIAL PRIMARY KEY,
+    id_candidature INT NOT NULL REFERENCES candidatures(id),
+    id_document    INT NOT NULL REFERENCES document(id)
+);
+
+CREATE TABLE type_information (
+    id      SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+            CHECK (libelle IN ('EXPERIENCE PRO', 'EDUCATION', 'QUALITE'))
+);
+
+CREATE TABLE candidat_detail (
+    id                   SERIAL PRIMARY KEY,
+    id_candidat          INT NOT NULL REFERENCES candidat(id),
+    id_type_information  INT NOT NULL REFERENCES type_information(id),
+    libelle              VARCHAR(255) NOT NULL,
+    date_debut           DATE NULL,
+    date_fin             DATE NULL
+);
+
+CREATE TABLE workflow_candidature (
+    id               SERIAL PRIMARY KEY,
+    ordre            INT NOT NULL UNIQUE,
+    type_evaluation  VARCHAR(100) NOT NULL,
+    score_min        NUMERIC(5,2) NULL
+);
+
+CREATE TABLE traitement (
+    id             SERIAL PRIMARY KEY,
+    id_candidature INT NOT NULL REFERENCES candidatures(id)
+);
+
+CREATE TABLE traitement_detail (
+    id                              SERIAL PRIMARY KEY,
+    id_traitement                   INT NOT NULL REFERENCES traitement(id),
+    id_workflow_traitement          INT NOT NULL REFERENCES workflow_candidature(id),
+    date_prevue                     DATE NULL,
+    date_realisee                   DATE NULL,
+    libelle                         VARCHAR(255),
+    id_poste_responsable            INT NULL REFERENCES poste(id),
+    id_user                         INT NULL REFERENCES "user"(id),
+    score                           NUMERIC(5,2) NULL
+);
