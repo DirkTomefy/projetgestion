@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="'Offre ' + ${ref}">Offre</title>
+    <style>
+        @page { size: A4; margin: 18mm 16mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11pt; color: #222; }
+        .bandeau { border-bottom: 3px solid #1f4e79; padding-bottom: 8px; margin-bottom: 18px; }
+        .societe { font-size: 10pt; color: #1f4e79; font-weight: bold; letter-spacing: 1px; }
+        .titre { font-size: 22pt; font-weight: bold; color: #1f4e79; margin: 6px 0 2px 0; }
+        .ref { font-size: 9pt; color: #666; }
+        h2 { font-size: 12pt; color: #1f4e79; border-bottom: 1px solid #ccd; padding-bottom: 3px; margin-top: 18px; }
+        table.infos { width: 100%; border-collapse: collapse; }
+        table.infos td { padding: 5px 6px; vertical-align: top; border-bottom: 1px solid #eee; }
+        table.infos td.label { width: 38%; color: #555; }
+        table.infos td.val { font-weight: bold; }
+        .texte { white-space: pre-line; line-height: 1.4; }
+        .encadre { margin-top: 22px; padding: 10px 12px; background: #eef3f8; border-left: 4px solid #1f4e79; }
+        .pied { margin-top: 30px; font-size: 8pt; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="bandeau">
+    <div class="societe">GESTION RH – RECRUTEMENT</div>
+    <div class="titre">OFFRE D'EMPLOI</div>
+    <div class="ref">Référence : <span th:text="${ref}">OFF-2026-0001</span></div>
+</div>
+
+<h2 th:text="${poste}">Poste</h2>
+
+<table class="infos">
+    <tr>
+        <td class="label">Unité</td>
+        <td class="val"><span th:text="${unite}">Unité</span>
+            <span th:if="${uniteType}" th:text="'(' + ${uniteType} + ')'"></span></td>
+    </tr>
+    <tr th:if="${metier}">
+        <td class="label">Métier / catégorie</td>
+        <td class="val" th:text="${metier} + (${categorie} != null ? ' – ' + ${categorie} : '')">Métier</td>
+    </tr>
+    <tr th:if="${echelon}">
+        <td class="label">Niveau</td>
+        <td class="val" th:text="${echelon}">Junior</td>
+    </tr>
+    <tr>
+        <td class="label">Nombre de postes</td>
+        <td class="val" th:text="${effectif}">1</td>
+    </tr>
+    <tr th:if="${typeContrat}">
+        <td class="label">Type de contrat</td>
+        <td class="val" th:text="${typeContrat}">CDI</td>
+    </tr>
+    <tr th:if="${salaire}">
+        <td class="label">Rémunération indicative</td>
+        <td class="val" th:text="${salaire}">—</td>
+    </tr>
+    <tr th:if="${datePriseFonction}">
+        <td class="label">Prise de fonction souhaitée</td>
+        <td class="val" th:text="${datePriseFonction}">—</td>
+    </tr>
+</table>
+
+<div th:if="${description}">
+    <h2>Description du poste</h2>
+    <div class="texte" th:text="${description}">Missions...</div>
+</div>
+
+<div th:if="${profil}">
+    <h2>Profil recherché</h2>
+    <div class="texte" th:text="${profil}">Profil...</div>
+</div>
+
+<div class="encadre">
+    Publiée le <strong th:text="${datePublication}">--/--/----</strong>.<br/>
+    Date limite de candidature : <strong th:text="${dateLimite}">--/--/----</strong>.<br/>
+    Pour postuler, rendez-vous sur la page « Offres d'emploi » et cliquez sur « Candidater »
+    (CV au format PDF obligatoire).
+</div>
+
+<div class="pied">
+    Document généré automatiquement – besoin <span th:text="${besoinRef}">BES-…</span>
+</div>
+
+</body>
+</html>
