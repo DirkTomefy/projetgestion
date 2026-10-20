@@ -4,6 +4,12 @@
 <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/}">Gestion RH</a>
+        <ul class="navbar-nav me-auto">
+            <!-- P4 : offres d'emploi (RH) -->
+            <li class="nav-item" th:if="${currentUser != null and currentUser.hasRole('RH')}">
+                <a class="nav-link" th:href="@{/rh/offres}">Offres d'emploi</a>
+            </li>
+        </ul>
         <div class="d-flex align-items-center gap-3">
             <span class="text-light" th:if="${currentUser != null}">
                 Connecté : <strong th:text="${currentUser.login}">—</strong>
