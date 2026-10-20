@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/}">Gestion RH</a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-light" th:if="${currentUser != null}">
+                Connecté : <strong th:text="${currentUser.login}">—</strong>
+                <span th:if="${!#lists.isEmpty(currentUser.roles)}"
+                      th:text="'(' + ${#strings.listJoin(currentUser.roles, ', ')} + ')'"
+                      class="text-warning small"></span>
+            </span>
+            <form th:action="@{/auth/logout}" method="post" class="m-0"
+                  th:if="${currentUser != null}">
+                <button class="btn btn-outline-light btn-sm" type="submit">Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
