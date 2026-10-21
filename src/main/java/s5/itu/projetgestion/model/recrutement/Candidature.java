@@ -11,6 +11,7 @@ public class Candidature {
     public static final String ETAT_PRESELECTIONNER = "PRESELECTIONNER";
     public static final String ETAT_REFUSE = "REFUSE";
     public static final String ETAT_DESISTE = "DESISTE";
+    public static final String ETAT_RETENUE = "RETENUE";
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "id_candidat", nullable = false)
