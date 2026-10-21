@@ -29,7 +29,7 @@ public class CandidatureRhService {
 
     public static final Set<String> ETATS = Set.of(
             Candidature.ETAT_DEPOSEE, Candidature.ETAT_PRESELECTIONNER,
-            Candidature.ETAT_REFUSE, Candidature.ETAT_DESISTE);
+            Candidature.ETAT_REFUSE, Candidature.ETAT_DESISTE, Candidature.ETAT_RETENUE);
 
     private final OffreEmploiRepository offreRepo;
     private final CandidatureRepository candidatureRepo;
