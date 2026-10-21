@@ -6,9 +6,9 @@ import s5.itu.projetgestion.dto.rh.OffrePubliqueDto;
 import s5.itu.projetgestion.dto.rh.TypeInformationDto;
 import s5.itu.projetgestion.dto.rh.UniteFiltreDto;
 import s5.itu.projetgestion.err.ProjetgestionException;
-import s5.itu.projetgestion.model.rh.TypeInformation;
+import s5.itu.projetgestion.model.personnel.TypeInformation;
 import s5.itu.projetgestion.repository.rh.OffreEmploiRepository;
-import s5.itu.projetgestion.repository.rh.TypeInformationRepository;
+import s5.itu.projetgestion.repository.personnel.TypeInformationRepository;
 
 import java.util.List;
 import java.util.Map;

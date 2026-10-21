@@ -8,9 +8,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import s5.itu.projetgestion.dto.OptionDto;
+import s5.itu.projetgestion.dto.PosteDemandeRequest;
 import s5.itu.projetgestion.dto.postes.PosteDto;
+import s5.itu.projetgestion.model.postes.CategorieMetier;
+import s5.itu.projetgestion.model.postes.EchelonMetier;
+import s5.itu.projetgestion.model.postes.Metier;
 import s5.itu.projetgestion.model.postes.Poste;
+import s5.itu.projetgestion.model.postes.UniteOrga;
+import s5.itu.projetgestion.repository.postes.CategorieMetierRepository;
+import s5.itu.projetgestion.repository.postes.EchelonMetierRepository;
+import s5.itu.projetgestion.repository.postes.MetierRepository;
 import s5.itu.projetgestion.repository.postes.PosteRepository;
+import s5.itu.projetgestion.repository.postes.UniteOrgaRepository;
 
 @Service
 public class PosteService {
@@ -18,9 +28,21 @@ public class PosteService {
     private static final Set<String> ETATS = Set.of("PROPOSE", "ACTIF", "REFUSE", "SUPPRIME");
 
     private final PosteRepository posteRepository;
+    private final MetierRepository metierRepository;
+    private final CategorieMetierRepository categorieRepository;
+    private final EchelonMetierRepository echelonRepository;
+    private final UniteOrgaRepository uniteRepository;
 
-    public PosteService(PosteRepository posteRepository) {
+    public PosteService(PosteRepository posteRepository,
+            MetierRepository metierRepository,
+            CategorieMetierRepository categorieRepository,
+            EchelonMetierRepository echelonRepository,
+            UniteOrgaRepository uniteRepository) {
         this.posteRepository = posteRepository;
+        this.metierRepository = metierRepository;
+        this.categorieRepository = categorieRepository;
+        this.echelonRepository = echelonRepository;
+        this.uniteRepository = uniteRepository;
     }
 
     @Transactional(readOnly = true)
@@ -55,5 +77,67 @@ public class PosteService {
 
         poste.setEtat(nouvelEtat);
         return PosteDto.from(posteRepository.save(poste));
+    }
+
+    public List<OptionDto> listerMetiers() {
+        return metierRepository.findAll().stream()
+                .map(m -> new OptionDto(m.getId(), m.getLibelle() + " (" + m.getCategorie().getLibelle() + ")")).toList();
+    }
+
+    public List<OptionDto> listerCategories() {
+        return categorieRepository.findAll().stream().map(c -> new OptionDto(c.getId(), c.getLibelle())).toList();
+    }
+
+    public List<OptionDto> listerEchelons() {
+        return echelonRepository.findAll().stream().map(e -> new OptionDto(e.getId(), e.getLibelle())).toList();
+    }
+
+    public List<OptionDto> listerUnites() {
+        return uniteRepository.findAll().stream().map(u -> new OptionDto(u.getId(), u.getLibelle() + " [" + u.getType() + "]")).toList();
+    }
+
+    public List<OptionDto> listerSuperieursPossibles() {
+        return posteRepository.findByEtat("ACTIF").stream()
+                .map(p -> new OptionDto(p.getId(), p.getLibelle() + " - " + p.getUniteOrga().getLibelle())).toList();
+    }
+
+    @Transactional
+    public PosteDto creerDemande(PosteDemandeRequest req) {
+        if (req == null || req.libelle() == null || req.libelle().isBlank())
+            throw new IllegalArgumentException("Le libellé du poste est obligatoire.");
+        if (req.idEchelon() == null || req.idUniteOrga() == null)
+            throw new IllegalArgumentException("L'échelon et l'unité organisationnelle sont obligatoires.");
+        boolean metierExistant = req.idMetier() != null;
+        boolean nouveauMetier = req.nouveauMetierLibelle() != null && !req.nouveauMetierLibelle().isBlank();
+        if (metierExistant == nouveauMetier)
+            throw new IllegalArgumentException("Choisis un métier existant OU saisis un nouveau métier.");
+
+        Metier metier;
+        if (metierExistant) {
+            metier = metierRepository.findById(req.idMetier()).orElseThrow(() -> new IllegalArgumentException("Métier introuvable."));
+        } else {
+            if (req.idCategorie() == null) throw new IllegalArgumentException("La catégorie est obligatoire pour un nouveau métier.");
+            CategorieMetier categorie = categorieRepository.findById(req.idCategorie()).orElseThrow(() -> new IllegalArgumentException("Catégorie introuvable."));
+            String libelle = req.nouveauMetierLibelle().trim();
+            if (metierRepository.existsByLibelleIgnoreCaseAndCategorieId(libelle, categorie.getId()))
+                throw new IllegalArgumentException("Ce métier existe déjà dans cette catégorie.");
+            metier = new Metier(); metier.setLibelle(libelle); metier.setCategorie(categorie); metier = metierRepository.save(metier);
+        }
+        EchelonMetier echelon = echelonRepository.findById(req.idEchelon()).orElseThrow(() -> new IllegalArgumentException("Échelon introuvable."));
+        UniteOrga unite = uniteRepository.findById(req.idUniteOrga()).orElseThrow(() -> new IllegalArgumentException("Unité introuvable."));
+        Poste superieur = req.idSuperieurDirect() == null ? null : posteRepository.findById(req.idSuperieurDirect())
+                .orElseThrow(() -> new IllegalArgumentException("Supérieur direct introuvable."));
+        if (superieur != null && !"ACTIF".equals(superieur.getEtat())) throw new IllegalArgumentException("Le supérieur direct doit être un poste ACTIF.");
+        Poste poste = new Poste(); poste.setCode(genererCode()); poste.setMetier(metier); poste.setEchelon(echelon);
+        poste.setUniteOrga(unite); poste.setSuperieurDirect(superieur); poste.setLibelle(req.libelle().trim());
+        poste.setEtat("PROPOSE"); poste.setStatutOccupation("LIBRE");
+        return PosteDto.from(posteRepository.save(poste));
+    }
+
+    private String genererCode() {
+        long n = posteRepository.count() + 1;
+        String code = String.format("POST-%03d", n);
+        while (posteRepository.existsByCode(code)) code = String.format("POST-%03d", ++n);
+        return code;
     }
 }

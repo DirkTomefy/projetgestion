@@ -2,22 +2,39 @@ package s5.itu.projetgestion.controller.besoin;
 
 import java.util.List;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import s5.itu.projetgestion.config.SessionKeys;
+import s5.itu.projetgestion.dto.OptionDto;
+import s5.itu.projetgestion.dto.SessionUser;
 import s5.itu.projetgestion.dto.besoin.BesoinResponse;
+import s5.itu.projetgestion.dto.rh.BesoinDto;
+import s5.itu.projetgestion.dto.rh.BesoinRequest;
+import s5.itu.projetgestion.dto.rh.MotifRequest;
+import s5.itu.projetgestion.model.User;
+import s5.itu.projetgestion.repository.UserRepository;
 import s5.itu.projetgestion.service.besoin.BesoinService;
 
 @RestController 
+@RequestMapping
 public class BesoinController {
     
     private final BesoinService besoinService;
+    private final UserRepository userRepository;
 
-    public BesoinController(BesoinService besoinService){
+    public BesoinController(BesoinService besoinService, UserRepository userRepository){
         this.besoinService = besoinService;
+        this.userRepository = userRepository;
     } 
 
 
@@ -35,5 +52,27 @@ public class BesoinController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     } 
+
+    @GetMapping("/api/rh/motifs")
+    public List<OptionDto> motifs() { return besoinService.listerMotifs(); }
+
+    @PostMapping("/api/rh/motifs")
+    public ResponseEntity<OptionDto> creerMotif(@RequestBody MotifRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(besoinService.creerMotif(request.libelle()));
+    }
+
+    @GetMapping("/api/rh/postes/actifs")
+    public List<OptionDto> postesActifs(@RequestParam Integer idUnite) {
+        return besoinService.listerPostesActifs(idUnite);
+    }
+
+    @PostMapping("/api/rh/besoins")
+    public ResponseEntity<BesoinDto> creer(@RequestBody BesoinRequest request, HttpSession session) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
+        if (sessionUser == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Aucun utilisateur connecté.");
+        User user = userRepository.findById(sessionUser.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur introuvable."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(besoinService.creerBesoin(request, user));
+    }
 
 }

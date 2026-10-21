@@ -10,6 +10,10 @@ import s5.itu.projetgestion.model.postes.Poste;
 
 public interface PosteRepository extends JpaRepository<Poste, Integer> {
 
+    List<Poste> findByEtat(String etat);
+    List<Poste> findByEtatAndUniteOrgaId(String etat, Integer idUnite);
+    boolean existsByCode(String code);
+
     // JOIN FETCH : charge les relations LAZY en une seule requête
     @Query("""
             SELECT p FROM Poste p

@@ -20,4 +20,8 @@ public interface BesoinRepository extends JpaRepository<Besoin, Integer> {
 			WHERE b.id = :id
 			""")
 	Optional<Besoin> findByIdWithRelations(@Param("id") Integer id);
+
+	long countByReferenceStartingWith(String prefix);
+
+	boolean existsByReference(String reference);
 }

@@ -2,7 +2,7 @@ package s5.itu.projetgestion.dto.rh;
 
 import java.time.LocalDate;
 
-import s5.itu.projetgestion.model.rh.besoin.Besoin;
+import s5.itu.projetgestion.model.besoin.Besoin;
 
 public record BesoinDto(
     Integer id, String reference, String typeBesoin, String poste, String motif,
