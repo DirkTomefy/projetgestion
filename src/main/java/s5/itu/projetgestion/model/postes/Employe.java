@@ -1,6 +1,7 @@
 package s5.itu.projetgestion.model.postes;
 
 import jakarta.persistence.*;
+import s5.itu.projetgestion.model.personnel.Personne;
 
 @Entity
 @Table(name = "employe")
@@ -16,6 +17,9 @@ public class Employe {
     private String prenoms;
     @Column(length = 255)
     private String adresse;
+
+    @JoinColumn(name = "id_personne")
+    private Personne personne;
 
     public Integer getId() {
         return id;
@@ -56,4 +60,13 @@ public class Employe {
     public void setAdresse(String value) {
         adresse = value;
     }
+
+    public Personne getPersonne() {
+        return personne;
+    }
+
+    public void setPersonne(Personne personne) {
+        this.personne = personne;
+    }
+    
 }
