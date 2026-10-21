@@ -78,13 +78,6 @@ public class TestDocumentController {
                 .body(resource);
     }
 
-    // ---------- API JSON : réutilisable par tous les modules ----------
-
-    /**
-     * Endpoint d'upload « service commun » à appeler depuis un autre module
-     * (candidatures, contrats, offres…). Le module appelant récupère `id`
-     * et le stocke dans sa propre table (ex : candidat.id_document).
-     */
     @PostMapping(value = "/api/upload", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<UploadResult> apiUpload(
