@@ -1,6 +1,7 @@
 package s5.itu.projetgestion.model.postes;
 
 import jakarta.persistence.*;
+import s5.itu.projetgestion.model.personnel.Candidat;
 import s5.itu.projetgestion.model.personnel.Personne;
 
 @Entity
@@ -18,8 +19,16 @@ public class Employe {
     @Column(length = 255)
     private String adresse;
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_personne")
     private Personne personne;
+
+
+    public void fromCandidat(Candidat candidat){
+        this.setAdresse(candidat.getAdresse());
+        this.setNom(candidat.getNom());
+        this.setPrenoms(candidat.getPrenom());
+    }
 
     public Integer getId() {
         return id;

@@ -54,20 +54,11 @@ public class BesoinPoste {
         etat = value;
     }
 
-<<<<<<< Updated upstream
-    public Integer getIdCandidatureRetenue() {
-        return idCandidatureRetenue;
-    }
-
-    public void setIdCandidatureRetenue(Integer value) {
-        idCandidatureRetenue = value;
-=======
     public Candidature getCandidatureRetenue() {
         return candidatureRetenue;
     }
 
     public void setCandidatureRetenue(Candidature value) {
         candidatureRetenue = value;
->>>>>>> Stashed changes
     }
 }
