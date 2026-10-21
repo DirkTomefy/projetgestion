@@ -1,8 +1,8 @@
 package s5.itu.projetgestion.model.besoin;
 
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.User;
-import s5.itu.projetgestion.model.postes.UniteOrga;
+import s5.itu.projetgestion.model.auth.User;
+import s5.itu.projetgestion.model.organisation.UniteOrga;
 
 import java.time.LocalDate;
 

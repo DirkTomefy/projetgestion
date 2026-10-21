@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import s5.itu.projetgestion.model.postes.UniteOrga;
+import s5.itu.projetgestion.model.organisation.UniteOrga;
 
 @Entity
 @Table(name = "budget_unite")

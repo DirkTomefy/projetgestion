@@ -10,26 +10,26 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import s5.itu.projetgestion.dto.OptionDto;
+import s5.itu.projetgestion.dto.commun.OptionDto;
 import s5.itu.projetgestion.dto.besoin.BesoinResponse;
-import s5.itu.projetgestion.dto.rh.BesoinDto;
-import s5.itu.projetgestion.dto.rh.BesoinRequest;
-import s5.itu.projetgestion.dto.rh.LignePosteRequest;
-import s5.itu.projetgestion.model.User;
+import s5.itu.projetgestion.dto.besoin.BesoinDto;
+import s5.itu.projetgestion.dto.besoin.BesoinRequest;
+import s5.itu.projetgestion.dto.besoin.LignePosteRequest;
+import s5.itu.projetgestion.model.auth.User;
 import s5.itu.projetgestion.model.besoin.Besoin;
 import s5.itu.projetgestion.model.besoin.BesoinPoste;
 import s5.itu.projetgestion.model.besoin.Motif;
-import s5.itu.projetgestion.model.postes.Poste;
-import s5.itu.projetgestion.model.postes.UniteOrga;
-import s5.itu.projetgestion.model.validation.Validation;
-import s5.itu.projetgestion.model.validation.WorkflowValidation;
+import s5.itu.projetgestion.model.besoin.Validation;
+import s5.itu.projetgestion.model.besoin.WorkflowValidation;
+import s5.itu.projetgestion.model.organisation.Poste;
+import s5.itu.projetgestion.model.organisation.UniteOrga;
+import s5.itu.projetgestion.repository.besoin.BesoinPosteRepository;
 import s5.itu.projetgestion.repository.besoin.BesoinRepository;
 import s5.itu.projetgestion.repository.besoin.MotifRepository;
-import s5.itu.projetgestion.repository.postes.BesoinPosteRepository;
-import s5.itu.projetgestion.repository.postes.PosteRepository;
-import s5.itu.projetgestion.repository.postes.UniteOrgaRepository;
-import s5.itu.projetgestion.repository.validation.ValidationRepository;
-import s5.itu.projetgestion.repository.validation.WorkflowValidationRepository;
+import s5.itu.projetgestion.repository.besoin.ValidationRepository;
+import s5.itu.projetgestion.repository.besoin.WorkflowValidationRepository;
+import s5.itu.projetgestion.repository.organisation.PosteRepository;
+import s5.itu.projetgestion.repository.organisation.UniteOrgaRepository;
 
 @Service
 public class BesoinService {

@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import s5.itu.projetgestion.config.SessionKeys;
-import s5.itu.projetgestion.dto.OptionDto;
-import s5.itu.projetgestion.dto.SessionUser;
+import s5.itu.projetgestion.dto.commun.OptionDto;
+import s5.itu.projetgestion.dto.auth.SessionUser;
 import s5.itu.projetgestion.dto.besoin.BesoinResponse;
-import s5.itu.projetgestion.dto.rh.BesoinDto;
-import s5.itu.projetgestion.dto.rh.BesoinRequest;
-import s5.itu.projetgestion.dto.rh.MotifRequest;
-import s5.itu.projetgestion.model.User;
-import s5.itu.projetgestion.repository.UserRepository;
+import s5.itu.projetgestion.dto.besoin.BesoinDto;
+import s5.itu.projetgestion.dto.besoin.BesoinRequest;
+import s5.itu.projetgestion.dto.besoin.MotifRequest;
+import s5.itu.projetgestion.model.auth.User;
+import s5.itu.projetgestion.repository.auth.UserRepository;
 import s5.itu.projetgestion.service.besoin.BesoinService;
 
 @RestController 
