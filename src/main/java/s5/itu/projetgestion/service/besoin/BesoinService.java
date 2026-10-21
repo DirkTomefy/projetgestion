@@ -16,6 +16,12 @@ public class BesoinService {
         this.besoinRepository = besoinRepository;
     }
 
+    public Besoin getById(Integer id) throws Exception {
+        Besoin besoin = besoinRepository.findByIdWithRelations(id)
+                .orElseThrow(() -> new Exception("Besoin Introuvable"));
+                return besoin;
+    }
+
     @Transactional(readOnly = true)
     public BesoinResponse fiche(Integer id) throws Exception {
         Besoin besoin = besoinRepository.findByIdWithRelations(id)

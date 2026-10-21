@@ -20,17 +20,17 @@ public class Besoin {
     @Column(name = "type_besoin", nullable = false, length = 50)
     private String typeBesoin;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_motif", nullable = false)
     private Motif motif;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_unite_orga", nullable = false)
     private UniteOrga uniteOrga;
 
     private LocalDate dateSouhaitee;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_user", nullable = false)
     private User user;
 

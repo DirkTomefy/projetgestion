@@ -14,10 +14,10 @@ public class UniteOrga {
     private String type;
     @Column(nullable = false, length = 150)
     private String libelle;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_unite_mere")
     private UniteOrga uniteMere;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_poste_responsable")
     private Poste posteResponsable;
 

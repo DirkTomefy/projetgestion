@@ -1,4 +1,4 @@
-package s5.itu.projetgestion.service.postes;
+package s5.itu.projetgestion.repository.postes;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

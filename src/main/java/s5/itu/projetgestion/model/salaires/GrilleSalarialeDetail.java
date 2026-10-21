@@ -11,13 +11,13 @@ public class GrilleSalarialeDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_grille", nullable = false)
     private GrilleSalariale grille;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_categorie", nullable = false)
     private CategorieMetier categorie;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_echelon", nullable = false)
     private EchelonMetier echelon;
     @Column(name = "montant_min", nullable = false)

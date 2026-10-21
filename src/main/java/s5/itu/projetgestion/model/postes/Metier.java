@@ -10,7 +10,7 @@ public class Metier {
     private Integer id;
     @Column(nullable = false, length = 150)
     private String libelle;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_categorie", nullable = false)
     private CategorieMetier categorie;
 

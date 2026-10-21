@@ -10,16 +10,16 @@ public class Poste {
     private Integer id;
     @Column(nullable = false, unique = true, length = 50)
     private String code;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_metier", nullable = false)
     private Metier metier;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_echelon", nullable = false)
     private EchelonMetier echelon;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_unite_orga", nullable = false)
     private UniteOrga uniteOrga;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_superieur_direct")
     private Poste superieurDirect;
     @Column(nullable = false, length = 150)
