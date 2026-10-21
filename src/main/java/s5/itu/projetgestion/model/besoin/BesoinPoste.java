@@ -1,6 +1,7 @@
 package s5.itu.projetgestion.model.besoin;
 
 import jakarta.persistence.*;
+import s5.itu.projetgestion.model.embauche.Candidature;
 import s5.itu.projetgestion.model.postes.Poste;
 
 @Entity
@@ -17,8 +18,9 @@ public class BesoinPoste {
     private Poste poste;
     @Column(nullable = false, length = 20)
     private String etat;
-    @Column(name = "id_candidature_retenue")
-    private Integer idCandidatureRetenue;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_candidature_retenue")
+    private Candidature candidatureRetenue;
 
     public Integer getId() {
         return id;
@@ -52,11 +54,20 @@ public class BesoinPoste {
         etat = value;
     }
 
+<<<<<<< Updated upstream
     public Integer getIdCandidatureRetenue() {
         return idCandidatureRetenue;
     }
 
     public void setIdCandidatureRetenue(Integer value) {
         idCandidatureRetenue = value;
+=======
+    public Candidature getCandidatureRetenue() {
+        return candidatureRetenue;
+    }
+
+    public void setCandidatureRetenue(Candidature value) {
+        candidatureRetenue = value;
+>>>>>>> Stashed changes
     }
 }

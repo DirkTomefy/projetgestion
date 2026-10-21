@@ -2,6 +2,7 @@ package s5.itu.projetgestion.model.embauche;
 
 import jakarta.persistence.*;
 import s5.itu.projetgestion.model.personnel.Candidat;
+import s5.itu.projetgestion.model.rh.OffreEmploi;
 
 import java.time.LocalDate;
 
