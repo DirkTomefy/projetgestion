@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import s5.itu.projetgestion.model.User;
 import s5.itu.projetgestion.model.besoin.Besoin;
 import s5.itu.projetgestion.model.finance.BudgetUnite;
+import s5.itu.projetgestion.model.postes.Poste;
 import s5.itu.projetgestion.model.validation.Validation;
 import s5.itu.projetgestion.model.validation.WorkflowValidation;
 import s5.itu.projetgestion.repository.besoin.BesoinRepository;
@@ -19,10 +20,6 @@ import s5.itu.projetgestion.service.UserService;
 @Service 
 public class ValidationService {
     
-    private static final int RH_UO = 3;
-    private static final int FI_UO = 2;
-
-
 
     private final ValidationRepository validationRepository;
     private final WorkflowValidationService workflowValidationService;
@@ -103,7 +100,9 @@ public class ValidationService {
             throw new Exception("Utilisateur invalide");
         }
 
-        var posteUtilisateur = userService.getPosteByUser(u);
+        Poste posteUtilisateur = userService.getPosteByUser(u);
+
+        // TY MBOLA DISO FA TSY TOKONY posteUtilisateur no eo
         BudgetUnite bu = budgetUniteRepository.findByUniteOrga(posteUtilisateur.getUniteOrga());
         if (bu == null || bu.getMontant() == null) {
             return false;
