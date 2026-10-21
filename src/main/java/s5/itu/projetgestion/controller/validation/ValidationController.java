@@ -1,6 +1,7 @@
 package s5.itu.projetgestion.controller.validation;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,25 +29,44 @@ public class ValidationController {
         this.besoinService = besoinService;
     }
 
-    public void validerBesoin(@RequestParam Integer idBesoin, HttpSession session){
+    @PostMapping("/api/besoin/valider")
+    public void validerBesoin(@RequestParam Integer idBesoin, HttpSession session) {
         SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
         User u = userService.getById(sessionUser.getId());
         Besoin b = new Besoin();
-        try{
+        try {
             b = this.besoinService.getById(idBesoin);
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
 
-        try{
+        try {
             this.validationService.validerBesoin(b, u);
-            
-        }catch(Exception e){
+
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
 
         }
+    }
 
-        
+    @PostMapping("/api/besoin/refuser")
+    public void refuserBesoin(@RequestParam Integer idBesoin, HttpSession session) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
+        User u = userService.getById(sessionUser.getId());
+        Besoin b = new Besoin();
+        try {
+            b = this.besoinService.getById(idBesoin);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+
+        try {
+            this.validationService.refuserBesoin(b, u);
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+
+        }
     }
 
 }

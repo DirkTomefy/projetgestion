@@ -1,5 +1,7 @@
 package s5.itu.projetgestion.controller.besoin;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,11 @@ public class BesoinController {
         this.besoinService = besoinService;
     } 
 
+
+    @GetMapping("/api/besoin")
+    public List<BesoinResponse> list(){
+        return this.besoinService.findAll();
+    }
 
 
     @GetMapping("/api/besoin/{id}")

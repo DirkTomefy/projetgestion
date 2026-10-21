@@ -1,5 +1,8 @@
 package s5.itu.projetgestion.service.besoin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,15 @@ public class BesoinService {
 
     public BesoinService(BesoinRepository besoinRepository) {
         this.besoinRepository = besoinRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<BesoinResponse> findAll(){
+        List<BesoinResponse> retour = new ArrayList<>();
+        for(Besoin besoin : this.besoinRepository.findAll()){
+            retour.add(new BesoinResponse().fromBesoin(besoin));
+        }
+        return retour;
     }
 
     public Besoin getById(Integer id) throws Exception {
