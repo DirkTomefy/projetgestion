@@ -12,20 +12,10 @@ import s5.itu.projetgestion.model.rh.TypeInformation;
 import s5.itu.projetgestion.repository.rh.TypeInformationRepository;
 
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * P5 : lecture publique des offres (sans connexion).
- *
- * <p>Requêtes SQL directes en lecture seule, comme BesoinOffreLookupService (P4) :
- * pas de dépendance aux entités besoin / poste / unite_orga des autres membres.</p>
- *
- * <p>Une offre est visible si elle est PUBLIEE, déjà publiée, et que sa date
- * limite n'est pas dépassée (le jour limite est inclus).</p>
- */
 @Service
 public class OffrePubliqueService {
 
@@ -62,7 +52,6 @@ public class OffrePubliqueService {
             WHERE
             """ + OFFRE_VISIBLE;
 
-    /** Unité choisie + toutes ses sous-unités (un service sous un département, etc.). */
     private static final String FILTRE_UNITE = """
               AND b.id_unite_orga IN (
                   WITH RECURSIVE sous_unites AS (
@@ -105,7 +94,6 @@ public class OffrePubliqueService {
             WHERE o.id = ? AND o.id_document IS NOT NULL AND
             """ + OFFRE_VISIBLE;
 
-    /** Libellés lisibles des types de CV (la base stocke des codes). */
     private static final Map<String, String> LIBELLES_TYPES = Map.of(
             TypeInformation.EXPERIENCE_PRO, "Expérience professionnelle",
             TypeInformation.EDUCATION, "Formation / diplôme",
@@ -138,7 +126,6 @@ public class OffrePubliqueService {
         this.fileStorageService = fileStorageService;
     }
 
-    /** Offres visibles ; si idUnite est fourni, seulement celles de cette unité et de ses sous-unités. */
     public List<OffrePubliqueDto> listerOffres(Integer idUnite) {
         StringBuilder sql = new StringBuilder(SELECT_OFFRES);
         List<Object> params = new ArrayList<>();
@@ -156,13 +143,11 @@ public class OffrePubliqueService {
                         "Cette offre n'existe pas ou n'est plus ouverte aux candidatures"));
     }
 
-    /** Vrai si l'offre accepte encore des candidatures aujourd'hui. */
     public boolean estOuverte(Integer idOffre) {
         Integer nb = jdbc.queryForObject(SELECT_OFFRE_OUVERTE, Integer.class, idOffre);
         return nb != null && nb > 0;
     }
 
-    /** PDF de l'offre (généré par P4), seulement si l'offre est visible. */
     public Resource ficheOffre(Integer idOffre) {
         Integer idDocument = jdbc.queryForList(SELECT_DOCUMENT_OFFRE, Integer.class, idOffre).stream()
                 .findFirst()
@@ -186,7 +171,6 @@ public class OffrePubliqueService {
                 .toList();
     }
 
-    /** Offre absente, non publiée ou expirée : renvoyée en 404 par l'API publique. */
     public static class OffreIntrouvableException extends ProjetgestionException {
         public OffreIntrouvableException(String message) {
             super(message);
