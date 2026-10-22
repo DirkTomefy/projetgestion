@@ -2,6 +2,7 @@ package s5.itu.projetgestion.service.besoin;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import s5.itu.projetgestion.model.besoin.Besoin;
@@ -10,31 +11,33 @@ import s5.itu.projetgestion.model.besoin.WorkflowValidation;
 import s5.itu.projetgestion.repository.besoin.ValidationRepository;
 import s5.itu.projetgestion.repository.besoin.WorkflowValidationRepository;
 
-@Service 
+@Service
 public class WorkflowValidationService {
 
     private final WorkflowValidationRepository workflowValidationRepository;
     private final ValidationRepository validationRepository;
 
-    public WorkflowValidationService(WorkflowValidationRepository workflowValidationRepository, ValidationRepository validationRepository) {
+    public WorkflowValidationService(WorkflowValidationRepository workflowValidationRepository,
+            ValidationRepository validationRepository) {
         this.workflowValidationRepository = workflowValidationRepository;
         this.validationRepository = validationRepository;
     }
 
-    public WorkflowValidation getEtapeActuelleBesoin(Besoin b) throws Exception{
+    public List<WorkflowValidation> getEtapeActuelleBesoin(Besoin b) throws Exception {
         Optional<Validation> derniere = validationRepository.findFirstByBesoinOrderByDateDesc(b);
-        int ordre = derniere
-                .map(validation -> validation.getWorkflowValidation().getOrdre() + 1)
-                .orElse(1);
 
-        return workflowValidationRepository.findByOrdre(ordre)
-                .orElseThrow(() -> new Exception("Aucune étape de validation disponible pour ce besoin"));
+        int ordre = (derniere == null)
+                ? 1
+                : derniere
+                        .map(validation -> validation.getWorkflowValidation().getOrdre() + 1)
+                        .orElse(1);
+
+        return workflowValidationRepository.findByOrdre(ordre);
     }
 
     public boolean estDerniereEtape(WorkflowValidation etape) {
         return workflowValidationRepository.findByOrdre(etape.getOrdre() + 1).isEmpty();
 
     }
-
 
 }

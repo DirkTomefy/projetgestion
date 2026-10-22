@@ -1,11 +1,15 @@
 package s5.itu.projetgestion.service.besoin;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import s5.itu.projetgestion.model.auth.User;
+import s5.itu.projetgestion.exceptions.validation.AutorisationValidationException;
+import s5.itu.projetgestion.exceptions.validation.BesoinInvalideException;
+import s5.itu.projetgestion.exceptions.validation.UtilisateurInvalideException;
 import s5.itu.projetgestion.model.besoin.Besoin;
 import s5.itu.projetgestion.model.besoin.Validation;
 import s5.itu.projetgestion.model.besoin.WorkflowValidation;
@@ -17,9 +21,8 @@ import s5.itu.projetgestion.repository.organisation.UniteOrgaRepository;
 import s5.itu.projetgestion.repository.besoin.ValidationRepository;
 import s5.itu.projetgestion.service.auth.UserService;
 
-@Service 
+@Service
 public class ValidationService {
-    
 
     private final ValidationRepository validationRepository;
     private final WorkflowValidationService workflowValidationService;
@@ -27,10 +30,10 @@ public class ValidationService {
     private final UserService userService;
     private final BesoinRepository besoinRepository;
     private final UniteOrgaRepository uniteOrgaRepository;
-    
+
     public ValidationService(ValidationRepository validationRepository,
-            WorkflowValidationService workflowValidationService,BudgetUniteRepository budgetUniteRepository,
-        UserService userService, BesoinRepository besoinRepository, UniteOrgaRepository uniteOrgaRepository) {
+            WorkflowValidationService workflowValidationService, BudgetUniteRepository budgetUniteRepository,
+            UserService userService, BesoinRepository besoinRepository, UniteOrgaRepository uniteOrgaRepository) {
         this.validationRepository = validationRepository;
         this.workflowValidationService = workflowValidationService;
         this.budgetUniteRepository = budgetUniteRepository;
@@ -39,8 +42,8 @@ public class ValidationService {
         this.uniteOrgaRepository = uniteOrgaRepository;
     }
 
-    @Transactional 
-    public void refuserBesoin(Besoin b, User u) throws Exception{
+    @Transactional
+    public void refuserBesoin(Besoin b, User u) throws Exception {
         WorkflowValidation etapeActuelle = verifierAutorisation(b, u);
 
         Validation validation = new Validation();
@@ -55,8 +58,7 @@ public class ValidationService {
         besoinRepository.save(b);
     }
 
-
-    @Transactional 
+    @Transactional
     public void validerBesoin(Besoin b, User u) throws Exception {
         WorkflowValidation etapeActuelle = verifierAutorisation(b, u);
 
@@ -76,45 +78,64 @@ public class ValidationService {
 
     private WorkflowValidation verifierAutorisation(Besoin b, User u) throws Exception {
         if (b == null || b.getId() == null) {
-            throw new Exception("Besoin invalide");
-        }
-        if (u == null || u.getId() == null) {
-            throw new Exception("Utilisateur invalide");
+            throw new BesoinInvalideException("Besoin invalide");
         }
 
-        WorkflowValidation etapeActuelle = workflowValidationService.getEtapeActuelleBesoin(b);
-        var posteUtilisateur = userService.getPosteByUser(u);
-        if (etapeActuelle.getPoste() == null || posteUtilisateur == null
-                || !etapeActuelle.getPoste().getId().equals(posteUtilisateur.getId())) {
-            throw new Exception("Ce n'est pas à vous de valider cette demande");
+        if (u == null || u.getId() == null) {
+            throw new UtilisateurInvalideException("Utilisateur invalide");
         }
-        return etapeActuelle;
+
+        List<WorkflowValidation> etapesActuelle = workflowValidationService.getEtapeActuelleBesoin(b);
+
+        if (etapesActuelle.isEmpty()) {
+            throw new AutorisationValidationException(
+                    "Aucune étape de validation disponible pour ce besoin");
+        }
+        Poste posteUtilisateur = userService.getPosteByUser(u);
+        WorkflowValidation etape = null;
+        for (WorkflowValidation etapeActuelle : etapesActuelle) {
+            if (etapeActuelle.getPoste().getId()
+                        .equals(posteUtilisateur.getId())) {
+                etape = etapeActuelle;
+            }
+        }
+        if (etape == null) {
+            throw new AutorisationValidationException(
+                    "Ce n'est pas à vous de valider cette demande");
+        }
+
+        return etape;
     }
 
     @Transactional(readOnly = true)
-    public boolean validerBesoinFinance(Besoin b, User u) throws Exception{
-        if (b == null || b.getBudgetEstime() == null || b.getEffectif() == null || b.getEffectif() <= 0) {
-            throw new Exception("Montant ou effectif du besoin invalide");
+    public boolean validerBesoinFinance(Besoin b, User u) throws Exception {
+        if (b == null || b.getBudgetEstime() == null
+                || b.getEffectif() == null || b.getEffectif() <= 0) {
+            throw new BesoinInvalideException(
+                    "Montant ou effectif du besoin invalide");
         }
-        if (u == null) {
-            throw new Exception("Utilisateur invalide");
+
+        if (u == null || u.getId() == null) {
+            throw new UtilisateurInvalideException("Utilisateur invalide");
         }
 
         Poste posteUtilisateur = userService.getPosteByUser(u);
 
-        // TY MBOLA DISO FA TSY TOKONY posteUtilisateur no eo
-        BudgetUnite bu = budgetUniteRepository.findByUniteOrga(posteUtilisateur.getUniteOrga());
+        if (posteUtilisateur == null || posteUtilisateur.getUniteOrga() == null) {
+            throw new AutorisationValidationException(
+                    "L'utilisateur n'est affecté à aucun poste valide");
+        }
+
+        BudgetUnite bu = budgetUniteRepository
+                .findByUniteOrga(posteUtilisateur.getUniteOrga());
+
         if (bu == null || bu.getMontant() == null) {
             return false;
         }
 
         double coutAnnuel = b.getBudgetEstime() * b.getEffectif() * 12;
+
         return coutAnnuel <= bu.getMontant();
     }
-    
-
-
-
-
 
 }

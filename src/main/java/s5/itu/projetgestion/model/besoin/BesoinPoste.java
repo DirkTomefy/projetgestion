@@ -17,8 +17,9 @@ public class BesoinPoste {
     private Poste poste;
     @Column(nullable = false, length = 20)
     private String etat;
-    @Column(name = "id_candidature_retenue")
-    private Integer idCandidatureRetenue;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_candidature_retenue")
+    private Candidature candidatureRetenue;
 
     public Integer getId() {
         return id;
@@ -52,11 +53,11 @@ public class BesoinPoste {
         etat = value;
     }
 
-    public Integer getIdCandidatureRetenue() {
-        return idCandidatureRetenue;
+    public Candidature getCandidatureRetenue() {
+        return candidatureRetenue;
     }
 
-    public void setIdCandidatureRetenue(Integer value) {
-        idCandidatureRetenue = value;
+    public void setCandidatureRetenue(Candidature value) {
+        candidatureRetenue = value;
     }
 }

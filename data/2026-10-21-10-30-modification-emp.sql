@@ -1,0 +1,1 @@
+ALTER TABLE employe ADD COLUMN id_personne INT REFERENCES personne(id);

@@ -1,6 +1,7 @@
 package s5.itu.projetgestion.controller.besoin;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +11,9 @@ import jakarta.servlet.http.HttpSession;
 import s5.itu.projetgestion.config.SessionKeys;
 import s5.itu.projetgestion.dto.auth.SessionUser;
 import s5.itu.projetgestion.model.auth.User;
+import s5.itu.projetgestion.exceptions.validation.AutorisationValidationException;
+import s5.itu.projetgestion.exceptions.validation.BesoinInvalideException;
+import s5.itu.projetgestion.exceptions.validation.UtilisateurInvalideException;
 import s5.itu.projetgestion.model.besoin.Besoin;
 import s5.itu.projetgestion.service.auth.UserService;
 import s5.itu.projetgestion.service.besoin.BesoinService;
@@ -22,7 +26,9 @@ public class ValidationController {
     private final UserService userService;
     private final BesoinService besoinService;
 
-    public ValidationController(ValidationService validationService, UserService userService,
+    public ValidationController(
+            ValidationService validationService,
+            UserService userService,
             BesoinService besoinService) {
         this.validationService = validationService;
         this.userService = userService;
@@ -30,43 +36,100 @@ public class ValidationController {
     }
 
     @PostMapping("/api/besoin/valider")
-    public void validerBesoin(@RequestParam Integer idBesoin, HttpSession session) {
-        SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
-        User u = userService.getById(sessionUser.getId());
-        Besoin b = new Besoin();
-        try {
-            b = this.besoinService.getById(idBesoin);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+    public ResponseEntity<String> validerBesoin(
+            @RequestParam Integer idBesoin,
+            HttpSession session) {
+
+        User utilisateur = recupererUtilisateur(session);
+        Besoin besoin = new Besoin();
 
         try {
-            this.validationService.validerBesoin(b, u);
+            besoin = recupererBesoin(idBesoin);
+            validationService.validerBesoin(besoin, utilisateur);
+            return ResponseEntity.ok("Besoin validé avec succès.");
 
+        } catch (BesoinInvalideException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (UtilisateurInvalideException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+        } catch (AutorisationValidationException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-
+            e.printStackTrace();
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    e.getMessage(), e);
         }
     }
 
     @PostMapping("/api/besoin/refuser")
-    public void refuserBesoin(@RequestParam Integer idBesoin, HttpSession session) {
-        SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
-        User u = userService.getById(sessionUser.getId());
-        Besoin b = new Besoin();
-        try {
-            b = this.besoinService.getById(idBesoin);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+    public void refuserBesoin(
+            @RequestParam Integer idBesoin,
+            HttpSession session) {
+
+        User utilisateur = recupererUtilisateur(session);
+        Besoin besoin = new Besoin();
 
         try {
-            this.validationService.refuserBesoin(b, u);
-
+            besoin = recupererBesoin(idBesoin);
+            validationService.validerBesoin(besoin, utilisateur);
+        } catch (BesoinInvalideException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (UtilisateurInvalideException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+        } catch (AutorisationValidationException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Erreur lors du refus du besoin", e);
         }
     }
 
+    private User recupererUtilisateur(HttpSession session) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
+
+        if (sessionUser == null || sessionUser.getId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Utilisateur non connecté");
+        }
+
+        User utilisateur = userService.getById(sessionUser.getId());
+
+        if (utilisateur == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Utilisateur introuvable");
+        }
+
+        return utilisateur;
+    }
+
+    private Besoin recupererBesoin(Integer idBesoin) throws Exception {
+        if (idBesoin == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Identifiant du besoin obligatoire");
+        }
+
+        try {
+            Besoin besoin = besoinService.getById(idBesoin);
+
+            if (besoin == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Besoin introuvable");
+            }
+
+            return besoin;
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Besoin introuvable", e);
+        }
+    }
 }
