@@ -68,6 +68,12 @@
         <version>1.1.22</version>
     </dependency>
 
+    <!-- P4 sprint 3 : emails aux candidats (SMTP de test : Mailpit / MailHog) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
     <!-- Tests -->
     <dependency>
         <groupId>org.springframework.boot</groupId>

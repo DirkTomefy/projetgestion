@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import s5.itu.projetgestion.model.embauche.PropositionEmbauche;
 import s5.itu.projetgestion.repository.embauche.PropositionConditionRepository;
 import s5.itu.projetgestion.repository.embauche.PropositionEmbaucheRepository;
+import s5.itu.projetgestion.service.notification.NotificationService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,13 +22,16 @@ public class PropositionExpirationService {
     private final PropositionEmbaucheRepository propositionRepo;
     private final PropositionConditionRepository conditionRepo;
     private final HistoPropositionService histoService;
+    private final NotificationService notificationService;
 
     public PropositionExpirationService(PropositionEmbaucheRepository propositionRepo,
                                         PropositionConditionRepository conditionRepo,
-                                        HistoPropositionService histoService) {
+                                        HistoPropositionService histoService,
+                                        NotificationService notificationService) {
         this.propositionRepo = propositionRepo;
         this.conditionRepo = conditionRepo;
         this.histoService = histoService;
+        this.notificationService = notificationService;
     }
 
     /** Tâche quotidienne. */
@@ -56,5 +60,10 @@ public class PropositionExpirationService {
                 "Date limite de réponse dépassée (" + ConditionsProposition.date(p.getDateLimiteReponse())
                         + ") sans réponse du candidat");
         propositionRepo.save(p);
+        var ca = p.getCandidature().getCandidat();
+        notificationService.notifierRole("RH", NotificationService.PROPOSITION_EXPIREE,
+                "La proposition faite à " + ca.getNom() + (ca.getPrenom() == null ? "" : " " + ca.getPrenom())
+                        + " a expiré sans réponse : vous pouvez lui faire une nouvelle proposition",
+                "/rh/propositions/" + p.getId());
     }
 }

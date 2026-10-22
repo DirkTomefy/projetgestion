@@ -18,6 +18,8 @@ import s5.itu.projetgestion.model.recrutement.OffreEmploi;
 import s5.itu.projetgestion.repository.embauche.PropositionEmbaucheRepository;
 import s5.itu.projetgestion.repository.embauche.RelanceConditionRepository;
 import s5.itu.projetgestion.repository.recrutement.OffreEmploiRepository;
+import s5.itu.projetgestion.service.notification.CommunicationCandidatService;
+import s5.itu.projetgestion.service.notification.NotificationService;
 import s5.itu.projetgestion.service.recrutement.OffreClotureService;
 
 import java.time.LocalDateTime;
@@ -46,6 +48,8 @@ public class PropositionReponseService {
     private final PropositionExpirationService expirationService;
     private final OffreClotureService clotureService;
     private final ObjectProvider<EmbaucheService> embaucheService;
+    private final NotificationService notificationService;
+    private final CommunicationCandidatService communication;
 
     public PropositionReponseService(PropositionEmbaucheRepository propositionRepo,
                                      RelanceConditionRepository relanceRepo,
@@ -54,7 +58,9 @@ public class PropositionReponseService {
                                      HistoPropositionService histoService,
                                      PropositionExpirationService expirationService,
                                      OffreClotureService clotureService,
-                                     ObjectProvider<EmbaucheService> embaucheService) {
+                                     ObjectProvider<EmbaucheService> embaucheService,
+                                     NotificationService notificationService,
+                                     CommunicationCandidatService communication) {
         this.propositionRepo = propositionRepo;
         this.relanceRepo = relanceRepo;
         this.offreRepo = offreRepo;
@@ -63,6 +69,8 @@ public class PropositionReponseService {
         this.expirationService = expirationService;
         this.clotureService = clotureService;
         this.embaucheService = embaucheService;
+        this.notificationService = notificationService;
+        this.communication = communication;
     }
 
     /** Page publique : la proposition telle que le candidat la voit (expire à la volée si besoin). */
@@ -115,6 +123,7 @@ public class PropositionReponseService {
             histoService.enregistrer(p, null, "Le candidat refuse : " + String.join(" ; ", refus)
                     + " — en attente d'une contre-proposition de la RH");
             propositionRepo.save(p);
+            notifierRh(p, "a refusé : " + String.join(" ; ", refus) + ". Une contre-proposition est attendue.");
         }
         return toDto(p);
     }
@@ -133,6 +142,7 @@ public class PropositionReponseService {
         histoService.changerStatut(p, PropositionEmbauche.STATUT_REFUSER, null,
                 "Le candidat décline la proposition" + (motif == null ? "" : " : " + motif));
         propositionRepo.save(p);
+        notifierRh(p, "a décliné la proposition" + (motif == null ? "." : " : " + motif));
         return toDto(p);
     }
 
@@ -144,14 +154,25 @@ public class PropositionReponseService {
         if (embauche == null) {
             log.warn("Proposition {} acceptée mais aucun EmbaucheService (P3) n'est disponible : embauche non lancée",
                     p.getId());
+            notifierRh(p, "a accepté toutes les conditions (embauche automatique non disponible).");
             return;
         }
         Integer idContrat = embauche.embaucher(p.getId());
         log.info("Proposition {} acceptée : contrat {} créé", p.getId(), idContrat);
+        notifierRh(p, "a accepté toutes les conditions : employé et contrat créés.");
+        communication.embaucheConfirmee(p);
 
         propositionRepo.flush();   // sièges POURVU écrits par l'embauche, avant la requête de clôture
         BesoinPoste siege = p.getBesoinPoste();
         clotureService.cloturerSiPostesPourvus(siege.getBesoin().getId());
+    }
+
+    /** P4 : « un candidat a répondu à une proposition » → tous les utilisateurs RH. */
+    private void notifierRh(PropositionEmbauche p, String quoi) {
+        Candidat ca = p.getCandidature().getCandidat();
+        notificationService.notifierRole("RH", NotificationService.PROPOSITION_REPONSE,
+                ca.getNom() + (ca.getPrenom() == null ? "" : " " + ca.getPrenom()) + " (" + p.getBesoinPoste().getPoste().getLibelle()
+                        + ") " + quoi, "/rh/propositions/" + p.getId());
     }
 
     private void verifierAttenteCandidat(PropositionEmbauche p) {

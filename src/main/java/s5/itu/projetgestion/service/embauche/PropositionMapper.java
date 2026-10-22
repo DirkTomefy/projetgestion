@@ -9,6 +9,9 @@ import s5.itu.projetgestion.model.embauche.PropositionCondition;
 import s5.itu.projetgestion.model.embauche.PropositionEmbauche;
 import s5.itu.projetgestion.model.embauche.RelanceCondition;
 import s5.itu.projetgestion.model.organisation.Poste;
+import s5.itu.projetgestion.model.contrat.TypeContrat;
+import s5.itu.projetgestion.model.embauche.PointCondition;
+import s5.itu.projetgestion.repository.contrat.TypeContratRepository;
 import s5.itu.projetgestion.repository.embauche.PropositionConditionRepository;
 import s5.itu.projetgestion.repository.embauche.RelanceConditionRepository;
 import s5.itu.projetgestion.service.finance.FourchetteSalariale;
@@ -30,10 +33,25 @@ public class PropositionMapper {
 
     private final PropositionConditionRepository conditionRepo;
     private final RelanceConditionRepository relanceRepo;
+    private final TypeContratRepository typeContratRepo;
 
-    public PropositionMapper(PropositionConditionRepository conditionRepo, RelanceConditionRepository relanceRepo) {
+    public PropositionMapper(PropositionConditionRepository conditionRepo, RelanceConditionRepository relanceRepo,
+                             TypeContratRepository typeContratRepo) {
         this.conditionRepo = conditionRepo;
         this.relanceRepo = relanceRepo;
+        this.typeContratRepo = typeContratRepo;
+    }
+
+    /**
+     * Valeur lisible d'une condition. TYPE_CONTRAT est stocké par id de type_contrat (lu ainsi par l'embauche P3) :
+     * on affiche son libellé (un ancien libellé stocké tel quel reste affiché tel quel).
+     */
+    public String afficher(String code, String valeur) {
+        if (PointCondition.TYPE_CONTRAT.equals(code) && valeur != null && valeur.trim().matches("\\d+")) {
+            return typeContratRepo.findById(Integer.valueOf(valeur.trim()))
+                    .map(TypeContrat::getLibelle).orElse(valeur);
+        }
+        return ConditionsProposition.afficher(code, valeur);
     }
 
     public List<PropositionCondition> conditionsTriees(Integer idProposition) {
@@ -68,9 +86,9 @@ public class PropositionMapper {
         return conditions.stream().map(c -> {
             RelanceCondition r = derniere.get(c.getId());
             return new ConditionDto(c.getId(), c.getCode(), ConditionsProposition.libelle(c.getCode()),
-                    c.getValeur(), ConditionsProposition.afficher(c.getCode(), c.getValeur()),
+                    c.getValeur(), afficher(c.getCode(), c.getValeur()),
                     c.getAccepte(), c.getCommentaireCandidat(),
-                    r != null, r == null ? null : ConditionsProposition.afficher(c.getCode(), r.getAncienneValeur()));
+                    r != null, r == null ? null : afficher(c.getCode(), r.getAncienneValeur()));
         }).toList();
     }
 
@@ -83,8 +101,8 @@ public class PropositionMapper {
             String code = r.getPropositionCondition().getCode();
             return new RelanceDto(r.getId(), r.getPropositionCondition().getId(), code,
                     ConditionsProposition.libelle(code),
-                    ConditionsProposition.afficher(code, r.getAncienneValeur()),
-                    ConditionsProposition.afficher(code, r.getNouvelleValeur()),
+                    afficher(code, r.getAncienneValeur()),
+                    afficher(code, r.getNouvelleValeur()),
                     r.getStatut(), r.getDateRelance(), r.getIdUser(), r.getCommentaire());
         }).toList();
     }

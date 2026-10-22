@@ -27,6 +27,7 @@ import s5.itu.projetgestion.repository.recrutement.CandidatureRepository;
 import s5.itu.projetgestion.repository.recrutement.OffreEmploiRepository;
 import s5.itu.projetgestion.service.finance.FourchetteSalariale;
 import s5.itu.projetgestion.service.finance.GrilleSalarialeService;
+import s5.itu.projetgestion.service.notification.CommunicationCandidatService;
 import s5.itu.projetgestion.service.recrutement.OffreEmploiService;
 
 import java.math.BigDecimal;
@@ -67,6 +68,7 @@ public class PropositionEmbaucheService {
     private final GrilleSalarialeService grilleService;
     private final HistoPropositionService histoService;
     private final PropositionMapper mapper;
+    private final CommunicationCandidatService communication;
     private final String frontUrl;
 
     public PropositionEmbaucheService(PropositionEmbaucheRepository propositionRepo,
@@ -80,6 +82,7 @@ public class PropositionEmbaucheService {
                                       GrilleSalarialeService grilleService,
                                       HistoPropositionService histoService,
                                       PropositionMapper mapper,
+                                      CommunicationCandidatService communication,
                                       @Value("${app.front.url:http://localhost:5173}") String frontUrl) {
         this.propositionRepo = propositionRepo;
         this.conditionRepo = conditionRepo;
@@ -92,6 +95,7 @@ public class PropositionEmbaucheService {
         this.grilleService = grilleService;
         this.histoService = histoService;
         this.mapper = mapper;
+        this.communication = communication;
         this.frontUrl = frontUrl.endsWith("/") ? frontUrl.substring(0, frontUrl.length() - 1) : frontUrl;
     }
 
@@ -179,7 +183,7 @@ public class PropositionEmbaucheService {
         Map<String, String> valeurs = new LinkedHashMap<>();
         valeurs.put(PointCondition.SALAIRE, ConditionsProposition.stockerSalaire(req.salaire()));
         valeurs.put(PointCondition.DATE_DEBUT, req.dateDebut().toString());
-        valeurs.put(PointCondition.TYPE_CONTRAT, type.getLibelle());
+        valeurs.put(PointCondition.TYPE_CONTRAT, String.valueOf(type.getId()));   // id lu par l'embauche (P3)
         valeurs.put(PointCondition.HORAIRE, ConditionsProposition.texte(PointCondition.HORAIRE, req.horaire(), true));
         valeurs.put(PointCondition.LIEU, ConditionsProposition.texte(PointCondition.LIEU, req.lieu(), true));
         String conditions = ConditionsProposition.texte(PointCondition.CONDITIONS, req.conditionsTravail(), false);
@@ -206,6 +210,7 @@ public class PropositionEmbaucheService {
 
         histoService.enregistrer(p, idUser, joindre("Proposition envoyée au candidat (réponse attendue avant le "
                 + ConditionsProposition.date(p.getDateLimiteReponse()) + ")", req.commentaire()));
+        communication.propositionEnvoyee(p, false);   // email avec le lien de réponse
         return toDto(p);
     }
 
@@ -264,8 +269,8 @@ public class PropositionEmbaucheService {
             relanceRepo.save(r);
 
             changements.add(ConditionsProposition.libelle(pc.getCode()) + " : "
-                    + ConditionsProposition.afficher(pc.getCode(), pc.getValeur()) + " → "
-                    + ConditionsProposition.afficher(pc.getCode(), nouvelle));
+                    + mapper.afficher(pc.getCode(), pc.getValeur()) + " → "
+                    + mapper.afficher(pc.getCode(), nouvelle));
             pc.setValeur(nouvelle);
             pc.setAccepte(null);
             pc.setCommentaireCandidat(null);
@@ -281,6 +286,7 @@ public class PropositionEmbaucheService {
         propositionRepo.save(p);
         histoService.enregistrer(p, idUser, joindre("Contre-proposition envoyée (réponse attendue avant le "
                 + ConditionsProposition.date(dateLimite) + ") : " + String.join(" ; ", changements), req.commentaire()));
+        communication.propositionEnvoyee(p, true);
         return toDto(p);
     }
 
@@ -299,6 +305,7 @@ public class PropositionEmbaucheService {
         if (motif == null) throw PropositionException.invalide("commentaire", "Le motif du retrait est obligatoire");
         histoService.changerStatut(p, PropositionEmbauche.STATUT_REFUSER, idUser, "Proposition retirée par la RH : " + motif);
         propositionRepo.save(p);
+        communication.propositionRetiree(p);
         return toDto(p);
     }
 
@@ -349,8 +356,9 @@ public class PropositionEmbaucheService {
             case PointCondition.SALAIRE -> ConditionsProposition.stockerSalaire(ConditionsProposition.lireSalaire(valeur));
             case PointCondition.DATE_DEBUT -> ConditionsProposition.lireDate(valeur).toString();
             case PointCondition.TYPE_CONTRAT -> typeContratRepo.findAll().stream()
-                    .filter(t -> valeur != null && t.getLibelle().equalsIgnoreCase(valeur.trim()))
-                    .map(TypeContrat::getLibelle).findFirst()
+                    .filter(t -> valeur != null && (t.getLibelle().equalsIgnoreCase(valeur.trim())
+                            || String.valueOf(t.getId()).equals(valeur.trim())))
+                    .map(t -> String.valueOf(t.getId())).findFirst()
                     .orElseThrow(() -> PropositionException.invalide("idTypeContrat", "Type de contrat inconnu : " + valeur));
             default -> ConditionsProposition.texte(code, valeur, true);
         };
