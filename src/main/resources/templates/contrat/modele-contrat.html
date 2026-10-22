@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Contrat de Travail à Durée Indéterminée (CDI)</title>
+<title th:text="'Contrat ' + ${reference}">Contrat de travail</title>
 <style>
   @page {
     size: A4;
@@ -154,8 +154,11 @@
 
   <!-- EN-TÊTE -->
   <div class="header">
-    <h1>Contrat de Travail à Durée Indéterminée</h1>
-    <div class="subtitle">Contrat à durée indéterminée — CDI</div>
+    <h1>Contrat de travail</h1>
+    <div class="subtitle">
+      <span th:text="${typeContrat}">CE</span>
+      — référence <span th:text="${reference}">CTR-2026-0001</span>
+    </div>
   </div>
 
   <!-- PARTIES -->
@@ -163,22 +166,15 @@
   <div class="parties">
     <div class="party">
       <h3>L'Employeur</h3>
-      <p><span class="label">Raison sociale :</span> [Nom de la société]</p>
-      <p><span class="label">Forme juridique :</span> [SARL / SAS / SA…]</p>
-      <p><span class="label">Siège social :</span> [Adresse complète]</p>
-      <p><span class="label">SIRET :</span> [Numéro]</p>
-      <p><span class="label">Code APE :</span> [Code]</p>
-      <p><span class="label">Représentée par :</span> [Nom, fonction]</p>
-      <p><span class="label">URSSAF :</span> [N° compte cotisant]</p>
+      <p><span class="label">Raison sociale :</span> Gestion RH</p>
+      <p><span class="label">Unité :</span> <span th:text="${unite.libelle}">Unité</span></p>
+      <p><span class="label">Poste :</span> <span th:text="${poste.libelle}">Poste</span></p>
     </div>
     <div class="party">
       <h3>Le Salarié</h3>
-      <p><span class="label">Nom et prénom :</span> [Nom, prénom]</p>
-      <p><span class="label">Date de naissance :</span> [JJ/MM/AAAA]</p>
-      <p><span class="label">Adresse :</span> [Adresse complète]</p>
-      <p><span class="label">N° sécurité sociale :</span> [Numéro]</p>
-      <p><span class="label">Nationalité :</span> [Nationalité]</p>
-      <p><span class="label">Titre de séjour (si applicable) :</span> [N° / type]</p>
+      <p><span class="label">Nom et prénom :</span> <span th:text="${employe.nom + ' ' + (employe.prenoms ?: '')}">Salarié</span></p>
+      <p><span class="label">Matricule :</span> <span th:text="${employe.matricule}">EMP0001</span></p>
+      <p><span class="label">Adresse :</span> <span th:text="${employe.adresse ?: '-'}">-</span></p>
     </div>
   </div>
 
@@ -189,14 +185,14 @@
   <!-- ARTICLE 1 : ENGAGEMENT -->
   <h2>Article 1 — Engagement et objet</h2>
   <p>
-    Le Salarié est engagé par l'Employeur en qualité de <strong>[intitulé du poste]</strong>,
-    statut <strong>[cadre / non-cadre / agent de maîtrise]</strong>, niveau <strong>[niveau]</strong>,
-    coefficient <strong>[coefficient]</strong> de la convention collective
-    <strong>[nom de la convention collective]</strong>.
+    Le Salarié est engagé par l'Employeur en qualité de
+    <strong th:text="${poste.libelle}">Poste</strong>, au sein de
+    <strong th:text="${unite.libelle}">Unité</strong>.
   </p>
   <p>
-    Le présent contrat prend effet le <strong>[date d'embauche]</strong> et est conclu pour une
-    durée indéterminée.
+    Le présent contrat prend effet le <strong th:text="${dateDebut}">01/01/2026</strong>.
+    Il est conclu selon le type <strong th:text="${typeContrat}">CE</strong>.
+    <span th:if="${dateFinPrevue != '-'}">La date de fin prévue est le <strong th:text="${dateFinPrevue}">-</strong>.</span>
   </p>
 
   <!-- ARTICLE 2 : FONCTIONS -->
@@ -206,9 +202,8 @@
     Ses attributions principales sont les suivantes :
   </p>
   <ul>
-    <li>[Mission / tâche 1]</li>
-    <li>[Mission / tâche 2]</li>
-    <li>[Mission / tâche 3]</li>
+    <li th:if="${details.isEmpty()}">Les missions correspondent aux fonctions attachées au poste.</li>
+    <li th:each="detail : ${details}" th:text="${detail.pointCondition.libelle + ' : ' + detail.valeur}">Condition</li>
   </ul>
   <p>
     Cette liste n'est pas exhaustive. Le Salarié pourra se voir confier toute autre tâche
@@ -218,7 +213,8 @@
   <!-- ARTICLE 3 : LIEU DE TRAVAIL -->
   <h2>Article 3 — Lieu de travail</h2>
   <p>
-    Le Salarié exercera ses fonctions à <strong>[adresse du lieu de travail]</strong>.
+    Le Salarié exercera ses fonctions au sein de l'unité
+    <strong th:text="${unite.libelle}">Unité</strong>.
   </p>
   <p class="mention">
     Le cas échéant : Dans le cadre de ses fonctions, le Salarié pourra être amené à effectuer
@@ -228,8 +224,8 @@
   <!-- ARTICLE 4 : PÉRIODE D'ESSAI -->
   <h2>Article 4 — Période d'essai</h2>
   <p>
-    Le présent contrat comporte une période d'essai de <strong>[durée]</strong>
-    (renouvelable une fois pour une durée de <strong>[durée renouvellement]</strong>,
+    Le présent contrat comporte une période d'essai de <strong th:text="${dureeMax != null ? dureeMax + ' mois maximum' : 'selon les dispositions applicables'}">selon les dispositions applicables</strong>
+    (renouvelable selon les conditions prévues par le type de contrat,
     avec l'accord écrit du Salarié).
   </p>
   <p>
@@ -269,7 +265,7 @@
     <tbody>
       <tr>
         <td>Salaire de base</td>
-        <td class="amount">[0 000,00 €]</td>
+        <td class="amount" th:text="${remunerations.isEmpty() ? '-' : remunerations[0].salaire}">-</td>
         <td>Mensuel</td>
       </tr>
       <tr>
@@ -279,7 +275,7 @@
       </tr>
       <tr>
         <td><strong>Total brut mensuel</strong></td>
-        <td class="amount"><strong>[0 000,00 €]</strong></td>
+        <td class="amount"><strong th:text="${remunerations.isEmpty() ? '-' : remunerations[0].salaire}">-</strong></td>
         <td>—</td>
       </tr>
     </tbody>
@@ -352,7 +348,7 @@
   </div>
 
   <div class="footer">
-    Fait en deux exemplaires originaux, dont un remis au Salarié.
+    Document généré automatiquement — contrat <span th:text="${reference}">CTR-2026-0001</span>.
   </div>
 
 </body>

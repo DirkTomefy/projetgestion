@@ -41,16 +41,17 @@ public class EmployeService {
     private BesoinPosteRepository besoinPosteRepository;
     private BesoinRepository besoinRepository;
     private TypeContratRepository typeContratRepository;
+    private ContratPdfService contratPdfService;
 
     public EmployeService(EmployeRepository employeRepository, AffectationRepository affectationRepository,
-        ContratRepository contratRepository, PropositionConditionRepository propositionConditionRepository,
-        ContratDetailRepository contratDetailRepository,
-        ContratRemunerationRepository contratRemunerationRepository,
-        PropositionEmbaucheRepository propositionEmbaucheRepository,
-        BesoinPosteRepository besoinPosteRepository,
-        BesoinRepository besoinRepository,
-        TypeContratRepository typeContratRepository
-    ) {
+            ContratRepository contratRepository, PropositionConditionRepository propositionConditionRepository,
+            ContratDetailRepository contratDetailRepository,
+            ContratRemunerationRepository contratRemunerationRepository,
+            PropositionEmbaucheRepository propositionEmbaucheRepository,
+            BesoinPosteRepository besoinPosteRepository,
+            BesoinRepository besoinRepository,
+            TypeContratRepository typeContratRepository,
+            ContratPdfService contratPdfService) {
         this.employeRepository = employeRepository;
         this.affectationRepository = affectationRepository;
         this.contratRepository = contratRepository;
@@ -61,12 +62,14 @@ public class EmployeService {
         this.besoinPosteRepository = besoinPosteRepository;
         this.besoinRepository = besoinRepository;
         this.typeContratRepository = typeContratRepository;
+        this.contratPdfService = contratPdfService;
     }
 
     @Transactional
     public void embaucher(Integer idProposition) {
         PropositionEmbauche proposition = propositionEmbaucheRepository.findById(idProposition)
-                .orElseThrow(() -> new IllegalArgumentException("Proposition d'embauche introuvable : " + idProposition));
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Proposition d'embauche introuvable : " + idProposition));
         if (!PropositionEmbauche.STATUT_ACCEPTER.equals(proposition.getStatutActuel())) {
             throw new IllegalStateException("La proposition doit être acceptée avant l'embauche.");
         }
@@ -82,13 +85,16 @@ public class EmployeService {
         TypeContrat typeContrat = trouverTypeContrat(proposition);
         Contrat contrat = creerContrat(proposition, affectation, typeContrat);
         recopierRemuneration(proposition, contrat);
+        contrat.setDocument(contratPdfService.generateAndStore(contrat));
+        contratRepository.save(contrat);
 
         Poste poste = proposition.getBesoinPoste().getPoste();
         poste.setStatutOccupation("OCCUPE");
         proposition.getBesoinPoste().setEtat("POURVU");
         proposition.getBesoinPoste().setCandidatureRetenue(proposition.getCandidature());
 
-        List<BesoinPoste> lignes = besoinPosteRepository.findByBesoinId(proposition.getBesoinPoste().getBesoin().getId());
+        List<BesoinPoste> lignes = besoinPosteRepository
+                .findByBesoinId(proposition.getBesoinPoste().getBesoin().getId());
         if (!lignes.isEmpty() && lignes.stream().allMatch(l -> "POURVU".equals(l.getEtat()))) {
             proposition.getBesoinPoste().getBesoin().setEtatActuel("POURVU");
             besoinRepository.save(proposition.getBesoinPoste().getBesoin());
@@ -97,23 +103,24 @@ public class EmployeService {
 
     }
 
-
-    @Transactional 
-    public Contrat creerContrat(PropositionEmbauche propositionEmbauche, Affectation affectation, TypeContrat typeContrat){
+    @Transactional
+    public Contrat creerContrat(PropositionEmbauche propositionEmbauche, Affectation affectation,
+            TypeContrat typeContrat) {
         Contrat contrat = new Contrat();
         contrat.setReference(genererReferenceContrat());
         contrat.setAffectation(affectation);
         contrat.setProposition(propositionEmbauche);
         contrat.setDateDebut(affectation.getDateDebut());
         contrat.setStatutActuel("CREE");
-        if(typeContrat == null){
-            // TODO : Ajouter le type de contrat par défaut
-        }else{
-            contrat.setType(typeContrat);
-        }
+        contrat.setType(typeContrat);
         contrat = this.contratRepository.save(contrat);
-        List<PropositionCondition> conditions = this.propositionConditionRepository.findByPropositionId(propositionEmbauche.getId());
-        for(PropositionCondition cond : conditions){
+        List<PropositionCondition> conditions = this.propositionConditionRepository
+            .findByPropositionId(propositionEmbauche.getId());
+
+        for (PropositionCondition cond : conditions) {
+            if (cond.getAccepte() != Boolean.TRUE) {
+                continue;
+            }
             ContratDetail detail = new ContratDetail();
             detail.setContrat(contrat);
             detail.setPointCondition(cond.getPointCondition());
@@ -149,22 +156,23 @@ public class EmployeService {
                         && "id_type_contrat".equalsIgnoreCase(c.getPointCondition().getLibelle()))
                 .map(PropositionCondition::getValeur)
                 .filter(v -> v != null && !v.isBlank())
-            .findFirst();
+                .findFirst();
 
         if (valeurId.isEmpty()) {
             return typeContratRepository.findByLibelleIgnoreCase("CE")
-                .orElseThrow(() -> new IllegalStateException("Type de contrat CE introuvable"));
+                    .orElseThrow(() -> new IllegalStateException("Type de contrat CE introuvable"));
         }
 
         final Integer idTypeContrat;
         try {
             idTypeContrat = Integer.valueOf(valeurId.get().trim());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("L'identifiant du type de contrat doit être numérique : " + valeurId.get(), e);
+            throw new IllegalArgumentException(
+                    "L'identifiant du type de contrat doit être numérique : " + valeurId.get(), e);
         }
 
         return typeContratRepository.findById(idTypeContrat)
-            .orElseThrow(() -> new IllegalStateException("Type de contrat introuvable : " + idTypeContrat));
+                .orElseThrow(() -> new IllegalStateException("Type de contrat introuvable : " + idTypeContrat));
     }
 
     private void recopierRemuneration(PropositionEmbauche proposition, Contrat contrat) {
