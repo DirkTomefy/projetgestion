@@ -7,6 +7,7 @@ import s5.itu.projetgestion.model.recrutement.Candidature;
 import s5.itu.projetgestion.model.recrutement.HistoCandidature;
 import s5.itu.projetgestion.repository.recrutement.CandidatureRepository;
 import s5.itu.projetgestion.repository.recrutement.HistoCandidatureRepository;
+import s5.itu.projetgestion.service.notification.CommunicationCandidatService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,15 +18,19 @@ public class HistoCandidatureService {
 
     private final HistoCandidatureRepository histoRepo;
     private final CandidatureRepository candidatureRepo;
+    private final CommunicationCandidatService communication;
 
-    public HistoCandidatureService(HistoCandidatureRepository histoRepo, CandidatureRepository candidatureRepo) {
+    public HistoCandidatureService(HistoCandidatureRepository histoRepo, CandidatureRepository candidatureRepo,
+                                   CommunicationCandidatService communication) {
         this.histoRepo = histoRepo;
         this.candidatureRepo = candidatureRepo;
+        this.communication = communication;
     }
 
     /** Première ligne d'historique, au dépôt depuis le site public. */
     public void depot(Candidature candidature) {
         enregistrer(candidature, null, candidature.getEtat(), null, "Dépôt de la candidature");
+        communication.candidatureRecue(candidature);   // P4 : accusé de réception (après validation, sans risque)
     }
 
     public void changerEtat(Candidature candidature, String nouvelEtat, Integer idUser, String commentaire) {
@@ -33,6 +38,9 @@ public class HistoCandidatureService {
         candidature.setEtat(nouvelEtat);
         candidatureRepo.save(candidature);
         enregistrer(candidature, avant, nouvelEtat, idUser, commentaire);
+        if (Candidature.ETAT_REFUSE.equals(nouvelEtat) && !Candidature.ETAT_REFUSE.equals(avant)) {
+            communication.candidatureRefusee(candidature);   // P4 : email de résultat
+        }
     }
 
     @Transactional(readOnly = true)

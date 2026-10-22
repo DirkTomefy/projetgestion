@@ -19,8 +19,9 @@ import s5.itu.projetgestion.err.PropositionException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Erreurs des API de proposition (RH et page publique), au même format que les autres API : ErreurApi. */
-@RestControllerAdvice(basePackageClasses = EmbaucheErreurHandler.class)
+/** Erreurs des API de proposition (RH et page publique) et de notification, au même format que les autres API : ErreurApi. */
+@RestControllerAdvice(basePackageClasses = {EmbaucheErreurHandler.class,
+        s5.itu.projetgestion.controller.notification.NotificationController.class})
 public class EmbaucheErreurHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EmbaucheErreurHandler.class);

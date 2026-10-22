@@ -14,7 +14,7 @@ package s5.itu.projetgestion.service.embauche;
  * Conditions lues (proposition_condition, point_condition.libelle) :
  *   SALAIRE      : montant en Ariary, sans séparateur (ex. "2500000")
  *   DATE_DEBUT   : date ISO (ex. "2026-11-02")
- *   TYPE_CONTRAT : libellé de type_contrat (CE, CDD, CDI)
+ *   TYPE_CONTRAT : id de type_contrat (ex. "1" ; CE par défaut)
  *   HORAIRE, LIEU, CONDITIONS : texte libre
  */
 public interface EmbaucheService {
