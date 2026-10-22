@@ -23,7 +23,8 @@ public class Validation {
     @Column(nullable = false, length = 30)
     private String decision;
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime date = LocalDateTime.now();
+
     private String commentaire;
 
     public Integer getId() {

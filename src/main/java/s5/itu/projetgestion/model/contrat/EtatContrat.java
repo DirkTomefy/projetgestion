@@ -18,7 +18,8 @@ public class EtatContrat {
     @Column(nullable = false, length = 30)
     private String statut;
 
-    @Column(nullable = false)
+    // la base met NOW() toute seule
+    @Column(insertable = false, updatable = false)
     private LocalDateTime date;
 
     public Integer getId() { return id; }
@@ -28,12 +29,4 @@ public class EtatContrat {
     public String getStatut() { return statut; }
     public void setStatut(String statut) { this.statut = statut; }
     public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
-
-    @PrePersist
-    void initializeDate() {
-        if (date == null) {
-            date = LocalDateTime.now();
-        }
-    }
 }

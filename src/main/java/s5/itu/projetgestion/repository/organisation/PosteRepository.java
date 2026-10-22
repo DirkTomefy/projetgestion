@@ -25,4 +25,6 @@ public interface PosteRepository extends JpaRepository<Poste, Integer> {
             ORDER BY p.code
             """)
     List<Poste> findByEtatAvecRelations(@Param("etat") String etat);
+
+    List<Poste> findByEtatAndStatutOccupationAndUniteOrgaId(String etat, String statut, Integer idUnite);
 }
