@@ -11,4 +11,7 @@ public interface ValidationRepository extends JpaRepository<Validation, Integer>
     
     Optional<Validation> findFirstByBesoinOrderByDateDesc(Besoin besoin);
 
+    /** Dernière étape franchie (décision VALIDE) ; la ligne « Demande soumise » (EN_ATTENTE) ne compte pas. */
+    Optional<Validation> findFirstByBesoinAndDecisionOrderByDateDescIdDesc(Besoin besoin, String decision);
+
 }

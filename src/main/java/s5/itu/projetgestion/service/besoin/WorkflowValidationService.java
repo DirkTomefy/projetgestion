@@ -24,13 +24,11 @@ public class WorkflowValidationService {
     }
 
     public List<WorkflowValidation> getEtapeActuelleBesoin(Besoin b) throws Exception {
-        Optional<Validation> derniere = validationRepository.findFirstByBesoinOrderByDateDesc(b);
-
-        int ordre = (derniere == null)
-                ? 1
-                : derniere
-                        .map(validation -> validation.getWorkflowValidation().getOrdre() + 1)
-                        .orElse(1);
+        // L'étape attendue suit la dernière étape VALIDÉE. La ligne « Demande soumise » enregistrée à la
+        // création porte l'étape 1 avec la décision EN_ATTENTE : la compter faisait sauter la validation RH.
+        int ordre = validationRepository.findFirstByBesoinAndDecisionOrderByDateDescIdDesc(b, "VALIDE")
+                .map(validation -> validation.getWorkflowValidation().getOrdre() + 1)
+                .orElse(1);
 
         return workflowValidationRepository.findByOrdre(ordre);
     }

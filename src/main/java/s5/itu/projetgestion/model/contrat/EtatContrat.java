@@ -18,7 +18,8 @@ public class EtatContrat {
     @Column(nullable = false, length = 30)
     private String statut;
 
-    // la base met NOW() toute seule
+    // la base met NOW() toute seule ; Hibernate relit la valeur juste après l'insertion
+    @org.hibernate.annotations.Generated(event = org.hibernate.generator.EventType.INSERT)
     @Column(insertable = false, updatable = false)
     private LocalDateTime date;
 

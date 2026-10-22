@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpSession;
+import s5.itu.projetgestion.err.AccesRefuseException;
+import s5.itu.projetgestion.dto.commun.OptionDto;
 import s5.itu.projetgestion.config.SessionKeys;
 import s5.itu.projetgestion.dto.auth.SessionUser;
 import s5.itu.projetgestion.dto.commun.OptionDto;
@@ -68,7 +70,7 @@ public class ContratController {
     private void exigerRH(HttpSession session) {
         SessionUser su = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
         if (su == null || !su.hasRole("RH"))
-            throw new IllegalArgumentException("Action réservée au rôle RH.");
+            throw new AccesRefuseException("Action réservée au rôle RH.");
     }
 
     @PostMapping("/{id}/renouveler")
@@ -76,6 +78,11 @@ public class ContratController {
                                 @RequestBody RenouvellementRequest req, HttpSession session) {
         exigerRH(session);
         return service.renouveler(id, req);
+    }
+
+    @GetMapping("/types")
+    public List<OptionDto> types() {
+        return service.types();
     }
 
     @GetMapping("/echeances")

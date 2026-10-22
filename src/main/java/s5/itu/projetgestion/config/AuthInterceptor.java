@@ -14,6 +14,14 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute(SessionKeys.CURRENT_USER) == null) {
+            String chemin = request.getRequestURI().substring(request.getContextPath().length());
+            if (chemin.startsWith("/api/") || chemin.startsWith("/uploads/")) {
+                // API et fichiers (CV, contrats) : 401 que le front sait traiter, jamais le fichier
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"status\":401,\"message\":\"Vous n'êtes pas connecté\"}");
+                return false;
+            }
             response.sendRedirect(request.getContextPath() + "/auth/login");
             return false;
         }

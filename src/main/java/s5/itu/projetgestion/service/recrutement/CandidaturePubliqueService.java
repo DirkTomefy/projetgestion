@@ -17,6 +17,8 @@ import s5.itu.projetgestion.err.ProjetgestionException;
 import s5.itu.projetgestion.model.commun.Document;
 import s5.itu.projetgestion.model.commun.TypeDocument;
 import s5.itu.projetgestion.model.recrutement.Candidat;
+import s5.itu.projetgestion.model.recrutement.Personne;
+import s5.itu.projetgestion.repository.recrutement.PersonneRepository;
 import s5.itu.projetgestion.model.recrutement.CandidatDetail;
 import s5.itu.projetgestion.model.recrutement.Candidature;
 import s5.itu.projetgestion.model.recrutement.DocumentCandidat;
@@ -58,6 +60,7 @@ public class CandidaturePubliqueService {
     private final UploadProperties uploadProperties;
     private final CvPdfValidator cvValidator;
     private final HistoCandidatureService histoService;
+    private final PersonneRepository personneRepo;
 
     public CandidaturePubliqueService(OffrePubliqueService offres,
             CandidatRepository candidatRepo,
@@ -69,7 +72,8 @@ public class CandidaturePubliqueService {
             FileStorageService fileStorageService,
             UploadProperties uploadProperties,
             CvPdfValidator cvValidator,
-            HistoCandidatureService histoService) {
+            HistoCandidatureService histoService,
+            PersonneRepository personneRepo) {
         this.offres = offres;
         this.candidatRepo = candidatRepo;
         this.detailRepo = detailRepo;
@@ -81,6 +85,7 @@ public class CandidaturePubliqueService {
         this.uploadProperties = uploadProperties;
         this.cvValidator = cvValidator;
         this.histoService = histoService;
+        this.personneRepo = personneRepo;
     }
 
     @Transactional
@@ -136,6 +141,14 @@ public class CandidaturePubliqueService {
         c.setAdresse(nettoyer(demande.adresse()));
         c.setNumero(demande.telephone().trim());
         c.setEmail(email);
+        Personne p = new Personne();       // fiche d'identité commune candidat / employé
+        p.setNom(c.getNom());
+        p.setPrenoms(c.getPrenom());
+        p.setDateNaissance(c.getDateNaissance());
+        p.setAdresse(c.getAdresse());
+        p.setTelephone(c.getNumero());
+        p.setEmail(email);
+        c.setPersonne(personneRepo.save(p));
         return candidatRepo.save(c);
     }
 

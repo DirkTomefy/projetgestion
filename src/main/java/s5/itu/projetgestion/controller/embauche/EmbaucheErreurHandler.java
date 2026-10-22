@@ -9,6 +9,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import s5.itu.projetgestion.dto.commun.ErreurApi;
@@ -20,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Erreurs des API de proposition (RH et page publique), au même format que les autres API : ErreurApi. */
+@Order(Ordered.HIGHEST_PRECEDENCE)   // avant GlobalExceptionHandler
 @RestControllerAdvice(basePackageClasses = EmbaucheErreurHandler.class)
 public class EmbaucheErreurHandler {
 
