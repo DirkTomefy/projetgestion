@@ -16,10 +16,12 @@ import s5.itu.projetgestion.model.contrat.TypeContrat;
 import s5.itu.projetgestion.model.recrutement.OffreEmploi;
 import s5.itu.projetgestion.service.recrutement.BesoinOffreLookupService;
 import s5.itu.projetgestion.service.commun.FileStorageService;
+import s5.itu.projetgestion.service.recrutement.OffreClotureService;
 import s5.itu.projetgestion.service.recrutement.OffreEmploiService;
 import s5.itu.projetgestion.service.recrutement.OffrePdfService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -30,21 +32,25 @@ public class OffreEmploiApiController {
 
     public record OffreDto(Integer id, String ref, Integer idBesoin, String besoinRef, String poste,
                            String typeContrat, LocalDate datePublication, LocalDate dateLimiteCandidature,
-                           String etat, String pdfUrl) { }
+                           String etat, String pdfUrl,
+                           LocalDateTime dateCloture, String motifCloture, boolean cloturable) { }
 
     private final OffreEmploiService offreService;
     private final BesoinOffreLookupService besoinLookup;
     private final OffrePdfService pdfService;
     private final FileStorageService fileStorageService;
+    private final OffreClotureService clotureService;
 
     public OffreEmploiApiController(OffreEmploiService offreService,
                                     BesoinOffreLookupService besoinLookup,
                                     OffrePdfService pdfService,
-                                    FileStorageService fileStorageService) {
+                                    FileStorageService fileStorageService,
+                                    OffreClotureService clotureService) {
         this.offreService = offreService;
         this.besoinLookup = besoinLookup;
         this.pdfService = pdfService;
         this.fileStorageService = fileStorageService;
+        this.clotureService = clotureService;
     }
 
     @GetMapping
@@ -93,6 +99,20 @@ public class OffreEmploiApiController {
         return toDto(offreService.publier(id, currentUser(session)));
     }
 
+    /** Fiche d'une offre, clôturée ou non (ses candidatures : GET /api/rh/offres/{id}/candidatures). */
+    @GetMapping("/{id}")
+    public OffreDto fiche(@PathVariable Integer id, HttpSession session) {
+        verifierRh(session);
+        return toDto(offreService.getById(id));
+    }
+
+    /** Bouton « Clôturer » : l'offre quitte le site public mais reste consultable. */
+    @PostMapping("/{id}/cloturer")
+    public OffreDto cloturer(@PathVariable Integer id, HttpSession session) {
+        verifierRh(session);
+        return toDto(clotureService.cloturer(id, currentUser(session)));
+    }
+
     @GetMapping("/{id}/pdf")
     public ResponseEntity<Resource> pdf(@PathVariable Integer id) {
         OffreEmploi o = offreService.getById(id);
@@ -123,7 +143,9 @@ public class OffreEmploiApiController {
                 b != null ? b.poste() : null,
                 o.getTypeContrat() != null ? o.getTypeContrat().getLibelle() : null,
                 o.getDatePublication(), o.getDateLimiteCandidature(), o.getEtat(),
-                o.getDocument() != null ? "/api/rh/offres/" + o.getId() + "/pdf" : null);
+                o.getDocument() != null ? "/api/rh/offres/" + o.getId() + "/pdf" : null,
+                o.getDateCloture(), o.getMotifCloture(),
+                !OffreEmploi.ETAT_CLOTUREE.equals(o.getEtat()));
     }
 
     private static SessionUser currentUser(HttpSession session) {
