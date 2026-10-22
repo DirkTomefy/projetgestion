@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title th:text="'Contrat ' + ${reference}">Contrat de travail</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  /* En-tête */
+  .header {
+    text-align: center;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 10px;
+    margin-bottom: 22px;
+  }
+  .header h1 {
+    font-size: 16pt;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .header .subtitle {
+    font-size: 10pt;
+    color: #555;
+    font-style: italic;
+  }
+
+  /* Titres */
+  h2 {
+    font-size: 11pt;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 3px;
+    margin: 20px 0 10px;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 10.5pt;
+    margin: 12px 0 6px;
+    font-weight: bold;
+  }
+
+  /* Parties */
+  .parties {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+  }
+  .party {
+    flex: 1;
+    border: 1px solid #bbb;
+    padding: 10px 12px;
+  }
+  .party h3 {
+    margin: 0 0 6px;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .party p {
+    margin: 2px 0;
+    font-size: 9.5pt;
+  }
+  .label { color: #555; }
+
+  /* Texte */
+  p {
+    margin: 6px 0;
+    text-align: justify;
+  }
+  ol, ul {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+  li { margin-bottom: 4px; text-align: justify; }
+
+  /* Tableau */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #999;
+    padding: 6px 8px;
+    text-align: left;
+  }
+  th {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 8.5pt;
+    letter-spacing: 0.3px;
+  }
+  td.amount { text-align: right; }
+
+  /* Signatures */
+  .signatures {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-top: 40px;
+    page-break-inside: avoid;
+  }
+  .signature-block { flex: 1; }
+  .signature-block .title {
+    font-weight: bold;
+    margin-bottom: 50px;
+    font-size: 10pt;
+  }
+  .signature-line {
+    border-top: 1px solid #1a1a1a;
+    padding-top: 3px;
+    font-size: 8.5pt;
+    color: #555;
+  }
+
+  /* Pied */
+  .footer {
+    margin-top: 30px;
+    padding-top: 8px;
+    border-top: 1px solid #ccc;
+    font-size: 8pt;
+    color: #777;
+    text-align: center;
+  }
+
+  .mention {
+    font-size: 9pt;
+    color: #444;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+  <!-- EN-TÊTE -->
+  <div class="header">
+    <h1>Contrat de travail</h1>
+    <div class="subtitle">
+      <span th:text="${typeContrat}">CE</span>
+      — référence <span th:text="${reference}">CTR-2026-0001</span>
+    </div>
+  </div>
+
+  <!-- PARTIES -->
+  <h2>Entre les soussignés</h2>
+  <div class="parties">
+    <div class="party">
+      <h3>L'Employeur</h3>
+      <p><span class="label">Raison sociale :</span> Gestion RH</p>
+      <p><span class="label">Unité :</span> <span th:text="${unite.libelle}">Unité</span></p>
+      <p><span class="label">Poste :</span> <span th:text="${poste.libelle}">Poste</span></p>
+    </div>
+    <div class="party">
+      <h3>Le Salarié</h3>
+      <p><span class="label">Nom et prénom :</span> <span th:text="${employe.nom + ' ' + (employe.prenoms ?: '')}">Salarié</span></p>
+      <p><span class="label">Matricule :</span> <span th:text="${employe.matricule}">EMP0001</span></p>
+      <p><span class="label">Adresse :</span> <span th:text="${employe.adresse ?: '-'}">-</span></p>
+    </div>
+  </div>
+
+  <p class="mention">
+    Il a été convenu ce qui suit, conformément aux dispositions du Code du travail et de la convention collective applicable.
+  </p>
+
+  <!-- ARTICLE 1 : ENGAGEMENT -->
+  <h2>Article 1 — Engagement et objet</h2>
+  <p>
+    Le Salarié est engagé par l'Employeur en qualité de
+    <strong th:text="${poste.libelle}">Poste</strong>, au sein de
+    <strong th:text="${unite.libelle}">Unité</strong>.
+  </p>
+  <p>
+    Le présent contrat prend effet le <strong th:text="${dateDebut}">01/01/2026</strong>.
+    Il est conclu selon le type <strong th:text="${typeContrat}">CE</strong>.
+    <span th:if="${dateFinPrevue != '-'}">La date de fin prévue est le <strong th:text="${dateFinPrevue}">-</strong>.</span>
+  </p>
+
+  <!-- ARTICLE 2 : FONCTIONS -->
+  <h2>Article 2 — Fonctions et attributions</h2>
+  <p>
+    Le Salarié exercera les fonctions de <strong>[intitulé du poste]</strong>.
+    Ses attributions principales sont les suivantes :
+  </p>
+  <ul>
+    <li th:if="${details.isEmpty()}">Les missions correspondent aux fonctions attachées au poste.</li>
+    <li th:each="detail : ${details}" th:text="${detail.pointCondition.libelle + ' : ' + detail.valeur}">Condition</li>
+  </ul>
+  <p>
+    Cette liste n'est pas exhaustive. Le Salarié pourra se voir confier toute autre tâche
+    compatible avec sa qualification et relevant de son niveau de responsabilité.
+  </p>
+
+  <!-- ARTICLE 3 : LIEU DE TRAVAIL -->
+  <h2>Article 3 — Lieu de travail</h2>
+  <p>
+    Le Salarié exercera ses fonctions au sein de l'unité
+    <strong th:text="${unite.libelle}">Unité</strong>.
+  </p>
+  <p class="mention">
+    Le cas échéant : Dans le cadre de ses fonctions, le Salarié pourra être amené à effectuer
+    des déplacements professionnels ponctuels en France ou à l'étranger.
+  </p>
+
+  <!-- ARTICLE 4 : PÉRIODE D'ESSAI -->
+  <h2>Article 4 — Période d'essai</h2>
+  <p>
+    Le présent contrat comporte une période d'essai de <strong th:text="${dureeMax != null ? dureeMax + ' mois maximum' : 'selon les dispositions applicables'}">selon les dispositions applicables</strong>
+    (renouvelable selon les conditions prévues par le type de contrat,
+    avec l'accord écrit du Salarié).
+  </p>
+  <p>
+    Durant cette période, chacune des parties pourra rompre le contrat sans indemnité,
+    dans le respect des délais de prévenance prévus par le Code du travail.
+  </p>
+
+  <!-- ARTICLE 5 : DURÉE DU TRAVAIL -->
+  <h2>Article 5 — Durée du travail</h2>
+  <p>
+    Le Salarié est engagé dans le cadre d'un contrat à <strong>[temps plein / temps partiel]</strong>.
+  </p>
+  <p>
+    <strong>Pour un temps plein :</strong> La durée hebdomadaire de travail est fixée à
+    <strong>[35 / autre]</strong> heures, réparties selon l'horaire collectif en vigueur
+    au sein de l'entreprise.
+  </p>
+  <p>
+    <strong>Pour un temps partiel :</strong> La durée hebdomadaire de travail est fixée à
+    <strong>[XX]</strong> heures, selon la répartition suivante : <strong>[jours et horaires]</strong>.
+  </p>
+  <p class="mention">
+    Le cas échéant (forfait jours) : Le Salarié bénéficie d'une convention de forfait annuel
+    en jours fixée à <strong>[XXX]</strong> jours par an, conformément à l'accord collectif applicable.
+  </p>
+
+  <!-- ARTICLE 6 : RÉMUNÉRATION -->
+  <h2>Article 6 — Rémunération</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Élément de rémunération</th>
+        <th>Montant brut</th>
+        <th>Périodicité</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Salaire de base</td>
+        <td class="amount" th:text="${remunerations.isEmpty() ? '-' : remunerations[0].salaire}">-</td>
+        <td>Mensuel</td>
+      </tr>
+      <tr>
+        <td>Prime / variable (le cas échéant)</td>
+        <td class="amount">[0 000,00 €]</td>
+        <td>[Mensuel / annuel]</td>
+      </tr>
+      <tr>
+        <td><strong>Total brut mensuel</strong></td>
+        <td class="amount"><strong th:text="${remunerations.isEmpty() ? '-' : remunerations[0].salaire}">-</strong></td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Le salaire est versé mensuellement, à date fixe, par virement bancaire.
+    Il est soumis aux cotisations sociales et fiscales en vigueur.
+  </p>
+
+  <!-- ARTICLE 7 : CONGÉS PAYÉS -->
+  <h2>Article 7 — Congés payés</h2>
+  <p>
+    Le Salarié bénéficie des congés payés annuels légaux, soit <strong>5 semaines</strong>
+    par année de référence, ainsi que des congés conventionnels éventuels prévus par la
+    convention collective applicable.
+  </p>
+
+  <!-- ARTICLE 8 : PROTECTION SOCIALE -->
+  <h2>Article 8 — Retraite et prévoyance</h2>
+  <p>
+    Le Salarié est affilié à la caisse de retraite complémentaire
+    <strong>[nom de la caisse]</strong> et à l'organisme de prévoyance
+    <strong>[nom de l'organisme]</strong>, conformément aux dispositions légales et
+    conventionnelles en vigueur.
+  </p>
+
+  <!-- ARTICLE 9 : CONFIDENTIALITÉ -->
+  <h2>Article 9 — Confidentialité</h2>
+  <p>
+    Le Salarié s'engage à ne pas divulguer, pendant la durée du contrat et après son terme,
+    les informations confidentielles relatives à l'activité, aux clients, aux méthodes ou
+    aux affaires de l'Employeur dont il aurait connaissance dans l'exercice de ses fonctions.
+  </p>
+
+  <!-- ARTICLE 10 : RUPTURE -->
+  <h2>Article 10 — Rupture du contrat</h2>
+  <p>
+    Le contrat pourra être rompu dans les conditions prévues par le Code du travail et la
+    convention collective applicable : démission, rupture conventionnelle, licenciement
+    pour motif personnel ou économique, ou tout autre mode légal de rupture.
+  </p>
+  <p>
+    Les délais de préavis applicables sont ceux prévus par la loi et la convention collective.
+  </p>
+
+  <!-- ARTICLE 11 : LITIGES -->
+  <h2>Article 11 — Droit applicable et litiges</h2>
+  <p>
+    Le présent contrat est régi par le droit français. En cas de litige relatif à son
+    interprétation ou à son exécution, les parties s'efforceront de trouver une solution
+    amiable. À défaut, le litige sera porté devant le Conseil de prud'hommes compétent.
+  </p>
+
+  <!-- SIGNATURES -->
+  <div class="signatures">
+    <div class="signature-block">
+      <div class="title">L'Employeur</div>
+      <div class="signature-line">
+        Nom, date et signature<br>
+        <em>« Lu et approuvé »</em>
+      </div>
+    </div>
+    <div class="signature-block">
+      <div class="title">Le Salarié</div>
+      <div class="signature-line">
+        Nom, date et signature<br>
+        <em>« Lu et approuvé »</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Document généré automatiquement — contrat <span th:text="${reference}">CTR-2026-0001</span>.
+  </div>
+
+</body>
+</html>

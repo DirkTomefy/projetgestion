@@ -1,10 +1,13 @@
 package s5.itu.projetgestion.model.contrat;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.commun.Document;
+import s5.itu.projetgestion.model.recrutement.PointCondition;
+import s5.itu.projetgestion.model.recrutement.PropositionEmbauche;
 import s5.itu.projetgestion.model.organisation.Affectation;
+import s5.itu.projetgestion.model.commun.Document;
+import s5.itu.projetgestion.model.contrat.TypeContrat;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "contrat")
@@ -20,9 +23,9 @@ public class Contrat {
     @JoinColumn(name = "id_affectation", nullable = false)
     private Affectation affectation;
 
-    // proposition d'embauche d'origine : simple Integer (entité de P4)
-    @Column(name = "id_proposition")
-    private Integer idProposition;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_proposition")
+    private PropositionEmbauche proposition;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_type", nullable = false)
@@ -38,7 +41,7 @@ public class Contrat {
     private LocalDate dateFinEffective;
 
     @Column(name = "statut_actuel", nullable = false, length = 30)
-    private String statutActuel = "CREE";   // CREE, VALIDE, SIGNE, TERMINE, ANNULE
+    private String statutActuel;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_contrat_precedent")
@@ -57,8 +60,8 @@ public class Contrat {
     public void setReference(String reference) { this.reference = reference; }
     public Affectation getAffectation() { return affectation; }
     public void setAffectation(Affectation affectation) { this.affectation = affectation; }
-    public Integer getIdProposition() { return idProposition; }
-    public void setIdProposition(Integer idProposition) { this.idProposition = idProposition; }
+    public PropositionEmbauche getProposition() { return proposition; }
+    public void setProposition(PropositionEmbauche proposition) { this.proposition = proposition; }
     public TypeContrat getType() { return type; }
     public void setType(TypeContrat type) { this.type = type; }
     public LocalDate getDateDebut() { return dateDebut; }

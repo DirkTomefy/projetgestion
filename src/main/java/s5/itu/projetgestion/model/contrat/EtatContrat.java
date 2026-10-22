@@ -1,8 +1,8 @@
 package s5.itu.projetgestion.model.contrat;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "etat_contrat")

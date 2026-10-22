@@ -57,6 +57,7 @@ public class CandidaturePubliqueService {
     private final FileStorageService fileStorageService;
     private final UploadProperties uploadProperties;
     private final CvPdfValidator cvValidator;
+    private final HistoCandidatureService histoService;
 
     public CandidaturePubliqueService(OffrePubliqueService offres,
             CandidatRepository candidatRepo,
@@ -67,7 +68,8 @@ public class CandidaturePubliqueService {
             TypeDocumentRepository typeDocumentRepo,
             FileStorageService fileStorageService,
             UploadProperties uploadProperties,
-            CvPdfValidator cvValidator) {
+            CvPdfValidator cvValidator,
+            HistoCandidatureService histoService) {
         this.offres = offres;
         this.candidatRepo = candidatRepo;
         this.detailRepo = detailRepo;
@@ -78,6 +80,7 @@ public class CandidaturePubliqueService {
         this.fileStorageService = fileStorageService;
         this.uploadProperties = uploadProperties;
         this.cvValidator = cvValidator;
+        this.histoService = histoService;
     }
 
     @Transactional
@@ -113,6 +116,7 @@ public class CandidaturePubliqueService {
         candidature.setDateDepot(LocalDate.now());
         candidature.setEtat(Candidature.ETAT_DEPOSEE);
         candidature = candidatureRepo.save(candidature);
+        histoService.depot(candidature);
 
         DocumentCandidat lien = new DocumentCandidat();
         lien.setCandidature(candidature);

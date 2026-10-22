@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS proposition_embauche          CASCADE;
 DROP TABLE IF EXISTS point_condition               CASCADE;
 
 -- --- BLOC 2 : RECRUTEMENT ---
+DROP TABLE IF EXISTS histo_candidature             CASCADE;   -- P5 sprint 2
 DROP TABLE IF EXISTS traitement_detail             CASCADE;
 DROP TABLE IF EXISTS traitement                    CASCADE;
 DROP TABLE IF EXISTS workflow_candidature          CASCADE;

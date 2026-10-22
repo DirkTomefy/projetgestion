@@ -3,7 +3,7 @@ package s5.itu.projetgestion.model.besoin;
 import jakarta.persistence.*;
 import s5.itu.projetgestion.model.organisation.Employe;
 import s5.itu.projetgestion.model.organisation.Poste;
-
+import s5.itu.projetgestion.model.recrutement.Candidature;
 @Entity
 @Table(name = "besoin_poste")
 public class BesoinPoste {
@@ -18,8 +18,9 @@ public class BesoinPoste {
     private Poste poste;
     @Column(nullable = false, length = 20)
     private String etat;
-    @Column(name = "id_candidature_retenue")
-    private Integer idCandidatureRetenue;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_candidature_retenue")
+    private Candidature candidatureRetenue;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_employe_remplace")
@@ -60,12 +61,12 @@ public class BesoinPoste {
         etat = value;
     }
 
-    public Integer getIdCandidatureRetenue() {
-        return idCandidatureRetenue;
+    public Candidature getCandidatureRetenue() {
+        return candidatureRetenue;
     }
 
-    public void setIdCandidatureRetenue(Integer value) {
-        idCandidatureRetenue = value;
+    public void setCandidatureRetenue(Candidature value) {
+        candidatureRetenue = value;
     }
 
       public  Employe getEmployeRemplace() {
