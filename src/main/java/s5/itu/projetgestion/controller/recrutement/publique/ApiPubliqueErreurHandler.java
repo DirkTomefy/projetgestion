@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -23,6 +25,7 @@ import s5.itu.projetgestion.service.recrutement.OffrePubliqueService;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)   // avant GlobalExceptionHandler
 @RestControllerAdvice(basePackageClasses = {ApiPubliqueErreurHandler.class, CandidatureRhController.class})
 public class ApiPubliqueErreurHandler {
 

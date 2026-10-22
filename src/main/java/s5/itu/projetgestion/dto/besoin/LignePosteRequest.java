@@ -1,2 +1,3 @@
 package s5.itu.projetgestion.dto.besoin;
-public record LignePosteRequest(Integer idPoste, Integer quantite) {}
+
+public record LignePosteRequest(Integer idPoste, Integer quantite, Integer idEmployeRemplace) {}

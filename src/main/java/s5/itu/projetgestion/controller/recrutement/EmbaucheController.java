@@ -26,7 +26,13 @@ public class EmbaucheController {
 
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> embaucher(
-			@RequestParam(required = false) Integer idProposition) {
+			@RequestParam(required = false) Integer idProposition,
+			jakarta.servlet.http.HttpSession session) {
+		s5.itu.projetgestion.dto.auth.SessionUser su = (s5.itu.projetgestion.dto.auth.SessionUser)
+				session.getAttribute(s5.itu.projetgestion.config.SessionKeys.CURRENT_USER);
+		if (su == null || !su.hasRole("RH")) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Action réservée au rôle RH"));
+		}
 		if (idProposition == null) {
 			return ResponseEntity.badRequest().body(Map.of(
 					"error", "L'identifiant de la proposition est obligatoire."));

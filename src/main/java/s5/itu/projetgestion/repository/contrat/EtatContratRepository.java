@@ -6,5 +6,6 @@ import s5.itu.projetgestion.model.contrat.EtatContrat;
 import java.util.List;
 
 public interface EtatContratRepository extends JpaRepository<EtatContrat, Integer> {
-    List<EtatContrat> findByContratIdOrderByDateDesc(Integer contratId);
+    /** Historique d'un contrat, dans l'ordre des changements. */
+    List<EtatContrat> findByContratIdOrderByIdAsc(Integer contratId);
 }

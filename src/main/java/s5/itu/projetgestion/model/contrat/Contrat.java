@@ -51,6 +51,9 @@ public class Contrat {
     @JoinColumn(name = "id_document")
     private Document document;
 
+    @Column(name = "motif_fin", length = 255)
+    private String motifFin;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getReference() { return reference; }
@@ -73,4 +76,6 @@ public class Contrat {
     public void setContratPrecedent(Contrat contratPrecedent) { this.contratPrecedent = contratPrecedent; }
     public Document getDocument() { return document; }
     public void setDocument(Document document) { this.document = document; }
+    public String getMotifFin() { return motifFin; }
+    public void setMotifFin(String motifFin) { this.motifFin = motifFin; }
 }

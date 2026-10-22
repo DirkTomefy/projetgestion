@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import s5.itu.projetgestion.config.SessionKeys;
 import s5.itu.projetgestion.dto.auth.SessionUser;
+import s5.itu.projetgestion.err.AuthException;
 import s5.itu.projetgestion.model.auth.User;
 import s5.itu.projetgestion.service.auth.AuthService;
 
@@ -53,7 +54,7 @@ public class AuthController {
             body.put("user", su);
             return ResponseEntity.ok(body);
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | AuthException ex) {   // mauvais login ou mot de passe : 401, jamais 500
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("authenticated", false, "message", ex.getMessage()));
         }
