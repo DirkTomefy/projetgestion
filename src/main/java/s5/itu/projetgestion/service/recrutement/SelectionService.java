@@ -2,6 +2,7 @@ package s5.itu.projetgestion.service.recrutement;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import s5.itu.projetgestion.dto.recrutement.CandidatureRetenueDto;
 import s5.itu.projetgestion.dto.recrutement.EvaluationDto;
 import s5.itu.projetgestion.dto.recrutement.SelectionDto;
 import s5.itu.projetgestion.err.CandidatureException;
@@ -48,6 +49,16 @@ public class SelectionService {
         String etat = c.getEtat();
         return new SelectionDto(c.getId(), etat, evaluations(c), histoService.historique(c.getId()),
                 Candidature.ETAT_DEPOSEE.equals(etat), peutEtreRefusee(etat));
+    }
+
+    /** Pour P4 : candidatures RETENUE qui attendent une proposition d'embauche. */
+    @Transactional(readOnly = true)
+    public List<CandidatureRetenueDto> retenuesSansProposition() {
+        return traitementRepo.findRetenuesSansProposition().stream()
+                .map(r -> new CandidatureRetenueDto(r.getIdCandidature(), r.getDateDepot(), r.getDateRetenue(),
+                        r.getIdOffre(), r.getReferenceOffre(), r.getIdBesoin(), r.getPostes(), r.getIdCandidat(),
+                        r.getNom(), r.getPrenom(), r.getEmail(), r.getTelephone()))
+                .toList();
     }
 
     /** DEPOSEE → PRESELECTIONNER, et création des évaluations à passer. */

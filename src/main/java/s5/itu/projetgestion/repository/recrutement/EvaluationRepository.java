@@ -11,13 +11,10 @@ import java.util.List;
 
 public interface EvaluationRepository extends JpaRepository<Evaluation, Integer> {
 
-    /** Les évaluations d'une candidature, dans l'ordre des niveaux. */
     List<Evaluation> findByTraitement_Candidature_IdOrderByNiveau_OrdreAsc(Integer idCandidature);
 
-    /** Un niveau déjà utilisé par une candidature ne peut plus être modifié ni supprimé. */
     boolean existsByNiveau_Id(Integer idNiveau);
 
-    /** Évaluations d'une candidature pour l'affichage : niveau, poste responsable et login de l'évaluateur. */
     @Query(nativeQuery = true, value = """
             SELECT td.id AS "id", w.ordre AS "ordre", w.type_evaluation AS "typeEvaluation", w.score_min AS "scoreMin",
                    td.date_prevue AS "datePrevue", td.date_realisee AS "dateRealisee", td.libelle AS "libelle",
@@ -53,6 +50,48 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Integer>
               AND a.date_debut <= CURRENT_DATE AND (a.date_fin IS NULL OR a.date_fin >= CURRENT_DATE)
             """)
     List<Integer> findPostesActuels(@Param("idEmploye") Integer idEmploye);
+
+
+    /**
+     * Évaluations pas encore passées dont l'un des postes donnés est responsable.
+     * saisissable = c'est le niveau en cours (tous les niveaux précédents sont réussis).
+     */
+    @Query(nativeQuery = true, value = """
+            SELECT td.id AS "id", w.ordre AS "ordre", w.type_evaluation AS "typeEvaluation", w.score_min AS "scoreMin",
+                   td.date_prevue AS "datePrevue", td.libelle AS "libelle", p.libelle AS "posteResponsable",
+                   c.id AS "idCandidature", ca.nom AS "nom", ca.prenom AS "prenom", o.ref AS "referenceOffre",
+                   NOT EXISTS (
+                       SELECT 1 FROM traitement_detail td2
+                       JOIN workflow_candidature w2 ON w2.id = td2.id_workflow_traitement
+                       WHERE td2.id_traitement = td.id_traitement AND w2.ordre < w.ordre
+                         AND td2.decision IS DISTINCT FROM 'ADMIS'
+                   ) AS "saisissable"
+            FROM traitement_detail td
+            JOIN traitement t           ON t.id = td.id_traitement
+            JOIN candidatures c         ON c.id = t.id_candidature
+            JOIN candidat ca            ON ca.id = c.id_candidat
+            JOIN offre_emploi o         ON o.id = c.id_offre_emploi
+            JOIN workflow_candidature w ON w.id = td.id_workflow_traitement
+            LEFT JOIN poste p           ON p.id = td.id_poste_responsable
+            WHERE c.etat = 'PRESELECTIONNER' AND td.decision IS NULL AND td.id_poste_responsable IN (:postes)
+            ORDER BY td.date_prevue NULLS LAST, c.id, w.ordre
+            """)
+    List<EvaluationAVenirRow> findAVenirPourPostes(@Param("postes") List<Integer> postes);
+
+    interface EvaluationAVenirRow {
+        Integer getId();
+        Integer getOrdre();
+        String getTypeEvaluation();
+        BigDecimal getScoreMin();
+        LocalDate getDatePrevue();
+        String getLibelle();
+        String getPosteResponsable();
+        Integer getIdCandidature();
+        String getNom();
+        String getPrenom();
+        String getReferenceOffre();
+        Boolean getSaisissable();
+    }
 
     interface PosteOptionRow {
         Integer getId();

@@ -3,6 +3,8 @@ package s5.itu.projetgestion.service.recrutement;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import s5.itu.projetgestion.dto.auth.SessionUser;
+import s5.itu.projetgestion.dto.recrutement.EvaluationAVenirDto;
+import s5.itu.projetgestion.dto.recrutement.MesEvaluationsDto;
 import s5.itu.projetgestion.dto.recrutement.PlanificationRequest;
 import s5.itu.projetgestion.dto.recrutement.PosteOptionDto;
 import s5.itu.projetgestion.dto.recrutement.ResultatRequest;
@@ -38,6 +40,24 @@ public class EvaluationService {
         return evaluationRepo.findPostesActifs().stream()
                 .map(p -> new PosteOptionDto(p.getId(), p.getLibelle(), p.getUnite()))
                 .toList();
+    }
+
+    /** Évaluations à venir pour le poste actuel de l'utilisateur connecté. */
+    @Transactional(readOnly = true)
+    public MesEvaluationsDto mesEvaluations(SessionUser user) {
+        if (user.getIdEmploye() == null) {
+            return new MesEvaluationsDto(false, List.of());
+        }
+        List<Integer> postes = evaluationRepo.findPostesActuels(user.getIdEmploye());
+        if (postes.isEmpty()) {
+            return new MesEvaluationsDto(true, List.of());
+        }
+        return new MesEvaluationsDto(true, evaluationRepo.findAVenirPourPostes(postes).stream()
+                .map(r -> new EvaluationAVenirDto(r.getId(), r.getOrdre(), r.getTypeEvaluation(), r.getScoreMin(),
+                        r.getDatePrevue(), r.getLibelle(), r.getPosteResponsable(), r.getIdCandidature(),
+                        r.getPrenom() == null ? r.getNom() : r.getNom() + " " + r.getPrenom(),
+                        r.getReferenceOffre(), Boolean.TRUE.equals(r.getSaisissable())))
+                .toList());
     }
 
     /** La RH fixe la date et le poste qui fera passer l'évaluation (un niveau à venir peut être planifié d'avance). */
