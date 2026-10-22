@@ -1,6 +1,7 @@
 package s5.itu.projetgestion.model.besoin;
 
 import jakarta.persistence.*;
+import s5.itu.projetgestion.model.organisation.Employe;
 import s5.itu.projetgestion.model.organisation.Poste;
 
 @Entity
@@ -19,6 +20,13 @@ public class BesoinPoste {
     private String etat;
     @Column(name = "id_candidature_retenue")
     private Integer idCandidatureRetenue;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_employe_remplace")
+    private Employe employeRemplace;
+    // + getter et setter
+
+  
 
     public Integer getId() {
         return id;
@@ -58,5 +66,13 @@ public class BesoinPoste {
 
     public void setIdCandidatureRetenue(Integer value) {
         idCandidatureRetenue = value;
+    }
+
+      public  Employe getEmployeRemplace() {
+        return  employeRemplace ;
+    }
+
+    public  void  setEmployeRemplace(Employe employeRemplace){
+        this.employeRemplace = employeRemplace ;
     }
 }

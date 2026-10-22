@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import s5.itu.projetgestion.config.SessionKeys;
 import s5.itu.projetgestion.dto.commun.OptionDto;
+import s5.itu.projetgestion.dto.organisation.PosteOccupeDto;
 import s5.itu.projetgestion.dto.auth.SessionUser;
 import s5.itu.projetgestion.dto.besoin.BesoinResponse;
 import s5.itu.projetgestion.dto.besoin.BesoinDto;
@@ -73,6 +74,11 @@ public class BesoinController {
         User user = userRepository.findById(sessionUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur introuvable."));
         return ResponseEntity.status(HttpStatus.CREATED).body(besoinService.creerBesoin(request, user));
+    }
+
+    @GetMapping("/api/rh/postes/occupes")
+    public List<PosteOccupeDto> postesOccupes(@RequestParam Integer idUnite) {
+        return besoinService.listerPostesOccupes(idUnite);
     }
 
 }
