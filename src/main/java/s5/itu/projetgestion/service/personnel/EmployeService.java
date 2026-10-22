@@ -3,6 +3,7 @@ package s5.itu.projetgestion.service.personnel;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,15 +144,27 @@ public class EmployeService {
     }
 
     private TypeContrat trouverTypeContrat(PropositionEmbauche proposition) {
-        String libelle = propositionConditionRepository.findByPropositionId(proposition.getId()).stream()
+        Optional<String> valeurId = propositionConditionRepository.findByPropositionId(proposition.getId()).stream()
                 .filter(c -> c.getAccepte() == Boolean.TRUE && c.getPointCondition() != null
-                        && "TYPE_CONTRAT".equalsIgnoreCase(c.getPointCondition().getLibelle()))
+                        && "id_type_contrat".equalsIgnoreCase(c.getPointCondition().getLibelle()))
                 .map(PropositionCondition::getValeur)
                 .filter(v -> v != null && !v.isBlank())
-                .findFirst()
-                .orElse("CE");
-        return typeContratRepository.findByLibelleIgnoreCase(libelle)
-                .orElseThrow(() -> new IllegalStateException("Type de contrat introuvable : " + libelle));
+            .findFirst();
+
+        if (valeurId.isEmpty()) {
+            return typeContratRepository.findByLibelleIgnoreCase("CE")
+                .orElseThrow(() -> new IllegalStateException("Type de contrat CE introuvable"));
+        }
+
+        final Integer idTypeContrat;
+        try {
+            idTypeContrat = Integer.valueOf(valeurId.get().trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("L'identifiant du type de contrat doit être numérique : " + valeurId.get(), e);
+        }
+
+        return typeContratRepository.findById(idTypeContrat)
+            .orElseThrow(() -> new IllegalStateException("Type de contrat introuvable : " + idTypeContrat));
     }
 
     private void recopierRemuneration(PropositionEmbauche proposition, Contrat contrat) {
