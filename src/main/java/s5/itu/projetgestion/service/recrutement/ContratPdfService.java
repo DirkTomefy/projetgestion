@@ -1,4 +1,4 @@
-package s5.itu.projetgestion.service.personnel;
+package s5.itu.projetgestion.service.recrutement;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.stereotype.Service;
@@ -7,13 +7,13 @@ import org.thymeleaf.context.Context;
 import s5.itu.projetgestion.model.contrat.Contrat;
 import s5.itu.projetgestion.model.contrat.ContratDetail;
 import s5.itu.projetgestion.model.contrat.ContratRemuneration;
-import s5.itu.projetgestion.model.rh.Document;
-import s5.itu.projetgestion.model.rh.TypeDocument;
+import s5.itu.projetgestion.model.commun.Document;
+import s5.itu.projetgestion.model.commun.TypeDocument;
 import s5.itu.projetgestion.repository.contrat.ContratDetailRepository;
 import s5.itu.projetgestion.repository.contrat.ContratRemunerationRepository;
-import s5.itu.projetgestion.repository.rh.TypeDocumentRepository;
-import s5.itu.projetgestion.service.rh.ByteArrayMultipartFile;
-import s5.itu.projetgestion.service.rh.FileStorageService;
+import s5.itu.projetgestion.repository.commun.TypeDocumentRepository;
+import s5.itu.projetgestion.service.commun.ByteArrayMultipartFile;
+import s5.itu.projetgestion.service.commun.FileStorageService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

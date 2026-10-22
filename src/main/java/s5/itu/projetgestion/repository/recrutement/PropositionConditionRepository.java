@@ -1,7 +1,7 @@
-package s5.itu.projetgestion.repository.embauche;
+package s5.itu.projetgestion.repository.recrutement;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import s5.itu.projetgestion.model.embauche.PropositionCondition;
+import s5.itu.projetgestion.model.recrutement.PropositionCondition;
 
 import java.util.List;
 

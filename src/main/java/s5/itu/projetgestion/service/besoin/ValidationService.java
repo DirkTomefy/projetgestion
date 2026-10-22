@@ -6,10 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import s5.itu.projetgestion.err.validation.AutorisationValidationException;
+import s5.itu.projetgestion.err.validation.BesoinInvalideException;
+import s5.itu.projetgestion.err.validation.UtilisateurInvalideException;
 import s5.itu.projetgestion.model.auth.User;
-import s5.itu.projetgestion.exceptions.validation.AutorisationValidationException;
-import s5.itu.projetgestion.exceptions.validation.BesoinInvalideException;
-import s5.itu.projetgestion.exceptions.validation.UtilisateurInvalideException;
 import s5.itu.projetgestion.model.besoin.Besoin;
 import s5.itu.projetgestion.model.besoin.Validation;
 import s5.itu.projetgestion.model.besoin.WorkflowValidation;

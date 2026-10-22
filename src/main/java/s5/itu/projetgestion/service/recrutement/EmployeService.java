@@ -1,6 +1,7 @@
-package s5.itu.projetgestion.service.personnel;
+package s5.itu.projetgestion.service.recrutement;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -12,21 +13,21 @@ import s5.itu.projetgestion.model.besoin.BesoinPoste;
 import s5.itu.projetgestion.model.contrat.Contrat;
 import s5.itu.projetgestion.model.contrat.ContratDetail;
 import s5.itu.projetgestion.model.contrat.ContratRemuneration;
-import s5.itu.projetgestion.model.embauche.PropositionCondition;
-import s5.itu.projetgestion.model.embauche.PropositionEmbauche;
-import s5.itu.projetgestion.model.personnel.Candidat;
-import s5.itu.projetgestion.model.postes.Affectation;
-import s5.itu.projetgestion.model.postes.Employe;
-import s5.itu.projetgestion.model.postes.Poste;
-import s5.itu.projetgestion.model.rh.TypeContrat;
+import s5.itu.projetgestion.model.contrat.EtatContrat;
+import s5.itu.projetgestion.model.recrutement.PropositionCondition;
+import s5.itu.projetgestion.model.recrutement.PropositionEmbauche;
+import s5.itu.projetgestion.model.recrutement.Candidat;
+import s5.itu.projetgestion.model.organisation.Affectation;
+import s5.itu.projetgestion.model.organisation.Employe;
+import s5.itu.projetgestion.model.organisation.Poste;
+import s5.itu.projetgestion.model.contrat.TypeContrat;
 import s5.itu.projetgestion.repository.contrat.*;
 import s5.itu.projetgestion.repository.besoin.BesoinRepository;
-import s5.itu.projetgestion.repository.embauche.PropositionEmbaucheRepository;
-import s5.itu.projetgestion.repository.embauche.PropositionConditionRepository;
-import s5.itu.projetgestion.repository.rh.TypeContratRepository;
-import s5.itu.projetgestion.repository.postes.AffectationRepository;
-import s5.itu.projetgestion.repository.postes.BesoinPosteRepository;
-import s5.itu.projetgestion.repository.postes.EmployeRepository;
+import s5.itu.projetgestion.repository.recrutement.PropositionEmbaucheRepository;
+import s5.itu.projetgestion.repository.recrutement.PropositionConditionRepository;
+import s5.itu.projetgestion.repository.organisation.AffectationRepository;
+import s5.itu.projetgestion.repository.besoin.BesoinPosteRepository;
+import s5.itu.projetgestion.repository.organisation.EmployeRepository;
 
 @Service
 public class EmployeService {
@@ -42,6 +43,7 @@ public class EmployeService {
     private BesoinRepository besoinRepository;
     private TypeContratRepository typeContratRepository;
     private ContratPdfService contratPdfService;
+    private EtatContratRepository etatContratRepository;
 
     public EmployeService(EmployeRepository employeRepository, AffectationRepository affectationRepository,
             ContratRepository contratRepository, PropositionConditionRepository propositionConditionRepository,
@@ -51,7 +53,8 @@ public class EmployeService {
             BesoinPosteRepository besoinPosteRepository,
             BesoinRepository besoinRepository,
             TypeContratRepository typeContratRepository,
-            ContratPdfService contratPdfService) {
+            ContratPdfService contratPdfService,
+        EtatContratRepository etatContratRepository) {
         this.employeRepository = employeRepository;
         this.affectationRepository = affectationRepository;
         this.contratRepository = contratRepository;
@@ -63,6 +66,7 @@ public class EmployeService {
         this.besoinRepository = besoinRepository;
         this.typeContratRepository = typeContratRepository;
         this.contratPdfService = contratPdfService;
+        this.etatContratRepository = etatContratRepository;
     }
 
     @Transactional
@@ -115,7 +119,7 @@ public class EmployeService {
         contrat.setType(typeContrat);
         contrat = this.contratRepository.save(contrat);
         List<PropositionCondition> conditions = this.propositionConditionRepository
-            .findByPropositionId(propositionEmbauche.getId());
+                .findByPropositionId(propositionEmbauche.getId());
 
         for (PropositionCondition cond : conditions) {
             if (cond.getAccepte() != Boolean.TRUE) {
@@ -127,6 +131,13 @@ public class EmployeService {
             detail.setValeur(cond.getValeur());
             this.contratDetailRepository.save(detail);
         }
+        EtatContrat etatContrat = new EtatContrat();
+        etatContrat.setContrat(contrat);
+        etatContrat.setDate(LocalDateTime.now());
+        etatContrat.setStatut("CREE");
+
+        this.etatContratRepository.save(etatContrat);
+
         return contrat;
     }
 
@@ -147,13 +158,13 @@ public class EmployeService {
 
     public String genererMatricule() {
         Long prochain = this.employeRepository.getNextSequenceValue();
-        return "EMP000" + prochain;
+        return String.format("EMP%06d", prochain);
     }
 
     private TypeContrat trouverTypeContrat(PropositionEmbauche proposition) {
         Optional<String> valeurId = propositionConditionRepository.findByPropositionId(proposition.getId()).stream()
                 .filter(c -> c.getAccepte() == Boolean.TRUE && c.getPointCondition() != null
-                        && "id_type_contrat".equalsIgnoreCase(c.getPointCondition().getLibelle()))
+                        && "TYPE_CONTRAT".equalsIgnoreCase(c.getPointCondition().getLibelle()))
                 .map(PropositionCondition::getValeur)
                 .filter(v -> v != null && !v.isBlank())
                 .findFirst();

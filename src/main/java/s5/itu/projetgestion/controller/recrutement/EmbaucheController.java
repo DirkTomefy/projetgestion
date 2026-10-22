@@ -1,20 +1,15 @@
-package s5.itu.projetgestion.controller.embauche;
+package s5.itu.projetgestion.controller.recrutement;
 
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import s5.itu.projetgestion.model.embauche.PropositionEmbauche;
-import s5.itu.projetgestion.repository.embauche.PropositionEmbaucheRepository;
 import s5.itu.projetgestion.service.personnel.EmployeService;
 
 @RestController
@@ -22,12 +17,9 @@ import s5.itu.projetgestion.service.personnel.EmployeService;
 public class EmbaucheController {
 
 	private final EmployeService employeService;
-	private final PropositionEmbaucheRepository propositionEmbaucheRepository;
 
-	public EmbaucheController(EmployeService employeService,
-			PropositionEmbaucheRepository propositionEmbaucheRepository) {
+	public EmbaucheController(EmployeService employeService) {
 		this.employeService = employeService;
-		this.propositionEmbaucheRepository = propositionEmbaucheRepository;
 	}
 
 

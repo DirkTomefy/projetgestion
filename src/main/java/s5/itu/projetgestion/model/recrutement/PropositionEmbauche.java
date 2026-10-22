@@ -1,4 +1,4 @@
-package s5.itu.projetgestion.model.embauche;
+package s5.itu.projetgestion.model.recrutement;
 
 import jakarta.persistence.*;
 import s5.itu.projetgestion.model.besoin.BesoinPoste;

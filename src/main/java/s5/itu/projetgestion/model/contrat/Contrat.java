@@ -1,11 +1,11 @@
 package s5.itu.projetgestion.model.contrat;
 
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.embauche.PointCondition;
-import s5.itu.projetgestion.model.embauche.PropositionEmbauche;
-import s5.itu.projetgestion.model.postes.Affectation;
-import s5.itu.projetgestion.model.rh.Document;
-import s5.itu.projetgestion.model.rh.TypeContrat;
+import s5.itu.projetgestion.model.recrutement.PointCondition;
+import s5.itu.projetgestion.model.recrutement.PropositionEmbauche;
+import s5.itu.projetgestion.model.organisation.Affectation;
+import s5.itu.projetgestion.model.commun.Document;
+import s5.itu.projetgestion.model.contrat.TypeContrat;
 
 import java.time.LocalDate;
 

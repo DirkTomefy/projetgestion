@@ -2,7 +2,7 @@ package s5.itu.projetgestion.model.besoin;
 
 import jakarta.persistence.*;
 import s5.itu.projetgestion.model.organisation.Poste;
-
+import s5.itu.projetgestion.model.recrutement.Candidature;
 @Entity
 @Table(name = "besoin_poste")
 public class BesoinPoste {

@@ -1,7 +1,7 @@
-package s5.itu.projetgestion.model.personnel;
+package s5.itu.projetgestion.model.recrutement;
 
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.User;
+import s5.itu.projetgestion.model.auth.User;
 
 import java.time.LocalDateTime;
 

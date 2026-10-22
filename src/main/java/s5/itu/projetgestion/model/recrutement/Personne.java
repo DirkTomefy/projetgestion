@@ -1,4 +1,4 @@
-package s5.itu.projetgestion.model.personnel;
+package s5.itu.projetgestion.model.recrutement;
 
 import jakarta.persistence.*;
 

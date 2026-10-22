@@ -1,7 +1,7 @@
 package s5.itu.projetgestion.model.contrat;
 
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.postes.EchelonMetier;
+import s5.itu.projetgestion.model.organisation.EchelonMetier;
 
 import java.time.LocalDate;
 

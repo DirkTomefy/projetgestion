@@ -1,8 +1,8 @@
 package s5.itu.projetgestion.model.organisation;
 
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.personnel.Candidat;
-import s5.itu.projetgestion.model.personnel.Personne;
+import s5.itu.projetgestion.model.recrutement.Candidat;
+import s5.itu.projetgestion.model.recrutement.Personne;
 
 @Entity
 @Table(name = "employe")
