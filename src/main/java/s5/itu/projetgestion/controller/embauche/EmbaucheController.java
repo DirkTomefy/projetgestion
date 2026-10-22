@@ -5,11 +5,16 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import s5.itu.projetgestion.model.embauche.PropositionEmbauche;
+import s5.itu.projetgestion.repository.embauche.PropositionEmbaucheRepository;
 import s5.itu.projetgestion.service.personnel.EmployeService;
 
 @RestController
@@ -17,9 +22,23 @@ import s5.itu.projetgestion.service.personnel.EmployeService;
 public class EmbaucheController {
 
 	private final EmployeService employeService;
+	private final PropositionEmbaucheRepository propositionEmbaucheRepository;
 
-	public EmbaucheController(EmployeService employeService) {
+	public EmbaucheController(EmployeService employeService,
+			PropositionEmbaucheRepository propositionEmbaucheRepository) {
 		this.employeService = employeService;
+		this.propositionEmbaucheRepository = propositionEmbaucheRepository;
+	}
+
+	@GetMapping("/proposition/{id}")
+	public PropositionEmbauche ficheProposition(@PathVariable Integer id){
+		PropositionEmbauche pe = this.propositionEmbaucheRepository.findById(id).orElse(null); 
+
+		if(pe == null){
+			throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Proposition Introuvable");
+		}
+		return pe;
 	}
 
 	@PostMapping
@@ -60,8 +79,8 @@ public class EmbaucheController {
 
 	private static String messageOf(RuntimeException exception, String fallback) {
 		return exception.getMessage() == null || exception.getMessage().isBlank()
-				? fallback : exception.getMessage();
+				? fallback
+				: exception.getMessage();
 	}
-
 
 }
