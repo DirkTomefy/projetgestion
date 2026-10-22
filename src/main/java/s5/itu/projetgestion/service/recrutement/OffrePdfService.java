@@ -1,43 +1,27 @@
 package s5.itu.projetgestion.service.recrutement;
 
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.ITemplateEngine;
-import org.thymeleaf.context.Context;
+import s5.itu.projetgestion.service.commun.PdfService;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Map;
 
-
+/** PDF de l'offre d'emploi : s'appuie sur le service général PdfService. */
 @Service
 public class OffrePdfService {
 
     public static final String TEMPLATE = "offres/modele-offre";
 
-    private final ITemplateEngine templateEngine;
+    private final PdfService pdfService;
 
-    public OffrePdfService(ITemplateEngine templateEngine) {
-        this.templateEngine = templateEngine;
+    public OffrePdfService(PdfService pdfService) {
+        this.pdfService = pdfService;
     }
 
     public String renderHtml(Map<String, Object> variables) {
-        Context ctx = new Context();
-        ctx.setVariables(variables);
-        return templateEngine.process(TEMPLATE, ctx);
+        return pdfService.html(TEMPLATE, variables);
     }
 
     public byte[] renderPdf(Map<String, Object> variables) {
-        String html = renderHtml(variables);
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.useFastMode();
-            builder.withHtmlContent(html, null);
-            builder.toStream(out);
-            builder.run();
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new IllegalStateException("Échec de la génération du PDF de l'offre", e);
-        }
+        return pdfService.generer(TEMPLATE, variables);
     }
 }

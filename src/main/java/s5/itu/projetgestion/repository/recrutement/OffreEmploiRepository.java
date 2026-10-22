@@ -20,6 +20,26 @@ public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Intege
 
     List<OffreEmploi> findAllByOrderByIdDesc();
 
+    List<OffreEmploi> findByIdBesoinOrderByIdDesc(Integer idBesoin);
+
+    /** Offres encore publiées dont la date limite de candidature est dépassée. */
+    List<OffreEmploi> findByEtatAndDateLimiteCandidatureBefore(String etat, LocalDate date);
+
+    /**
+     * Offres non clôturées dont tous les sièges du besoin sont pourvus
+     * (aucun siège encore à pourvoir, au moins un POURVU ; les sièges ANNULE ne comptent pas).
+     * idBesoin NULL : tous les besoins.
+     */
+    @Query(nativeQuery = true, value = """
+            SELECT o.* FROM offre_emploi o
+            WHERE o.etat <> 'CLOTUREE'
+              AND (cast(:idBesoin AS integer) IS NULL OR o.id_besoin = :idBesoin)
+              AND EXISTS (SELECT 1 FROM besoin_poste bp WHERE bp.id_besoin = o.id_besoin AND bp.etat = 'POURVU')
+              AND NOT EXISTS (SELECT 1 FROM besoin_poste bp
+                              WHERE bp.id_besoin = o.id_besoin AND bp.etat NOT IN ('POURVU', 'ANNULE'))
+            """)
+    List<OffreEmploi> findACloturerPostesPourvus(@Param("idBesoin") Integer idBesoin);
+
     @Query(nativeQuery = true, value = """
             SELECT o.id AS id, o.ref AS ref, o.etat AS etat,
                    o.date_limite_candidature AS dateLimiteCandidature, u.libelle AS unite,
