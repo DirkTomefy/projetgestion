@@ -30,16 +30,7 @@ public class EmbaucheController {
 		this.propositionEmbaucheRepository = propositionEmbaucheRepository;
 	}
 
-	@GetMapping("/proposition/{id}")
-	public PropositionEmbauche ficheProposition(@PathVariable Integer id){
-		PropositionEmbauche pe = this.propositionEmbaucheRepository.findById(id).orElse(null); 
 
-		if(pe == null){
-			throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Proposition Introuvable");
-		}
-		return pe;
-	}
 
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> embaucher(
