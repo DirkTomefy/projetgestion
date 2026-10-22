@@ -10,8 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -21,6 +25,7 @@ import s5.itu.projetgestion.dto.commun.ErreurApi;
 import s5.itu.projetgestion.err.AccesRefuseException;
 import s5.itu.projetgestion.err.ProjetgestionException;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)   // avant GlobalExceptionHandler
 @RestControllerAdvice(basePackageClasses = {ContratController.class, BesoinController.class})
 public class ApiRhErreurHandler {
 
@@ -55,6 +60,17 @@ public class ApiRhErreurHandler {
     public ResponseEntity<ErreurApi> partieManquante(MissingServletRequestPartException e) {
         return reponse(ErreurApi.generale(400,
             "Requête incomplète : partie « " + e.getRequestPartName() + " » manquante"));
+    }
+
+    /** Statut choisi par le contrôleur (403 pas votre étape, 404 introuvable…) : on le garde. */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErreurApi> statut(ResponseStatusException e) {
+        return reponse(ErreurApi.generale(e.getStatusCode().value(), e.getReason()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErreurApi> parametreManquant(MissingServletRequestParameterException e) {
+        return reponse(ErreurApi.generale(400, "Paramètre manquant : " + e.getParameterName()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

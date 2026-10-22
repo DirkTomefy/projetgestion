@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
+import s5.itu.projetgestion.config.UploadProperties;
+import s5.itu.projetgestion.dto.commun.OptionDto;
 import s5.itu.projetgestion.dto.contrat.ContratDto;
 import s5.itu.projetgestion.dto.contrat.EtatContratDto;
 import s5.itu.projetgestion.dto.contrat.RenouvellementRequest;
@@ -32,10 +34,13 @@ public class ContratService {
     private final TypeDocumentRepository typeDocumentRepo ;
     private final FileStorageService fileStorageService ;
     private  final TypeContratRepository typeRepo ;
+    private final UploadProperties uploadProperties;
 
 
     public ContratService(ContratRepository contratRepo, EtatContratRepository etatRepo,
-                          OnboardingService onboardingService , TypeDocumentRepository typeDocumentRepository, FileStorageService fileStorageService , TypeContratRepository typeRepo) {
+                          OnboardingService onboardingService , TypeDocumentRepository typeDocumentRepository, FileStorageService fileStorageService , TypeContratRepository typeRepo,
+                          UploadProperties uploadProperties) {
+        this.uploadProperties = uploadProperties;
         this.contratRepo = contratRepo;
         this.etatRepo = etatRepo;
         this.onboardingService = onboardingService;
@@ -57,6 +62,8 @@ public class ContratService {
         return versDto(trouver(id), true);
     }
 
+    private static final String TYPE_SIGNE = "CONTRAT_SIGNE";
+
     // ---------- Changements d'état ----------
 
     @Transactional
@@ -71,8 +78,9 @@ public class ContratService {
     public ContratDto signer(Integer id) {
         Contrat c = trouver(id);
         exigerEtat(c, "VALIDE", "Un contrat doit être VALIDE avant d'être signé.");
-        if (c.getDocument() == null)
-        throw new IllegalArgumentException("Dépose d'abord le contrat signé (PDF) avant de signer.");
+        // le PDF généré à l'embauche ne suffit pas : il faut la copie signée déposée par la RH
+        if (c.getDocument() == null || !TYPE_SIGNE.equals(c.getDocument().getTypeDocument().getLibelle()))
+            throw new IllegalArgumentException("Dépose d'abord le contrat signé (PDF) avant de signer.");
         changerEtat(c, "SIGNE");
         onboardingService.demarrer(c.getId());   // même transaction : si ça échoue, la signature est annulée
         return versDto(c, true);
@@ -103,7 +111,7 @@ public class ContratService {
             throw new IllegalArgumentException("Le fichier doit être un PDF.");
 
    
-        Integer idType = typeDocumentRepo.findByLibelle("CONTRAT_SIGNE")
+        Integer idType = typeDocumentRepo.findByLibelle(TYPE_SIGNE)
             .orElseThrow(() -> new IllegalStateException("Type de document CONTRAT_SIGNE manquant."))
             .getId();
         c.setDocument(fileStorageService.saveUpload(fichier, idType));
@@ -145,7 +153,14 @@ public class ContratService {
             c.getType().getLibelle(), c.getDateDebut(), c.getDateFinPrevue(),
             c.getDateFinEffective(), c.getStatutActuel(), c.getMotifFin(),
             c.getContratPrecedent() == null ? null : c.getContratPrecedent().getReference(),
-            c.getDocument() != null, histo);
+            c.getDocument() != null, histo,
+            c.getDocument() != null && TYPE_SIGNE.equals(c.getDocument().getTypeDocument().getLibelle()),
+            c.getDocument() == null ? null : uploadProperties.getUrlPrefix() + c.getDocument().getLien());
+    }
+
+    /** Types de contrat (CE, CDD, CDI) pour le renouvellement. */
+    public List<OptionDto> types() {
+        return typeRepo.findAll().stream().map(t -> new OptionDto(t.getId(), t.getLibelle())).toList();
     }
 
     @Transactional

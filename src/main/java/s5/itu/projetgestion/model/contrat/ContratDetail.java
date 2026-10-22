@@ -1,7 +1,7 @@
 package s5.itu.projetgestion.model.contrat;
 
 import jakarta.persistence.*;
-import s5.itu.projetgestion.model.recrutement.PointCondition;
+import s5.itu.projetgestion.model.embauche.PointCondition;
 
 @Entity
 @Table(name = "contrat_details")

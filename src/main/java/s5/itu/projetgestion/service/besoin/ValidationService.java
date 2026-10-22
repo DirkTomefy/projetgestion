@@ -1,5 +1,6 @@
 package s5.itu.projetgestion.service.besoin;
 
+import s5.itu.projetgestion.repository.besoin.BesoinPosteRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,11 +35,13 @@ public class ValidationService {
     private final BesoinRepository besoinRepository;
     private final UniteOrgaRepository uniteOrgaRepository;
     private final DelegationRepository delegationRepository;
+    private final BesoinPosteRepository besoinPosteRepository;
 
     public ValidationService(ValidationRepository validationRepository,
             WorkflowValidationService workflowValidationService, BudgetUniteRepository budgetUniteRepository,
             UserService userService, BesoinRepository besoinRepository, UniteOrgaRepository uniteOrgaRepository,
-        DelegationRepository delegationRepository) {
+        DelegationRepository delegationRepository, BesoinPosteRepository besoinPosteRepository) {
+        this.besoinPosteRepository = besoinPosteRepository;
         this.validationRepository = validationRepository;
         this.workflowValidationService = workflowValidationService;
         this.budgetUniteRepository = budgetUniteRepository;
@@ -63,6 +66,7 @@ public class ValidationService {
 
         b.setEtatActuel("ANNULE");
         besoinRepository.save(b);
+        besoinPosteRepository.findByBesoinId(b.getId()).forEach(bp -> bp.setEtat("ANNULE"));
     }
 
     @Transactional
@@ -82,6 +86,9 @@ public class ValidationService {
         boolean derniereEtape = workflowValidationService.estDerniereEtape(autorisation.etape());
         b.setEtatActuel(derniereEtape ? "OUVERT" : "EN_ATTENTE");
         besoinRepository.save(b);
+        if (derniereEtape) {   // tous les sièges deviennent à pourvoir : l'offre d'emploi peut être créée
+            besoinPosteRepository.findByBesoinId(b.getId()).forEach(bp -> bp.setEtat("OUVERT"));
+        }
     }
 
     private Autorisation verifierAutorisation(Besoin b, User u) throws Exception {
@@ -92,14 +99,17 @@ public class ValidationService {
         if (u == null || u.getId() == null) {
             throw new UtilisateurInvalideException("Utilisateur invalide");
         }
+        if (!"EN_ATTENTE".equals(b.getEtatActuel())) {
+            throw new BesoinInvalideException("Ce besoin n'est plus en attente de validation (état " + b.getEtatActuel() + ")");
+        }
         List<WorkflowValidation> etapesActuelle = workflowValidationService.getEtapeActuelleBesoin(b);
         if (etapesActuelle.isEmpty()) {
             throw new AutorisationValidationException(
                     "Aucune étape de validation disponible pour ce besoin");
         }
-        Poste posteUtilisateur = userService.getPosteByUser(u);
+        Poste posteUtilisateur = posteOuNull(u);
         for (WorkflowValidation etape : etapesActuelle) {
-            if (etape.getPoste().getId().equals(posteUtilisateur.getId())) {
+            if (posteUtilisateur != null && etape.getPoste().getId().equals(posteUtilisateur.getId())) {
                 return new Autorisation(etape, null);
             }
         }
@@ -108,14 +118,23 @@ public class ValidationService {
         List<Delegation> delegations = delegationRepository
                 .findByUserDelegueAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(u, aujourdHui, aujourdHui);
         for (Delegation delegation : delegations) {
-            Poste posteDelegant = userService.getPosteByUser(delegation.getUserDelegant());
+            Poste posteDelegant = posteOuNull(delegation.getUserDelegant());
             for (WorkflowValidation etape : etapesActuelle) {
-                if (etape.getPoste().getId().equals(posteDelegant.getId())) {
+                if (posteDelegant != null && etape.getPoste().getId().equals(posteDelegant.getId())) {
                     return new Autorisation(etape, delegation);
                 }
             }
         }
         throw new AutorisationValidationException("Ce n'est pas à vous de valider cette demande");
+    }
+
+    /** Poste occupé par l'utilisateur, ou null s'il n'est rattaché à aucun employé affecté. */
+    private Poste posteOuNull(User u) {
+        try {
+            return userService.getPosteByUser(u);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String commentaireDelegation(Delegation delegation) {
