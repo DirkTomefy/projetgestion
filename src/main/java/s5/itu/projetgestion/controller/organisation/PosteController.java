@@ -40,23 +40,4 @@ public class PosteController {
         return posteService.traiterProposition(id, request.etat());
     }
 
-    @GetMapping("/api/rh/metiers")
-    public List<OptionDto> metiers() { return posteService.listerMetiers(); }
-
-    @GetMapping("/api/rh/categories")
-    public List<OptionDto> categories() { return posteService.listerCategories(); }
-
-    @GetMapping("/api/rh/echelons")
-    public List<OptionDto> echelons() { return posteService.listerEchelons(); }
-
-    @GetMapping("/api/rh/unites")
-    public List<OptionDto> unites() { return posteService.listerUnites(); }
-
-    @GetMapping("/api/rh/postes/superieurs")
-    public List<OptionDto> superieurs() { return posteService.listerSuperieursPossibles(); }
-
-    @org.springframework.web.bind.annotation.PostMapping("/api/rh/postes/demande")
-    public ResponseEntity<PosteDto> demander(@RequestBody PosteDemandeRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(posteService.creerDemande(request));
-    }
 }

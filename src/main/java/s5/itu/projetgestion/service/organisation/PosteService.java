@@ -79,11 +79,7 @@ public class PosteService {
         return PosteDto.from(posteRepository.save(poste));
     }
 
-    public List<OptionDto> listerMetiers() {
-        return metierRepository.findAll().stream()
-                .map(m -> new OptionDto(m.getId(), m.getLibelle() + " (" + m.getCategorie().getLibelle() + ")")).toList();
-    }
-
+ 
     public List<OptionDto> listerCategories() {
         return categorieRepository.findAll().stream().map(c -> new OptionDto(c.getId(), c.getLibelle())).toList();
     }
@@ -96,11 +92,22 @@ public class PosteService {
         return uniteRepository.findAll().stream().map(u -> new OptionDto(u.getId(), u.getLibelle() + " [" + u.getType() + "]")).toList();
     }
 
-    public List<OptionDto> listerSuperieursPossibles() {
-        return posteRepository.findByEtat("ACTIF").stream()
-                .map(p -> new OptionDto(p.getId(), p.getLibelle() + " - " + p.getUniteOrga().getLibelle())).toList();
+    @Transactional(readOnly = true)
+    public List<OptionDto> listerMetiers() {
+        return metierRepository.findAll().stream()
+                .map(m -> new OptionDto(m.getId(),
+                        m.getLibelle() + " (" + m.getCategorie().getLibelle() + ")"))
+                .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<OptionDto> listerSuperieursPossibles() {
+        return posteRepository.findByEtat("ACTIF").stream()
+                .map(p -> new OptionDto(p.getId(),
+                        p.getLibelle() + " - " + p.getUniteOrga().getLibelle()))
+                .toList();
+    }
+    
     @Transactional
     public PosteDto creerDemande(PosteDemandeRequest req) {
         if (req == null || req.libelle() == null || req.libelle().isBlank())

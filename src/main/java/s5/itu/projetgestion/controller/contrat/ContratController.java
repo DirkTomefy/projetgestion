@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpSession;
 import s5.itu.projetgestion.config.SessionKeys;
 import s5.itu.projetgestion.dto.auth.SessionUser;
+import s5.itu.projetgestion.dto.commun.OptionDto;
 import s5.itu.projetgestion.dto.contrat.ContratDto;
 import s5.itu.projetgestion.dto.contrat.RenouvellementRequest;
 import s5.itu.projetgestion.service.service.ContratService;
@@ -81,4 +82,7 @@ public class ContratController {
     public List<ContratDto> echeances(@RequestParam(defaultValue = "30") int jours) {
         return service.echeances(jours);
     }
+
+    // ContratController
+
 }
