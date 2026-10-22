@@ -9,5 +9,8 @@ import java.util.List;
 
 public interface DelegationRepository extends JpaRepository<Delegation, Integer> {
     List<Delegation> findByUserDelegantAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
-            User userDelegant, LocalDate date, LocalDate sameDate);
+            User userDelegant, LocalDate dateFin, LocalDate dateDebut);
+
+    List<Delegation> findByUserDelegueAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
+            User userDelegue, LocalDate date, LocalDate sameDate);
 }

@@ -1,5 +1,6 @@
 package s5.itu.projetgestion.service.besoin;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,9 +16,11 @@ import s5.itu.projetgestion.model.besoin.Validation;
 import s5.itu.projetgestion.model.besoin.WorkflowValidation;
 import s5.itu.projetgestion.model.finance.BudgetUnite;
 import s5.itu.projetgestion.model.organisation.Poste;
+import s5.itu.projetgestion.model.recrutement.Delegation;
 import s5.itu.projetgestion.repository.besoin.BesoinRepository;
 import s5.itu.projetgestion.repository.finance.BudgetUniteRepository;
 import s5.itu.projetgestion.repository.organisation.UniteOrgaRepository;
+import s5.itu.projetgestion.repository.recrutement.DelegationRepository;
 import s5.itu.projetgestion.repository.besoin.ValidationRepository;
 import s5.itu.projetgestion.service.auth.UserService;
 
@@ -30,28 +33,32 @@ public class ValidationService {
     private final UserService userService;
     private final BesoinRepository besoinRepository;
     private final UniteOrgaRepository uniteOrgaRepository;
+    private final DelegationRepository delegationRepository;
 
     public ValidationService(ValidationRepository validationRepository,
             WorkflowValidationService workflowValidationService, BudgetUniteRepository budgetUniteRepository,
-            UserService userService, BesoinRepository besoinRepository, UniteOrgaRepository uniteOrgaRepository) {
+            UserService userService, BesoinRepository besoinRepository, UniteOrgaRepository uniteOrgaRepository,
+        DelegationRepository delegationRepository) {
         this.validationRepository = validationRepository;
         this.workflowValidationService = workflowValidationService;
         this.budgetUniteRepository = budgetUniteRepository;
         this.userService = userService;
         this.besoinRepository = besoinRepository;
         this.uniteOrgaRepository = uniteOrgaRepository;
+        this.delegationRepository = delegationRepository;
     }
 
     @Transactional
     public void refuserBesoin(Besoin b, User u) throws Exception {
-        WorkflowValidation etapeActuelle = verifierAutorisation(b, u);
+        Autorisation autorisation = verifierAutorisation(b, u);
 
         Validation validation = new Validation();
         validation.setBesoin(b);
         validation.setDate(LocalDateTime.now());
         validation.setDecision("REFUSE");
         validation.setUser(u);
-        validation.setWorkflowValidation(etapeActuelle);
+        validation.setWorkflowValidation(autorisation.etape());
+        validation.setCommentaire(commentaireDelegation(autorisation.delegation()));
         validationRepository.save(validation);
 
         b.setEtatActuel("ANNULE");
@@ -60,23 +67,24 @@ public class ValidationService {
 
     @Transactional
     public void validerBesoin(Besoin b, User u) throws Exception {
-        WorkflowValidation etapeActuelle = verifierAutorisation(b, u);
+        Autorisation autorisation = verifierAutorisation(b, u);
 
         Validation validation = new Validation();
         validation.setBesoin(b);
         validation.setDate(LocalDateTime.now());
         validation.setDecision("VALIDE");
         validation.setUser(u);
-        validation.setWorkflowValidation(etapeActuelle);
+        validation.setWorkflowValidation(autorisation.etape());
+        validation.setCommentaire(commentaireDelegation(autorisation.delegation()));
 
         validationRepository.save(validation);
 
-        boolean derniereEtape = workflowValidationService.estDerniereEtape(etapeActuelle);
+        boolean derniereEtape = workflowValidationService.estDerniereEtape(autorisation.etape());
         b.setEtatActuel(derniereEtape ? "OUVERT" : "EN_ATTENTE");
         besoinRepository.save(b);
     }
 
-    private WorkflowValidation verifierAutorisation(Besoin b, User u) throws Exception {
+    private Autorisation verifierAutorisation(Besoin b, User u) throws Exception {
         if (b == null || b.getId() == null) {
             throw new BesoinInvalideException("Besoin invalide");
         }
@@ -84,28 +92,41 @@ public class ValidationService {
         if (u == null || u.getId() == null) {
             throw new UtilisateurInvalideException("Utilisateur invalide");
         }
-
         List<WorkflowValidation> etapesActuelle = workflowValidationService.getEtapeActuelleBesoin(b);
-
         if (etapesActuelle.isEmpty()) {
             throw new AutorisationValidationException(
                     "Aucune étape de validation disponible pour ce besoin");
         }
         Poste posteUtilisateur = userService.getPosteByUser(u);
-        WorkflowValidation etape = null;
-        for (WorkflowValidation etapeActuelle : etapesActuelle) {
-            if (etapeActuelle.getPoste().getId()
-                        .equals(posteUtilisateur.getId())) {
-                etape = etapeActuelle;
+        for (WorkflowValidation etape : etapesActuelle) {
+            if (etape.getPoste().getId().equals(posteUtilisateur.getId())) {
+                return new Autorisation(etape, null);
             }
         }
-        if (etape == null) {
-            throw new AutorisationValidationException(
-                    "Ce n'est pas à vous de valider cette demande");
-        }
 
-        return etape;
+        LocalDate aujourdHui = LocalDate.now();
+        List<Delegation> delegations = delegationRepository
+                .findByUserDelegueAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(u, aujourdHui, aujourdHui);
+        for (Delegation delegation : delegations) {
+            Poste posteDelegant = userService.getPosteByUser(delegation.getUserDelegant());
+            for (WorkflowValidation etape : etapesActuelle) {
+                if (etape.getPoste().getId().equals(posteDelegant.getId())) {
+                    return new Autorisation(etape, delegation);
+                }
+            }
+        }
+        throw new AutorisationValidationException("Ce n'est pas à vous de valider cette demande");
     }
+
+    private String commentaireDelegation(Delegation delegation) {
+        if (delegation == null) {
+            return null;
+        }
+        String nomDelegant = delegation.getUserDelegant().getLogin();
+        return "Par délégation de " + (nomDelegant == null ? delegation.getUserDelegant().getId() : nomDelegant);
+    }
+
+    private record Autorisation(WorkflowValidation etape, Delegation delegation) {}
 
     @Transactional(readOnly = true)
     public boolean validerBesoinFinance(Besoin b, User u) throws Exception {

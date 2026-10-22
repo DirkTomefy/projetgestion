@@ -75,7 +75,7 @@ public class ValidationController {
 
         try {
             besoin = recupererBesoin(idBesoin);
-            validationService.validerBesoin(besoin, utilisateur);
+            validationService.refuserBesoin(besoin, utilisateur);
         } catch (BesoinInvalideException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e);
