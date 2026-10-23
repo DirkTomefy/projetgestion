@@ -57,4 +57,19 @@ public class DelegationController {
 
     }
 
+
+    /** Mes délégations (données ou reçues) ; ?toutes=true pour la RH et l'ADMIN. */
+    @org.springframework.web.bind.annotation.GetMapping
+    public java.util.List<s5.itu.projetgestion.dto.recrutement.DelegationDto> lister(
+            @RequestParam(defaultValue = "false") boolean toutes, HttpSession session) {
+        SessionUser su = s5.itu.projetgestion.config.Acces.connecte(session);
+        boolean tout = toutes && (su.hasRole("RH") || su.hasRole("ADMIN"));
+        return delegationService.lister(tout ? null : su.getId());
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/{id}/annuler")
+    public ResponseEntity<Void> annuler(@org.springframework.web.bind.annotation.PathVariable Integer id, HttpSession session) {
+        delegationService.annuler(id, s5.itu.projetgestion.config.Acces.connecte(session));
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -35,7 +35,9 @@ public class UserService {
         }
         Employe emp = employeRepository.findById(u.getIdEmploye()).orElse(null);
 
-        Affectation affectation = affectationRepository.findByEmploye(emp);
+        // affectation en cours (un employé muté a plusieurs affectations dans son historique)
+        Affectation affectation = emp == null ? null
+                : affectationRepository.findEnCoursParEmploye(emp.getId()).stream().findFirst().orElse(null);
 
         if(affectation == null){
             throw new Exception("Aucune affectation pour cet employé");

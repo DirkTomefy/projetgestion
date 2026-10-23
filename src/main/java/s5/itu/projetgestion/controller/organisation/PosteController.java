@@ -30,13 +30,16 @@ public class PosteController {
 
     // GET /api/postes?etat=PROPOSE
     @GetMapping
-    public List<PosteDto> lister(@RequestParam(defaultValue = "PROPOSE") String etat) {
+    public List<PosteDto> lister(@RequestParam(defaultValue = "PROPOSE") String etat, jakarta.servlet.http.HttpSession session) {
+        s5.itu.projetgestion.config.Acces.connecte(session);
         return posteService.listerParEtat(etat);
     }
 
     // PUT /api/postes/{id}/etat   { "etat": "ACTIF" | "REFUSE" }
     @PutMapping("/{id}/etat")
-    public PosteDto changerEtat(@PathVariable Integer id, @RequestBody EtatRequest request) {
+    public PosteDto changerEtat(@PathVariable Integer id, @RequestBody EtatRequest request, jakarta.servlet.http.HttpSession session) {
+        // cahier des charges : la création d'un poste est validée par le DG
+        s5.itu.projetgestion.config.Acces.exiger(session, s5.itu.projetgestion.config.Acces.DG, s5.itu.projetgestion.config.Acces.ADMIN);
         return posteService.traiterProposition(id, request.etat());
     }
 

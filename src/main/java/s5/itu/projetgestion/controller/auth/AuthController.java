@@ -1,5 +1,13 @@
 package s5.itu.projetgestion.controller.auth;
 
+import org.springframework.web.bind.annotation.PutMapping;
+import s5.itu.projetgestion.config.Acces;
+import s5.itu.projetgestion.dto.auth.InscriptionRequest;
+import s5.itu.projetgestion.dto.auth.MotDePasseRequest;
+import s5.itu.projetgestion.dto.auth.UtilisateurDto;
+import s5.itu.projetgestion.repository.auth.UserRepository;
+import s5.itu.projetgestion.service.auth.UtilisateurService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,9 +27,46 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UtilisateurService utilisateurService;
+    private final UserRepository userRepository;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UtilisateurService utilisateurService, UserRepository userRepository) {
         this.authService = authService;
+        this.utilisateurService = utilisateurService;
+        this.userRepository = userRepository;
+    }
+
+    // -----------------------------------------------------------------
+    // Inscription, profil, mot de passe
+    // -----------------------------------------------------------------
+
+    /** Inscription publique : compte EN_ATTENTE jusqu'à sa validation par un administrateur. */
+    @PostMapping(value = "/inscription", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> inscription(@RequestBody InscriptionRequest req) {
+        UtilisateurDto u = utilisateurService.inscrire(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("login", u.login(),
+                "message", "Inscription enregistrée. Vous pourrez vous connecter dès qu'un administrateur aura validé votre compte."));
+    }
+
+    @GetMapping("/profil")
+    public UtilisateurDto profil(HttpSession session) {
+        return utilisateurService.profil(Acces.connecte(session).getId());
+    }
+
+    public record ProfilRequest(String nomComplet, String email) { }
+
+    @PutMapping(value = "/profil", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public UtilisateurDto modifierProfil(@RequestBody ProfilRequest req, HttpSession session) {
+        SessionUser su = Acces.connecte(session);
+        UtilisateurDto u = utilisateurService.modifierProfil(su.getId(), req.nomComplet(), req.email());
+        userRepository.findById(su.getId()).ifPresent(user -> session.setAttribute(SessionKeys.CURRENT_USER, SessionUser.from(user)));
+        return u;
+    }
+
+    @PostMapping(value = "/mot-de-passe", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, String> motDePasse(@RequestBody MotDePasseRequest req, HttpSession session) {
+        utilisateurService.changerMotDePasse(Acces.connecte(session).getId(), req);
+        return Map.of("message", "Mot de passe modifié.");
     }
 
     // -----------------------------------------------------------------

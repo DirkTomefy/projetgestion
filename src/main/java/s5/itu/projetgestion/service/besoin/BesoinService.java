@@ -55,6 +55,10 @@ public class BesoinService {
     private final ContratRepository contratRepo ;
     private final AffectationRepository affectationRepo ;
     private final EmployeRepository employeRepository ;
+    private final s5.itu.projetgestion.service.organisation.PosteService posteService;
+    private final s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService;
+    private final HistoBesoinService histoBesoin;
+    private final ValidationService validationService;
 
     private static final Set<String> TYPES = Set.of("CREATION", "REMPLACEMENT");
 
@@ -64,7 +68,14 @@ public class BesoinService {
             WorkflowValidationRepository workflowRepository,
             MotifRepository motifRepository,
             PosteRepository posteRepository,
-            UniteOrgaRepository uniteRepository , ContratRepository contratRepo , AffectationRepository affectationRepo, EmployeRepository employeRepository) {
+            UniteOrgaRepository uniteRepository , ContratRepository contratRepo , AffectationRepository affectationRepo, EmployeRepository employeRepository,
+            s5.itu.projetgestion.service.organisation.PosteService posteService,
+            s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService,
+            HistoBesoinService histoBesoin, ValidationService validationService) {
+        this.posteService = posteService;
+        this.grilleService = grilleService;
+        this.histoBesoin = histoBesoin;
+        this.validationService = validationService;
         this.besoinRepository = besoinRepository;
         this.besoinPosteRepository = besoinPosteRepository;
         this.validationRepository = validationRepository;
@@ -152,6 +163,20 @@ public BesoinDto creerBesoin(BesoinRequest req, User user) {
     Set<String> dejaVus = new HashSet<>();
 
     for (LignePosteRequest l : req.lignes()) {
+        if (l.nouveauPoste() != null) {
+            // --- Nouveau poste : proposé avec le besoin, activé quand le besoin est validé ---
+            if (remplacement)
+                throw new IllegalArgumentException("Un nouveau poste ne peut être demandé que pour un besoin de CREATION.");
+            if (l.quantite() == null || l.quantite() <= 0)
+                throw new IllegalArgumentException("La quantité de chaque poste doit être supérieure à 0.");
+            var np = l.nouveauPoste();
+            var dto = posteService.creerDemande(new s5.itu.projetgestion.dto.organisation.PosteDemandeRequest(
+                np.idMetier(), np.nouveauMetierLibelle(), np.idCategorie(), np.idEchelon(), unite.getId(),
+                np.idSuperieurDirect(), np.libelle()));
+            Poste nouveau = posteRepository.findById(dto.id()).orElseThrow();
+            for (int i = 0; i < l.quantite(); i++) places.add(new Place(nouveau, null));
+            continue;
+        }
         if (l.idPoste() == null)
             throw new IllegalArgumentException("Chaque ligne doit avoir un poste.");
         Poste p = posteRepository.findById(l.idPoste())
@@ -205,6 +230,7 @@ public BesoinDto creerBesoin(BesoinRequest req, User user) {
     besoin.setEtatActuel("EN_ATTENTE");
     besoin.setPrecisionMotif(req.precisionMotif() == null || req.precisionMotif().isBlank()
         ? null : req.precisionMotif().trim());
+    besoin.setBudgetEstime(coutAnnuelEstime(places, req.dateSouhaitee()));
     besoin = besoinRepository.save(besoin);
 
     // 4. besoin_poste : une ligne par place. Le poste occupé reste OCCUPE.
@@ -225,6 +251,14 @@ public BesoinDto creerBesoin(BesoinRequest req, User user) {
     v.setDecision("EN_ATTENTE");
     v.setCommentaire("Demande soumise");
     validationRepository.save(v);
+    histoBesoin.tracer(besoin, null, "EN_ATTENTE", HistoBesoinService.CREATION, user,
+        places.size() + " personne(s) demandée(s)" + (besoin.getBudgetEstime() == null ? ""
+            : String.format(java.util.Locale.FRANCE, " — coût annuel estimé %,.0f Ar", besoin.getBudgetEstime())));
+    try {
+        validationService.avancerAutomatiquement(besoin);   // contrôle budgétaire et notification des valideurs
+    } catch (Exception e) {
+        throw new IllegalStateException(e.getMessage(), e);
+    }
 
     String resume = places.stream()
         .map(pl -> pl.poste().getLibelle()
@@ -260,6 +294,20 @@ public BesoinDto creerBesoin(BesoinRequest req, User user) {
             .findFirst()
             .orElse(null);
     }
+    /**
+     * Coût annuel estimé : pour chaque siège, salaire maximum de la grille (catégorie × échelon du poste)
+     * à la date souhaitée × 12. Null si un poste n'a pas de ligne de grille.
+     */
+    private Double coutAnnuelEstime(List<Place> places, LocalDate date) {
+        java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+        for (Place pl : places) {
+            var f = grilleService.fourchette(pl.poste().getId(), date).orElse(null);
+            if (f == null) return null;
+            total = total.add(f.max().multiply(java.math.BigDecimal.valueOf(12)));
+        }
+        return total.doubleValue();
+    }
+
     private String genererReference() {
         String prefix = "BES-" + java.time.LocalDate.now().getYear() + "-";
         long n = besoinRepository.countByReferenceStartingWith(prefix) + 1;

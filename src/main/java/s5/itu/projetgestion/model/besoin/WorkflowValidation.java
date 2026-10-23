@@ -15,6 +15,13 @@ public class WorkflowValidation {
     @Column(nullable = false)
     private Integer ordre;
 
+    /** Contrôle automatique de l'étape : BUDGET (validée d'office si le coût tient dans le budget), ou null. */
+    @Column(length = 20)
+    private String controle;
+
+    public String getControle() { return controle; }
+    public void setControle(String controle) { this.controle = controle; }
+
     public Integer getId() {
         return id;
     }

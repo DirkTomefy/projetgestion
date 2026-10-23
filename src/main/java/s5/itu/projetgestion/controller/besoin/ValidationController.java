@@ -38,6 +38,7 @@ public class ValidationController {
     @PostMapping("/api/besoin/valider")
     public ResponseEntity<String> validerBesoin(
             @RequestParam Integer idBesoin,
+            @RequestParam(required = false) String commentaire,
             HttpSession session) {
 
         User utilisateur = recupererUtilisateur(session);
@@ -45,7 +46,7 @@ public class ValidationController {
 
         try {
             besoin = recupererBesoin(idBesoin);
-            validationService.validerBesoin(besoin, utilisateur);
+            validationService.validerBesoin(besoin, utilisateur, commentaire);
             return ResponseEntity.ok("Besoin validé avec succès.");
 
         } catch (BesoinInvalideException e) {
@@ -68,6 +69,7 @@ public class ValidationController {
     @PostMapping("/api/besoin/refuser")
     public void refuserBesoin(
             @RequestParam Integer idBesoin,
+            @RequestParam(required = false) String commentaire,
             HttpSession session) {
 
         User utilisateur = recupererUtilisateur(session);
@@ -75,7 +77,7 @@ public class ValidationController {
 
         try {
             besoin = recupererBesoin(idBesoin);
-            validationService.refuserBesoin(besoin, utilisateur);
+            validationService.refuserBesoin(besoin, utilisateur, commentaire);
         } catch (BesoinInvalideException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e);

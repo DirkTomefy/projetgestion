@@ -9,5 +9,7 @@ public record ContratDto(
     String statut, String motifFin, String referencePrecedent, boolean documentDepose,
     List<EtatContratDto> historique,
     boolean documentSigne,    // la copie signée a été déposée (condition pour signer)
-    String lienDocument       // PDF actuel : contrat généré à l'embauche, puis copie signée
+    String lienDocument,      // PDF actuel : contrat généré à l'embauche, puis copie signée
+    Integer idEmploye,        // lien vers le dossier de l'employé
+    Integer idPrecedent       // lien vers le contrat précédent
 ) {}

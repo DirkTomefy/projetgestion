@@ -11,6 +11,7 @@ public class SessionUser implements Serializable {
     private String login;
     private Integer idEmploye;
     private List<String> roles;
+    private String nomComplet;
 
     public SessionUser() { }
 
@@ -19,7 +20,8 @@ public class SessionUser implements Serializable {
         s.id = u.getId();
         s.login = u.getLogin();
         s.idEmploye = u.getIdEmploye();
-        s.roles = u.getRoles().stream().map(r -> r.getLibelle()).toList();
+        s.roles = u.getRoles().stream().map(r -> r.getLibelle()).sorted().toList();
+        s.nomComplet = u.getNomComplet();
         return s;
     }
 
@@ -33,6 +35,8 @@ public class SessionUser implements Serializable {
     public void setLogin(String login) { this.login = login; }
     public Integer getIdEmploye() { return idEmploye; }
     public void setIdEmploye(Integer idEmploye) { this.idEmploye = idEmploye; }
+    public String getNomComplet() { return nomComplet; }
+    public void setNomComplet(String nomComplet) { this.nomComplet = nomComplet; }
     public List<String> getRoles() { return roles; }
     public void setRoles(List<String> roles) { this.roles = roles; }
 }

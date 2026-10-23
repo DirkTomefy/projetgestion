@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import s5.itu.projetgestion.model.besoin.Besoin;
 import s5.itu.projetgestion.model.besoin.BesoinPoste;
 import s5.itu.projetgestion.model.contrat.Contrat;
 import s5.itu.projetgestion.model.contrat.ContratDetail;
@@ -52,6 +53,7 @@ public class EmployeService implements EmbaucheService {
     private TypeContratRepository typeContratRepository;
     private ContratPdfService contratPdfService;
     private EtatContratRepository etatContratRepository;
+    private s5.itu.projetgestion.service.besoin.HistoBesoinService histoBesoin;
 
     public EmployeService(EmployeRepository employeRepository, AffectationRepository affectationRepository,
             ContratRepository contratRepository, PropositionConditionRepository propositionConditionRepository,
@@ -62,7 +64,9 @@ public class EmployeService implements EmbaucheService {
             BesoinRepository besoinRepository,
             TypeContratRepository typeContratRepository,
             ContratPdfService contratPdfService,
-        EtatContratRepository etatContratRepository) {
+        EtatContratRepository etatContratRepository,
+        s5.itu.projetgestion.service.besoin.HistoBesoinService histoBesoin) {
+        this.histoBesoin = histoBesoin;
         this.employeRepository = employeRepository;
         this.affectationRepository = affectationRepository;
         this.contratRepository = contratRepository;
@@ -115,9 +119,16 @@ public class EmployeService implements EmbaucheService {
 
         List<BesoinPoste> lignes = besoinPosteRepository
                 .findByBesoinId(proposition.getBesoinPoste().getBesoin().getId());
+        Besoin besoinPourvu = proposition.getBesoinPoste().getBesoin();
+        histoBesoin.tracer(besoinPourvu, besoinPourvu.getEtatActuel(), besoinPourvu.getEtatActuel(), "SIEGE_POURVU", null,
+                "Siège « " + poste.getLibelle() + " » pourvu : " + employe.getNom()
+                        + (employe.getPrenoms() == null ? "" : " " + employe.getPrenoms()) + " (" + employe.getMatricule() + ")");
         if (!lignes.isEmpty() && lignes.stream().allMatch(l -> "POURVU".equals(l.getEtat()))) {
-            proposition.getBesoinPoste().getBesoin().setEtatActuel("POURVU");
-            besoinRepository.save(proposition.getBesoinPoste().getBesoin());
+            String avant = besoinPourvu.getEtatActuel();
+            besoinPourvu.setEtatActuel("POURVU");
+            besoinRepository.save(besoinPourvu);
+            histoBesoin.tracer(besoinPourvu, avant, "POURVU", s5.itu.projetgestion.service.besoin.HistoBesoinService.POURVU, null,
+                    "Tous les sièges du besoin sont pourvus");
         }
         besoinPosteRepository.save(proposition.getBesoinPoste());
         return contrat.getId();

@@ -19,9 +19,12 @@ public class HistoCandidatureService {
     private final HistoCandidatureRepository histoRepo;
     private final CandidatureRepository candidatureRepo;
     private final CommunicationCandidatService communication;
+    private final s5.itu.projetgestion.service.notification.NotificationService notificationService;
 
     public HistoCandidatureService(HistoCandidatureRepository histoRepo, CandidatureRepository candidatureRepo,
-                                   CommunicationCandidatService communication) {
+                                   CommunicationCandidatService communication,
+                                   s5.itu.projetgestion.service.notification.NotificationService notificationService) {
+        this.notificationService = notificationService;
         this.histoRepo = histoRepo;
         this.candidatureRepo = candidatureRepo;
         this.communication = communication;
@@ -31,6 +34,11 @@ public class HistoCandidatureService {
     public void depot(Candidature candidature) {
         enregistrer(candidature, null, candidature.getEtat(), null, "Dépôt de la candidature");
         communication.candidatureRecue(candidature);   // P4 : accusé de réception (après validation, sans risque)
+        var ca = candidature.getCandidat();
+        Integer idOffre = candidature.getIdOffreEmploi();
+        notificationService.notifierRole("RH", s5.itu.projetgestion.service.notification.NotificationService.CANDIDATURE_RECUE,
+                "Nouvelle candidature de " + ca.getNom() + (ca.getPrenom() == null ? "" : " " + ca.getPrenom()),
+                "/candidatures" + (idOffre == null ? "" : "?offre=" + idOffre));
     }
 
     public void changerEtat(Candidature candidature, String nouvelEtat, Integer idUser, String commentaire) {

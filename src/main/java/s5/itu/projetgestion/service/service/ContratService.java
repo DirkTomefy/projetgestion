@@ -121,6 +121,27 @@ public class ContratService {
 
     // ---------- Outils ----------
 
+    /**
+     * Fin d'un contrat (départ de l'employé) : un contrat SIGNE passe TERMINE avec sa date de fin effective et son motif ;
+     * un contrat pas encore signé (CREE, VALIDE) est ANNULE. L'historique des états est conservé.
+     */
+    @Transactional
+    public void terminerPourDepart(Integer id, LocalDate dateFin, String motif) {
+        Contrat c = trouver(id);
+        switch (c.getStatutActuel()) {
+            case "SIGNE" -> {
+                c.setDateFinEffective(dateFin);
+                c.setMotifFin(motif);
+                changerEtat(c, "TERMINE");
+            }
+            case "CREE", "VALIDE" -> {
+                c.setMotifFin(motif);
+                changerEtat(c, "ANNULE");
+            }
+            default -> { }
+        }
+    }
+
     private void changerEtat(Contrat c, String nouvelEtat) {
         c.setStatutActuel(nouvelEtat);
         contratRepo.save(c);
@@ -155,7 +176,8 @@ public class ContratService {
             c.getContratPrecedent() == null ? null : c.getContratPrecedent().getReference(),
             c.getDocument() != null, histo,
             c.getDocument() != null && TYPE_SIGNE.equals(c.getDocument().getTypeDocument().getLibelle()),
-            c.getDocument() == null ? null : uploadProperties.getUrlPrefix() + c.getDocument().getLien());
+            c.getDocument() == null ? null : uploadProperties.getUrlPrefix() + c.getDocument().getLien(),
+            emp.getId(), c.getContratPrecedent() == null ? null : c.getContratPrecedent().getId());
     }
 
     /** Types de contrat (CE, CDD, CDI) pour le renouvellement. */
