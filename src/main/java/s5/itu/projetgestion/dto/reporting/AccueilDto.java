@@ -6,5 +6,5 @@ import java.util.List;
 public record AccueilDto(String nom, List<String> roles, String poste, String unite,
                          long validationsAFaire, long evaluationsAVenir, long tachesOnboarding, long notificationsNonLues,
                          long mesBesoinsEnCours, long inscriptionsAValider, List<String> delegationsRecues,
-                         long budgetsAValider, long grillesAValider) {
+                         long budgetsAValider, long grillesAValider, long postesAValider, long demandesContratATraiter) {
 }

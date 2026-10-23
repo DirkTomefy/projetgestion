@@ -115,7 +115,8 @@ public class EmployeGestionService {
         e.setPersonne(p);
         copier(e, p);
         employeRepo.save(e);
-        affecter(e, poste, req.dateEntree() == null ? LocalDate.now() : req.dateEntree());
+        Affectation a = affecter(e, poste, req.dateEntree() == null ? LocalDate.now() : req.dateEntree());
+        contratService.creerReprise(a, req.idTypeContrat(), req.dateFinPrevue(), req.salaire());   // contrat en cours et salaire
         return dossier(e.getId());
     }
 

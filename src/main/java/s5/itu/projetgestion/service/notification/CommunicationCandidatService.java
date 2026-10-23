@@ -126,7 +126,7 @@ public class CommunicationCandidatService {
         OffreEmploi o = idOffre == null ? null : offreRepo.findById(idOffre).orElse(null);
         if (o == null) return;
         v.put("referenceOffre", o.getRef());
-        BesoinOffreInfo b = besoinLookup.findById(o.getIdBesoin()).orElse(null);
+        BesoinOffreInfo b = besoinLookup.findById(o.getIdBesoin(), o.getIdPoste()).orElse(null);
         if (b != null) {
             v.putIfAbsent("poste", b.poste());
             v.putIfAbsent("unite", b.unite());

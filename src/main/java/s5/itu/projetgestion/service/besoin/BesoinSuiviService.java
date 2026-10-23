@@ -49,12 +49,15 @@ public class BesoinSuiviService {
     private final ValidationService validationService;
     private final HistoBesoinService histo;
     private final GrilleSalarialeService grilleService;
+    private final s5.itu.projetgestion.repository.organisation.PosteRepository posteRepo;
 
     public BesoinSuiviService(BesoinRepository besoinRepo, BesoinPosteRepository besoinPosteRepo,
                               ValidationRepository validationRepo, WorkflowValidationRepository workflowRepo,
                               HistoBesoinRepository histoRepo, OffreEmploiRepository offreRepo, UserRepository userRepo,
                               ValidationService validationService, HistoBesoinService histo,
-                              GrilleSalarialeService grilleService) {
+                              GrilleSalarialeService grilleService,
+                              s5.itu.projetgestion.repository.organisation.PosteRepository posteRepo) {
+        this.posteRepo = posteRepo;
         this.besoinRepo = besoinRepo;
         this.besoinPosteRepo = besoinPosteRepo;
         this.validationRepo = validationRepo;
@@ -145,18 +148,25 @@ public class BesoinSuiviService {
                         h.getUser() == null ? "Application" : nom(h.getUser()), h.getCommentaire()))
                 .toList();
         List<BesoinFicheDto.Offre> offres = offreRepo.findByIdBesoinOrderByIdDesc(id).stream()
-                .map(o -> new BesoinFicheDto.Offre(o.getId(), o.getRef(), o.getEtat(), o.getDatePublication(), o.getDateLimiteCandidature()))
+                .map(o -> new BesoinFicheDto.Offre(o.getId(), o.getRef(), o.getEtat(), o.getDatePublication(), o.getDateLimiteCandidature(),
+                        o.getIdPoste() == null ? null : posteRepo.findById(o.getIdPoste()).map(p -> p.getLibelle()).orElse(null)))
                 .toList();
 
         boolean decider = "EN_ATTENTE".equals(b.getEtatActuel()) && validationService.peutDecider(b, u);
         boolean annuler = peutAnnuler(b, su, offres);
-        boolean creerOffre = su.hasRole("RH") && "OUVERT".equals(b.getEtatActuel())
-                && offres.stream().noneMatch(o -> !"CLOTUREE".equals(o.etat()));
+        // une offre par poste : postes qui ont encore des places ouvertes et pas d'offre en cours
+        List<Integer> postesSansOffre = !"OUVERT".equals(b.getEtatActuel()) ? List.of()
+                : besoinPosteRepo.findByBesoinId(id).stream()
+                    .filter(l -> !"POURVU".equals(l.getEtat()) && !"ANNULE".equals(l.getEtat()))
+                    .map(l -> l.getPoste().getId()).distinct()
+                    .filter(idPoste -> !offreRepo.existeOffreEnCours(id, idPoste)).toList();
+        boolean creerOffre = su.hasRole("RH") && !postesSansOffre.isEmpty();
         return new BesoinFicheDto(b.getId(), b.getReference(), b.getTypeBesoin(), b.getEtatActuel(),
                 b.getUniteOrga().getId(), b.getUniteOrga().getLibelle(), b.getMotif().getId(), b.getMotif().getLibelle(),
                 b.getPrecisionMotif(), b.getDateSouhaitee(), b.getEffectif(), nom(b.getUser()), dateDemande(b),
-                lignes, circuit, new BesoinFicheDto.Budget(cb.exercice(), cb.coutAnnuel(), cb.budget(), cb.dansLeBudget()),
-                historique, offres, new BesoinFicheDto.Actions(decider, decider, annuler, creerOffre));
+                lignes, circuit, new BesoinFicheDto.Budget(cb.exercice(), cb.coutAnnuel(), cb.budget(),
+                        cb.masseSalariale(), cb.autresBesoins(), cb.disponible(), cb.dansLeBudget()),
+                historique, offres, new BesoinFicheDto.Actions(decider, decider, annuler, creerOffre, postesSansOffre));
     }
 
     /** Annulation par le demandeur (ou la RH) tant qu'aucun siège n'est pourvu et qu'aucune offre n'est publiée. */
@@ -164,7 +174,8 @@ public class BesoinSuiviService {
     public BesoinFicheDto annuler(Integer id, SessionUser su, String motif) {
         Besoin b = trouver(id);
         List<BesoinFicheDto.Offre> offres = offreRepo.findByIdBesoinOrderByIdDesc(id).stream()
-                .map(o -> new BesoinFicheDto.Offre(o.getId(), o.getRef(), o.getEtat(), o.getDatePublication(), o.getDateLimiteCandidature()))
+                .map(o -> new BesoinFicheDto.Offre(o.getId(), o.getRef(), o.getEtat(), o.getDatePublication(), o.getDateLimiteCandidature(),
+                        o.getIdPoste() == null ? null : posteRepo.findById(o.getIdPoste()).map(p -> p.getLibelle()).orElse(null)))
                 .toList();
         if (!peutAnnuler(b, su, offres)) {
             if (!b.getUser().getId().equals(su.getId()) && !su.hasRole("RH"))

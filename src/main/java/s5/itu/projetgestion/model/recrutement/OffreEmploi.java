@@ -27,6 +27,10 @@ public class OffreEmploi {
     @Column(name = "id_besoin", nullable = false)
     private Integer idBesoin;
 
+    /** Poste du besoin couvert par l'offre ; NULL pour une offre antérieure qui couvre tout le besoin. */
+    @Column(name = "id_poste")
+    private Integer idPoste;
+
     @Column(name = "ref", nullable = false, unique = true, length = 50)
     private String ref;
 
@@ -62,6 +66,8 @@ public class OffreEmploi {
     public void setId(Integer id) { this.id = id; }
     public Integer getIdBesoin() { return idBesoin; }
     public void setIdBesoin(Integer idBesoin) { this.idBesoin = idBesoin; }
+    public Integer getIdPoste() { return idPoste; }
+    public void setIdPoste(Integer idPoste) { this.idPoste = idPoste; }
     public String getRef() { return ref; }
     public void setRef(String ref) { this.ref = ref; }
     public TypeContrat getTypeContrat() { return typeContrat; }

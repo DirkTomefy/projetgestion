@@ -66,11 +66,12 @@ public class OffreEmploiApiController {
     }
 
     @GetMapping("/nouvelle")
-    public Map<String, Object> nouvelle(@RequestParam Integer idBesoin, HttpSession session) {
+    public Map<String, Object> nouvelle(@RequestParam Integer idBesoin, @RequestParam(required = false) Integer idPoste,
+                                        HttpSession session) {
         verifierRh(session);
         return Map.of(
-                "form", offreService.nouveauFormulaire(idBesoin),
-                "besoin", offreService.getBesoinOuvert(idBesoin),
+                "form", offreService.nouveauFormulaire(idBesoin, idPoste),
+                "besoin", offreService.getBesoinOuvert(idBesoin, idPoste),
                 "typesContrat", offreService.typesContrat());
     }
 
@@ -84,7 +85,7 @@ public class OffreEmploiApiController {
     @PostMapping(value = "/apercu", produces = MediaType.TEXT_HTML_VALUE)
     public String apercu(@RequestBody OffreEmploiForm form, HttpSession session) {
         verifierRh(session);
-        BesoinOffreInfo b = offreService.getBesoinOuvert(form.getIdBesoin());
+        BesoinOffreInfo b = offreService.getBesoinOuvert(form.getIdBesoin(), form.getIdPoste());
         TypeContrat tc = form.getIdTypeContrat() == null ? null :
                 offreService.typesContrat().stream()
                         .filter(t -> t.getId().equals(form.getIdTypeContrat())).findFirst().orElse(null);
@@ -137,7 +138,7 @@ public class OffreEmploiApiController {
 
 
     private OffreDto toDto(OffreEmploi o) {
-        BesoinOffreInfo b = besoinLookup.findById(o.getIdBesoin()).orElse(null);
+        BesoinOffreInfo b = besoinLookup.findById(o.getIdBesoin(), o.getIdPoste()).orElse(null);
         return new OffreDto(o.getId(), o.getRef(), o.getIdBesoin(),
                 b != null ? b.reference() : null,
                 b != null ? b.poste() : null,

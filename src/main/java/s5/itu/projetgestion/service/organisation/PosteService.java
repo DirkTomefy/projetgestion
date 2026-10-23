@@ -33,13 +33,16 @@ public class PosteService {
     private final EchelonMetierRepository echelonRepository;
     private final UniteOrgaRepository uniteRepository;
     private final s5.itu.projetgestion.repository.besoin.BesoinPosteRepository besoinPosteRepository;
+    private final s5.itu.projetgestion.service.notification.NotificationService notifications;
 
     public PosteService(PosteRepository posteRepository,
             MetierRepository metierRepository,
             CategorieMetierRepository categorieRepository,
             EchelonMetierRepository echelonRepository,
             UniteOrgaRepository uniteRepository,
-            s5.itu.projetgestion.repository.besoin.BesoinPosteRepository besoinPosteRepository) {
+            s5.itu.projetgestion.repository.besoin.BesoinPosteRepository besoinPosteRepository,
+            s5.itu.projetgestion.service.notification.NotificationService notifications) {
+        this.notifications = notifications;
         this.besoinPosteRepository = besoinPosteRepository;
         this.posteRepository = posteRepository;
         this.metierRepository = metierRepository;
@@ -84,7 +87,27 @@ public class PosteService {
         }
 
         poste.setEtat(nouvelEtat);
-        return PosteDto.from(posteRepository.save(poste));
+        Poste enregistre = posteRepository.save(poste);
+        boolean valide = "ACTIF".equals(nouvelEtat);
+        String msg = "Le poste « " + enregistre.getLibelle() + " » (" + enregistre.getUniteOrga().getLibelle() + ") a été "
+                + (valide ? "validé par la direction générale : il est actif." : "refusé par la direction générale.");
+        notifications.notifierRole("RH", "POSTE_DECISION", msg, "/postes/" + enregistre.getId());
+        if (enregistre.getSuperieurDirect() != null)
+            notifications.notifierPoste(enregistre.getSuperieurDirect().getId(), "POSTE_DECISION", msg, "/postes/" + enregistre.getId());
+        return PosteDto.from(enregistre);
+    }
+
+    /** Demande de poste hors besoin : le poste est PROPOSE et le DG est prévenu pour le valider ou le refuser. */
+    @Transactional
+    public PosteDto demanderPoste(PosteDemandeRequest req, String demandeur, boolean demandeurEstDg) {
+        PosteDto dto = creerDemande(req);
+        if (!demandeurEstDg) {
+            notifications.notifierRole("DG", "POSTE_A_VALIDER",
+                    "Création du poste « " + dto.libelle() + " » demandée pour " + dto.uniteOrga().libelle()
+                            + " par " + demandeur + " : à valider ou refuser.",
+                    "/postes?etat=PROPOSE");
+        }
+        return dto;
     }
 
  
@@ -109,13 +132,23 @@ public class PosteService {
     }
 
     @Transactional(readOnly = true)
-    public List<OptionDto> listerSuperieursPossibles() {
+    public List<OptionDto> listerSuperieursPossibles(Integer idUnite) {
+        java.util.Set<Integer> chaine = idUnite == null ? null : uniteEtAscendants(idUnite);
         return posteRepository.findByEtat("ACTIF").stream()
+                .filter(p -> chaine == null || chaine.contains(p.getUniteOrga().getId()))
                 .map(p -> new OptionDto(p.getId(),
                         p.getLibelle() + " - " + p.getUniteOrga().getLibelle()))
                 .toList();
     }
     
+    /** L'unité et ses unités mères, jusqu'à la direction. */
+    private java.util.Set<Integer> uniteEtAscendants(Integer idUnite) {
+        java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
+        UniteOrga u = uniteRepository.findById(idUnite).orElse(null);
+        while (u != null && ids.add(u.getId())) u = u.getUniteMere();
+        return ids;
+    }
+
     @Transactional
     public PosteDto creerDemande(PosteDemandeRequest req) {
         if (req == null || req.libelle() == null || req.libelle().isBlank())
@@ -143,6 +176,8 @@ public class PosteService {
         Poste superieur = req.idSuperieurDirect() == null ? null : posteRepository.findById(req.idSuperieurDirect())
                 .orElseThrow(() -> new IllegalArgumentException("Supérieur direct introuvable."));
         if (superieur != null && !"ACTIF".equals(superieur.getEtat())) throw new IllegalArgumentException("Le supérieur direct doit être un poste ACTIF.");
+        if (superieur != null && !uniteEtAscendants(unite.getId()).contains(superieur.getUniteOrga().getId()))
+            throw new IllegalArgumentException("Le supérieur direct doit appartenir à l'unité du poste ou à une unité dont elle dépend.");
         Poste poste = new Poste(); poste.setCode(genererCode()); poste.setMetier(metier); poste.setEchelon(echelon);
         poste.setUniteOrga(unite); poste.setSuperieurDirect(superieur); poste.setLibelle(req.libelle().trim());
         poste.setEtat("PROPOSE"); poste.setStatutOccupation("LIBRE");

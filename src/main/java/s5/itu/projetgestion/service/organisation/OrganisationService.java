@@ -209,6 +209,11 @@ public class OrganisationService {
         if (req.idSuperieurDirect() != null) {
             sup = posteRepo.findById(req.idSuperieurDirect()).orElseThrow(() -> new IllegalArgumentException("Supérieur direct introuvable."));
             if (!"ACTIF".equals(sup.getEtat())) throw new IllegalArgumentException("Le supérieur direct doit être un poste ACTIF.");
+            boolean dansLaChaine = false;   // l'unité du supérieur : celle du poste ou une unité dont elle dépend
+            for (UniteOrga u = p.getUniteOrga(); u != null && !dansLaChaine; u = u.getUniteMere())
+                dansLaChaine = u.getId().equals(sup.getUniteOrga().getId());
+            if (!dansLaChaine)
+                throw new IllegalArgumentException("Le supérieur direct doit appartenir à l'unité du poste ou à une unité dont elle dépend.");
             for (Poste x = sup; x != null; x = x.getSuperieurDirect())
                 if (p.getId() != null && x.getId().equals(p.getId()))
                     throw new IllegalArgumentException("Un poste ne peut pas être son propre supérieur (directement ou non).");

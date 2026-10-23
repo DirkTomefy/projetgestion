@@ -22,8 +22,10 @@ import s5.itu.projetgestion.service.organisation.OrganisationService;
 public class OrganisationController {
 
     private final OrganisationService service;
+    private final s5.itu.projetgestion.service.organisation.PerimetreService perimetre;
 
-    public OrganisationController(OrganisationService service) {
+    public OrganisationController(OrganisationService service, s5.itu.projetgestion.service.organisation.PerimetreService perimetre) {
+        this.perimetre = perimetre;
         this.service = service;
     }
 
@@ -37,6 +39,14 @@ public class OrganisationController {
     public List<UniteDto> organigramme(HttpSession session) {
         Acces.connecte(session);
         return service.organigramme();
+    }
+
+    /** Unités pour lesquelles l'utilisateur peut exprimer un besoin ou demander un poste. */
+    @GetMapping("/unites/demandables")
+    public List<UniteDto> unitesDemandables(HttpSession session) {
+        var su = Acces.connecte(session);
+        var ids = perimetre.unitesDemandables(su);
+        return service.unites().stream().filter(u -> ids.contains(u.id())).toList();
     }
 
     @PostMapping("/unites")
@@ -115,7 +125,8 @@ public class OrganisationController {
         return ResponseEntity.noContent().build();
     }
 
+    /** Unités, postes et circuit de validation : la structure de l'organisation est décidée par le DG. */
     private static void ecriture(HttpSession session) {
-        Acces.exiger(session, Acces.ADMIN, Acces.RH);
+        Acces.exiger(session, Acces.DG);
     }
 }

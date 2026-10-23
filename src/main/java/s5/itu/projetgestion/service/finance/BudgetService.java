@@ -66,6 +66,24 @@ public class BudgetService {
                 .map(BudgetUnite::getMontant).map(BigDecimal::valueOf).orElse(null);
     }
 
+    /**
+     * Engagements d'une unité pour un exercice : budget validé, masse salariale annuelle des contrats en cours
+     * et coût des besoins en cours (validation ou recrutement), sans le besoin examiné (coutExclu).
+     */
+    @Transactional(readOnly = true)
+    public Engagement engagement(Integer idUnite, int exercice, BigDecimal coutExclu) {
+        BigDecimal budget = budget(idUnite, exercice);
+        IndicateurRepository.LigneUnite l = indicateurs.parUnite(exercice).stream()
+                .filter(x -> x.getIdUnite().equals(idUnite)).findFirst().orElse(null);
+        BigDecimal masse = l == null ? BigDecimal.ZERO : l.getMasseMensuelle().multiply(DOUZE);
+        BigDecimal besoins = l == null ? BigDecimal.ZERO : l.getBesoinsEnCours();
+        if (coutExclu != null) besoins = besoins.subtract(coutExclu).max(BigDecimal.ZERO);
+        BigDecimal disponible = budget == null ? null : budget.subtract(masse).subtract(besoins);
+        return new Engagement(budget, masse, besoins, disponible);
+    }
+
+    public record Engagement(BigDecimal budget, BigDecimal masseSalariale, BigDecimal autresBesoins, BigDecimal disponible) { }
+
     @Transactional(readOnly = true)
     public long aValider() {
         return budgetRepo.countByStatut(BudgetUnite.A_VALIDER);

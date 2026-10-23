@@ -7,6 +7,8 @@ import java.time.LocalDate;
 public class OffreEmploiForm {
 
     private Integer idBesoin;
+    /** Poste du besoin couvert par l'offre (obligatoire si le besoin demande plusieurs postes). */
+    private Integer idPoste;
 
     private String reference;
 
@@ -25,6 +27,8 @@ public class OffreEmploiForm {
 
     public Integer getIdBesoin() { return idBesoin; }
     public void setIdBesoin(Integer idBesoin) { this.idBesoin = idBesoin; }
+    public Integer getIdPoste() { return idPoste; }
+    public void setIdPoste(Integer idPoste) { this.idPoste = idPoste; }
     public String getReference() { return reference; }
     public void setReference(String reference) { this.reference = reference; }
     public LocalDate getDatePublication() { return datePublication; }

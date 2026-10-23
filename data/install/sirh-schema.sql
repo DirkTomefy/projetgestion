@@ -12,7 +12,7 @@ CREATE SCHEMA public;
 SET search_path = public;
 
 -- ---------------------------------------------------------------------
--- Tables (50)
+-- Tables (51)
 -- ---------------------------------------------------------------------
 
 CREATE TABLE affectation (
@@ -151,6 +151,33 @@ CREATE TABLE delegation (
     CONSTRAINT delegation_check1 CHECK ((date_fin >= date_debut))
 );
 
+CREATE TABLE demande_contrat (
+    id SERIAL,
+    reference VARCHAR(30) NOT NULL,
+    id_contrat integer NOT NULL,
+    origine VARCHAR(10) NOT NULL,
+    motif_type VARCHAR(20) NOT NULL,
+    id_type_contrat integer,
+    date_effet date NOT NULL,
+    date_fin_prevue date,
+    salaire numeric(15,2) NOT NULL,
+    motif text,
+    etat VARCHAR(20) NOT NULL,
+    depassement_budget boolean DEFAULT false NOT NULL,
+    id_demandeur integer NOT NULL,
+    date_demande TIMESTAMP DEFAULT now() NOT NULL,
+    id_rh integer,
+    date_rh TIMESTAMP,
+    commentaire_rh text,
+    id_finance integer,
+    date_finance TIMESTAMP,
+    commentaire_finance text,
+    id_dg integer,
+    date_dg TIMESTAMP,
+    commentaire_dg text,
+    id_contrat_resultat integer
+);
+
 CREATE TABLE document (
     id SERIAL,
     id_type_document integer NOT NULL,
@@ -285,6 +312,7 @@ CREATE TABLE offre_emploi (
     date_cloture TIMESTAMP,
     motif_cloture VARCHAR(20),
     id_user_cloture integer,
+    id_poste integer,
     CONSTRAINT ck_offre_emploi_motif_cloture CHECK (((motif_cloture IS NULL) OR ((motif_cloture)::text = ANY ((ARRAY['DATE_LIMITE', 'POSTES_POURVUS', 'MANUELLE'])::text[])))),
     CONSTRAINT offre_emploi_etat_check CHECK (((etat)::text = ANY ((ARRAY['BROUILLON', 'PUBLIEE', 'CLOTUREE'])::text[])))
 );
@@ -555,6 +583,12 @@ ALTER TABLE coordonnees_bancaires
 ALTER TABLE delegation
     ADD CONSTRAINT delegation_pkey PRIMARY KEY (id);
 
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_pkey PRIMARY KEY (id);
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_reference_key UNIQUE (reference);
+
 ALTER TABLE document_candidat
     ADD CONSTRAINT document_candidat_pkey PRIMARY KEY (id);
 
@@ -725,6 +759,10 @@ CREATE INDEX idx_contrat_affect ON contrat USING btree (id_affectation);
 
 CREATE INDEX idx_coordonnees_bancaires_employe ON coordonnees_bancaires USING btree (id_employe);
 
+CREATE INDEX idx_demande_contrat_contrat ON demande_contrat USING btree (id_contrat);
+
+CREATE INDEX idx_demande_contrat_etat ON demande_contrat USING btree (etat);
+
 CREATE INDEX idx_histo_besoin_besoin ON histo_besoin USING btree (id_besoin, date_action);
 
 CREATE INDEX idx_histo_candidature ON histo_candidature USING btree (id_candidature, date_changement);
@@ -738,6 +776,8 @@ CREATE INDEX idx_notification_type_lien ON notification USING btree (type, lien)
 CREATE INDEX idx_notification_user_date ON notification USING btree (id_utilisateur, date_creation DESC);
 
 CREATE INDEX idx_notification_user_lu ON notification USING btree (id_utilisateur, lu);
+
+CREATE INDEX idx_offre_emploi_besoin_poste ON offre_emploi USING btree (id_besoin, id_poste);
 
 CREATE INDEX idx_poste_unite ON poste USING btree (id_unite_orga);
 
@@ -848,6 +888,27 @@ ALTER TABLE delegation
 ALTER TABLE delegation
     ADD CONSTRAINT delegation_id_user_delegue_fkey FOREIGN KEY (id_user_delegue) REFERENCES "user"(id) DEFERRABLE;
 
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_contrat_fkey FOREIGN KEY (id_contrat) REFERENCES contrat(id) DEFERRABLE;
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_contrat_resultat_fkey FOREIGN KEY (id_contrat_resultat) REFERENCES contrat(id) DEFERRABLE;
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_demandeur_fkey FOREIGN KEY (id_demandeur) REFERENCES "user"(id) DEFERRABLE;
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_dg_fkey FOREIGN KEY (id_dg) REFERENCES "user"(id) DEFERRABLE;
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_finance_fkey FOREIGN KEY (id_finance) REFERENCES "user"(id) DEFERRABLE;
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_rh_fkey FOREIGN KEY (id_rh) REFERENCES "user"(id) DEFERRABLE;
+
+ALTER TABLE demande_contrat
+    ADD CONSTRAINT demande_contrat_id_type_contrat_fkey FOREIGN KEY (id_type_contrat) REFERENCES type_contrat(id) DEFERRABLE;
+
 ALTER TABLE document_candidat
     ADD CONSTRAINT document_candidat_id_candidature_fkey FOREIGN KEY (id_candidature) REFERENCES candidatures(id) DEFERRABLE;
 
@@ -919,6 +980,9 @@ ALTER TABLE offre_emploi
 
 ALTER TABLE offre_emploi
     ADD CONSTRAINT offre_emploi_id_document_fkey FOREIGN KEY (id_document) REFERENCES document(id) DEFERRABLE;
+
+ALTER TABLE offre_emploi
+    ADD CONSTRAINT offre_emploi_id_poste_fkey FOREIGN KEY (id_poste) REFERENCES poste(id) DEFERRABLE;
 
 ALTER TABLE offre_emploi
     ADD CONSTRAINT offre_emploi_id_type_contrat_fkey FOREIGN KEY (id_type_contrat) REFERENCES type_contrat(id) DEFERRABLE;

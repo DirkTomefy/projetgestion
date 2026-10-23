@@ -58,4 +58,11 @@ public interface PosteRepository extends JpaRepository<Poste, Integer> {
     java.util.Optional<Poste> findAvecRelations(@Param("id") Integer id);
 
     List<Poste> findBySuperieurDirectIdAndEtatNot(Integer idPoste, String etat);
+
+    /** Postes proposés hors besoin, en attente de la décision du DG. */
+    @Query("""
+            SELECT COUNT(p) FROM Poste p WHERE p.etat = 'PROPOSE'
+            AND NOT EXISTS (SELECT 1 FROM BesoinPoste bp WHERE bp.poste = p AND bp.etat = 'EN_ATTENTE')
+            """)
+    long countProposesAValider();
 }

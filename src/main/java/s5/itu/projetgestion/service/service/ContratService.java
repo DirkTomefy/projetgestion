@@ -35,12 +35,18 @@ public class ContratService {
     private final FileStorageService fileStorageService ;
     private  final TypeContratRepository typeRepo ;
     private final UploadProperties uploadProperties;
+    private final s5.itu.projetgestion.repository.contrat.ContratRemunerationRepository remunerationRepo;
+    private final s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService;
 
 
     public ContratService(ContratRepository contratRepo, EtatContratRepository etatRepo,
                           OnboardingService onboardingService , TypeDocumentRepository typeDocumentRepository, FileStorageService fileStorageService , TypeContratRepository typeRepo,
-                          UploadProperties uploadProperties) {
+                          UploadProperties uploadProperties,
+                          s5.itu.projetgestion.repository.contrat.ContratRemunerationRepository remunerationRepo,
+                          s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService) {
         this.uploadProperties = uploadProperties;
+        this.remunerationRepo = remunerationRepo;
+        this.grilleService = grilleService;
         this.contratRepo = contratRepo;
         this.etatRepo = etatRepo;
         this.onboardingService = onboardingService;
@@ -187,6 +193,16 @@ public class ContratService {
 
     @Transactional
     public ContratDto renouveler(Integer id, RenouvellementRequest req) {
+        return renouveler(id, req, null, null, false);
+    }
+
+    /**
+     * Renouvellement / transformation. salaireImpose et dateEffet sont facultatifs (par défaut : salaire en vigueur,
+     * lendemain de la fin prévue). En simulation, toutes les règles sont contrôlées mais rien n'est enregistré.
+     */
+    @Transactional
+    public ContratDto renouveler(Integer id, RenouvellementRequest req, java.math.BigDecimal salaireImpose,
+                                 LocalDate dateEffet, boolean simulation) {
         Contrat ancien = trouver(id);
         exigerEtat(ancien, "SIGNE", "Seul un contrat SIGNE peut être renouvelé ou transformé.");
 
@@ -202,9 +218,12 @@ public class ContratService {
         if (!memeType && "CE".equals(nouveauType.getLibelle()))
             throw new IllegalArgumentException("On ne peut pas revenir à un contrat d'essai.");
 
-        LocalDate debut = ancien.getDateFinPrevue() != null
-            ? ancien.getDateFinPrevue().plusDays(1) : LocalDate.now();
+        LocalDate debut = dateEffet != null ? dateEffet
+            : ancien.getDateFinPrevue() != null ? ancien.getDateFinPrevue().plusDays(1) : LocalDate.now();
+        if (!debut.isAfter(ancien.getDateDebut()))
+            throw new IllegalArgumentException("Le nouveau contrat doit commencer après le début du contrat actuel.");
         LocalDate fin = req.dateFinPrevue();
+        if (salaireImpose != null) verifierGrille(ancien, salaireImpose, debut);
 
         if (nouveauType.getDureeMax() == null) {
             fin = null;                                   // CDI : pas de fin
@@ -240,6 +259,8 @@ public class ContratService {
             }
         }
 
+        if (simulation) return null;
+
         // Terminer l'ancien contrat (historique conservé)
         ancien.setDateFinEffective(debut.minusDays(1));
         ancien.setMotifFin(memeType ? "Renouvellement" : "Changement de type : "
@@ -260,6 +281,12 @@ public class ContratService {
         e.setContrat(nouveau);
         e.setStatut("CREE");
         etatRepo.save(e);
+        // le salaire en vigueur passe au nouveau contrat (sinon la masse salariale le perdrait)
+        if (salaireImpose != null) remunerer(nouveau, debut, salaireImpose);
+        else {
+            var salaire = remunerationRepo.findByContratIdOrderByDateEffetDesc(ancien.getId()).stream().findFirst().orElse(null);
+            if (salaire != null) remunerer(nouveau, debut, java.math.BigDecimal.valueOf(salaire.getSalaire()));
+        }
         return versDto(nouveau, true);
     }
 
@@ -269,6 +296,94 @@ public class ContratService {
         return contratRepo.findByStatutActuelAndDateFinPrevueBetweenOrderByDateFinPrevueAsc(
                 "SIGNE", aujourdhui, aujourdhui.plusDays(jours)).stream()
             .map(c -> versDto(c, false)).toList();
+    }
+
+    /**
+     * Reprise d'un employé déjà en poste (saisie de l'existant) : contrat directement SIGNE, sans onboarding,
+     * avec le salaire mensuel, qui doit être dans la fourchette de la grille validée à la date de début.
+     */
+    @Transactional
+    public Contrat creerReprise(s5.itu.projetgestion.model.organisation.Affectation affectation, Integer idType,
+                                LocalDate finPrevue, java.math.BigDecimal salaire) {
+        if (idType == null) throw new IllegalArgumentException("Le type de contrat est obligatoire.");
+        TypeContrat type = typeRepo.findById(idType).orElseThrow(() -> new IllegalArgumentException("Type de contrat introuvable."));
+        if (salaire == null || salaire.signum() <= 0) throw new IllegalArgumentException("Le salaire mensuel est obligatoire.");
+        LocalDate debut = affectation.getDateDebut();
+        grilleService.fourchette(affectation.getPoste().getId(), debut).ifPresent(f -> {
+            if (!f.contient(salaire))
+                throw new IllegalArgumentException(String.format(java.util.Locale.FRANCE,
+                        "Le salaire doit être compris entre %,.0f et %,.0f Ar (grille : catégorie %s, échelon %s).",
+                        f.min(), f.max(), f.categorie(), f.echelon()));
+        });
+        if (type.getDureeMax() == null) finPrevue = null;   // CDI
+        else {
+            if (finPrevue == null) finPrevue = debut.plusMonths(type.getDureeMax()).minusDays(1);
+            if (!finPrevue.isAfter(debut)) throw new IllegalArgumentException("La date de fin doit suivre le début.");
+        }
+        Contrat c = new Contrat();
+        c.setReference(genererReference());
+        c.setAffectation(affectation);
+        c.setType(type);
+        c.setDateDebut(debut);
+        c.setDateFinPrevue(finPrevue);
+        c.setStatutActuel("CREE");
+        c = contratRepo.save(c);
+        for (String etat : List.of("CREE", "VALIDE", "SIGNE")) {
+            c.setStatutActuel(etat);
+            EtatContrat e = new EtatContrat();
+            e.setContrat(c);
+            e.setStatut(etat);
+            etatRepo.save(e);
+        }
+        contratRepo.save(c);
+        remunerer(c, debut, salaire);
+        return c;
+    }
+
+    /** Salaire mensuel en vigueur sur le contrat (0 si aucun). */
+    @Transactional
+    public java.math.BigDecimal salaireActuel(Integer idContrat) {
+        return remunerationRepo.findByContratIdOrderByDateEffetDesc(idContrat).stream().findFirst()
+                .map(r -> java.math.BigDecimal.valueOf(r.getSalaire())).orElse(java.math.BigDecimal.ZERO);
+    }
+
+    /** Fourchette de la grille pour le poste du contrat à une date (null si aucune grille). */
+    @Transactional
+    public s5.itu.projetgestion.service.finance.FourchetteSalariale fourchette(Contrat c, LocalDate date) {
+        return grilleService.fourchette(c.getAffectation().getPoste().getId(), date).orElse(null);
+    }
+
+    /** Le salaire doit être dans la fourchette de la grille en vigueur à la date d'effet. */
+    @Transactional
+    public void verifierGrille(Contrat c, java.math.BigDecimal salaire, LocalDate date) {
+        if (salaire == null || salaire.signum() <= 0) throw new IllegalArgumentException("Le salaire mensuel est obligatoire.");
+        grilleService.fourchette(c.getAffectation().getPoste().getId(), date).ifPresent(f -> {
+            if (!f.contient(salaire))
+                throw new IllegalArgumentException(String.format(java.util.Locale.FRANCE,
+                        "Le salaire doit être compris entre %,.0f et %,.0f Ar (grille : catégorie %s, échelon %s).",
+                        f.min(), f.max(), f.categorie(), f.echelon()));
+        });
+    }
+
+    /** Avenant de salaire : une nouvelle ligne de rémunération sur le contrat signé, à la date d'effet. */
+    @Transactional
+    public Contrat avenantSalaire(Integer idContrat, LocalDate dateEffet, java.math.BigDecimal salaire) {
+        Contrat c = trouver(idContrat);
+        exigerEtat(c, "SIGNE", "Seul un contrat SIGNE peut recevoir un avenant de salaire.");
+        if (dateEffet == null || dateEffet.isBefore(c.getDateDebut()))
+            throw new IllegalArgumentException("La date d'effet ne peut pas précéder le début du contrat.");
+        verifierGrille(c, salaire, dateEffet);
+        remunerer(c, dateEffet, salaire);
+        return c;
+    }
+
+    private void remunerer(Contrat c, LocalDate dateEffet, java.math.BigDecimal salaire) {
+        s5.itu.projetgestion.model.contrat.ContratRemuneration r = new s5.itu.projetgestion.model.contrat.ContratRemuneration();
+        r.setContrat(c);
+        r.setDateEffet(dateEffet);
+        r.setSalaire(salaire.doubleValue());
+        r.setEchelon(c.getAffectation().getPoste().getEchelon());
+        remunerationRepo.save(r);
     }
 
     private String genererReference() {
