@@ -70,15 +70,8 @@ public class ContratController {
 
     private void exigerRHouDG(HttpSession session) {
         SessionUser su = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
-        if (su == null || !su.hasRole("RH") || !su.hasRole("DG"))
-            throw new AccesRefuseException("Action réservée au rôle RH.");
-    }
-
-    @PostMapping("/{id}/renouveler")
-    public ContratDto renouveler(@PathVariable Integer id,
-            @RequestBody RenouvellementRequest req, HttpSession session) {
-        exigerRHouDG(session);
-        return service.renouveler(id, req);
+        if (su == null || (!su.hasRole("RH") && !su.hasRole("DG")))
+            throw new AccesRefuseException("Action réservée aux rôles RH et DG.");
     }
 
     @GetMapping("/types")

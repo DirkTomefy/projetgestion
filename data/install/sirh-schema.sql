@@ -12,7 +12,7 @@ CREATE SCHEMA public;
 SET search_path = public;
 
 -- ---------------------------------------------------------------------
--- Tables (51)
+-- Tables (52)
 -- ---------------------------------------------------------------------
 
 CREATE TABLE affectation (
@@ -212,6 +212,22 @@ CREATE TABLE etat_contrat (
     CONSTRAINT etat_contrat_statut_check CHECK (((statut)::text = ANY ((ARRAY['CREE', 'VALIDE', 'SIGNE', 'TERMINE', 'ANNULE'])::text[])))
 );
 
+CREATE TABLE fiche_poste (
+    id SERIAL,
+    id_metier integer,
+    id_poste integer,
+    mission text NOT NULL,
+    activites text,
+    formation text,
+    experience text,
+    competences text,
+    conditions text,
+    version integer DEFAULT 1 NOT NULL,
+    date_maj TIMESTAMP DEFAULT now() NOT NULL,
+    id_auteur integer,
+    CONSTRAINT ck_fiche_poste_portee CHECK (((id_metier IS NOT NULL) <> (id_poste IS NOT NULL)))
+);
+
 CREATE TABLE grille_salariale (
     id SERIAL,
     date_effectif date NOT NULL,
@@ -313,6 +329,7 @@ CREATE TABLE offre_emploi (
     motif_cloture VARCHAR(20),
     id_user_cloture integer,
     id_poste integer,
+    id_fiche_poste integer,
     CONSTRAINT ck_offre_emploi_motif_cloture CHECK (((motif_cloture IS NULL) OR ((motif_cloture)::text = ANY ((ARRAY['DATE_LIMITE', 'POSTES_POURVUS', 'MANUELLE'])::text[])))),
     CONSTRAINT offre_emploi_etat_check CHECK (((etat)::text = ANY ((ARRAY['BROUILLON', 'PUBLIEE', 'CLOTUREE'])::text[])))
 );
@@ -607,6 +624,9 @@ ALTER TABLE employe
 ALTER TABLE etat_contrat
     ADD CONSTRAINT etat_contrat_pkey PRIMARY KEY (id);
 
+ALTER TABLE fiche_poste
+    ADD CONSTRAINT fiche_poste_pkey PRIMARY KEY (id);
+
 ALTER TABLE grille_salariale_details
     ADD CONSTRAINT grille_salariale_details_id_grille_id_categorie_id_echelon_key UNIQUE (id_grille, id_categorie, id_echelon);
 
@@ -789,6 +809,10 @@ CREATE UNIQUE INDEX uq_document_candidat ON document_candidat USING btree (id_ca
 
 CREATE UNIQUE INDEX ux_candidat_email ON candidat USING btree (lower((email)::text));
 
+CREATE UNIQUE INDEX ux_fiche_poste_metier ON fiche_poste USING btree (id_metier) WHERE (id_metier IS NOT NULL);
+
+CREATE UNIQUE INDEX ux_fiche_poste_poste ON fiche_poste USING btree (id_poste) WHERE (id_poste IS NOT NULL);
+
 CREATE UNIQUE INDEX ux_onboarding_contrat ON onboarding USING btree (id_contrat);
 
 CREATE UNIQUE INDEX ux_proposition_candidature_en_cours ON proposition_embauche USING btree (id_candidature) WHERE ((id_statut_actuel)::text = ANY ((ARRAY['PROPOSER', 'ACCEPTER'])::text[]));
@@ -924,6 +948,15 @@ ALTER TABLE employe
 ALTER TABLE etat_contrat
     ADD CONSTRAINT etat_contrat_id_contrat_fkey FOREIGN KEY (id_contrat) REFERENCES contrat(id) DEFERRABLE;
 
+ALTER TABLE fiche_poste
+    ADD CONSTRAINT fiche_poste_id_auteur_fkey FOREIGN KEY (id_auteur) REFERENCES "user"(id) DEFERRABLE;
+
+ALTER TABLE fiche_poste
+    ADD CONSTRAINT fiche_poste_id_metier_fkey FOREIGN KEY (id_metier) REFERENCES metier(id) DEFERRABLE;
+
+ALTER TABLE fiche_poste
+    ADD CONSTRAINT fiche_poste_id_poste_fkey FOREIGN KEY (id_poste) REFERENCES poste(id) DEFERRABLE;
+
 ALTER TABLE besoin_poste
     ADD CONSTRAINT fk_besoin_poste_candidature FOREIGN KEY (id_candidature_retenue) REFERENCES candidatures(id) DEFERRABLE;
 
@@ -980,6 +1013,9 @@ ALTER TABLE offre_emploi
 
 ALTER TABLE offre_emploi
     ADD CONSTRAINT offre_emploi_id_document_fkey FOREIGN KEY (id_document) REFERENCES document(id) DEFERRABLE;
+
+ALTER TABLE offre_emploi
+    ADD CONSTRAINT offre_emploi_id_fiche_poste_fkey FOREIGN KEY (id_fiche_poste) REFERENCES fiche_poste(id) DEFERRABLE;
 
 ALTER TABLE offre_emploi
     ADD CONSTRAINT offre_emploi_id_poste_fkey FOREIGN KEY (id_poste) REFERENCES poste(id) DEFERRABLE;

@@ -28,6 +28,7 @@ public class ContratPdfService {
 
 	private static final String TEMPLATE = "contrat/modele-contrat";
 	private static final String TYPE_DOCUMENT_CONTRAT = "CONTRAT";
+	private static final String RAISON_SOCIALE = "Gestion RH";
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	private final ITemplateEngine templateEngine;
@@ -99,7 +100,41 @@ public class ContratPdfService {
 		variables.put("poste", contrat.getAffectation().getPoste());
 		variables.put("unite", contrat.getAffectation().getPoste().getUniteOrga());
 		variables.put("reference", contrat.getReference());
+		variables.put("raisonSociale", RAISON_SOCIALE);
+		variables.put("typeCode", contrat.getType() != null ? contrat.getType().getLibelle() : "");
+		variables.put("renouvMax", contrat.getType() != null ? contrat.getType().getRenouvellementMax() : null);
+		variables.put("precedent", contrat.getContratPrecedent() != null ? contrat.getContratPrecedent().getReference() : null);
+		var poste = contrat.getAffectation().getPoste();
+		variables.put("metier", poste.getMetier() != null ? poste.getMetier().getLibelle() : null);
+		variables.put("superieur", poste.getSuperieurDirect() != null ? poste.getSuperieurDirect().getLibelle() : null);
+
+		// conditions convenues : horaire et lieu ont leur article, le reste est listé ; salaire, date et type sont déjà dans le contrat
+		String horaire = null, lieu = null;
+		List<String> autres = new java.util.ArrayList<>();
+		for (ContratDetail d : details) {
+			String code = d.getPointCondition().getLibelle();
+			String val = d.getValeur() == null ? "" : d.getValeur().trim();
+			if (val.isEmpty()) continue;
+			switch (code) {
+				case "HORAIRE" -> horaire = val;
+				case "LIEU" -> lieu = val;
+				case "CONDITIONS" -> autres.add(val);
+				default -> { }   // SALAIRE, DATE_DEBUT, TYPE_CONTRAT
+			}
+		}
+		variables.put("horaire", horaire);
+		variables.put("lieu", lieu);
+		variables.put("autres", autres);
+		variables.put("salaire", remunerations.isEmpty() ? "-" : montant(remunerations.get(0).getSalaire()));
 		return variables;
+	}
+
+	/** Montant en ariary, séparateur de milliers espace : « 1 200 000 Ar ». */
+	static String montant(Double valeur) {
+		if (valeur == null) return "-";
+		java.text.DecimalFormatSymbols sym = new java.text.DecimalFormatSymbols(java.util.Locale.FRANCE);
+		sym.setGroupingSeparator(' ');
+		return new java.text.DecimalFormat("#,##0", sym).format(valeur) + " Ar";
 	}
 
 	private String formatDate(LocalDate date) {
