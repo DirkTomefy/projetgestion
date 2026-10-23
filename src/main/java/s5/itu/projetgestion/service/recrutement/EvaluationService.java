@@ -30,11 +30,14 @@ public class EvaluationService {
     private final s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur;
     private final s5.itu.projetgestion.service.notification.NotificationService notifications;
     private final s5.itu.projetgestion.service.notification.CommunicationCandidatService communication;
+    private final ResponsableNiveauService responsables;
 
     public EvaluationService(s5.itu.projetgestion.service.notification.NotificationService notifications,
                              s5.itu.projetgestion.service.notification.CommunicationCandidatService communication,EvaluationRepository evaluationRepo, SelectionService selectionService,
                              HistoCandidatureService histoService,
-                             s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur) {
+                             s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur,
+                             ResponsableNiveauService responsables) {
+        this.responsables = responsables;
         this.notifications = notifications;
         this.communication = communication;
         this.postesUtilisateur = postesUtilisateur;
@@ -78,19 +81,26 @@ public class EvaluationService {
         if (e.estFaite()) {
             throw new CandidatureException(409, "Cette évaluation a déjà eu lieu");
         }
-        if (!evaluationRepo.existsPosteActif(req.idPosteResponsable())) {
+        // poste choisi par la RH, sinon celui que la règle du niveau désigne (ou déjà enregistré)
+        Integer idPoste = req.idPosteResponsable() != null ? req.idPosteResponsable()
+                : e.getIdPosteResponsable() != null ? e.getIdPosteResponsable()
+                : responsables.resoudre(e.getNiveau(), c.getIdOffreEmploi()).orElse(null);
+        if (idPoste == null) {
+            throw new CandidatureException(400, "Aucun poste responsable n'est défini pour ce niveau : choisissez-en un", "idPosteResponsable");
+        }
+        if (!evaluationRepo.existsPosteActif(idPoste)) {
             throw new CandidatureException(400, "Poste introuvable ou inactif", "idPosteResponsable");
         }
         java.time.LocalDate ancienneDate = e.getDatePrevue();
         Integer ancienPoste = e.getIdPosteResponsable();
         String ancienLibelle = e.getLibelle();
         e.setDatePrevue(req.datePrevue());
-        e.setIdPosteResponsable(req.idPosteResponsable());
+        e.setIdPosteResponsable(idPoste);
         e.setLibelle(req.libelle() == null || req.libelle().isBlank() ? null : req.libelle().trim());
         evaluationRepo.save(e);
-        boolean dejaPlanifiee = ancienPoste != null;
+        boolean dejaPlanifiee = ancienneDate != null;
         boolean dateChangee = !java.util.Objects.equals(ancienneDate, e.getDatePrevue());
-        boolean posteChange = !req.idPosteResponsable().equals(ancienPoste);
+        boolean posteChange = !idPoste.equals(ancienPoste);
         boolean libelleChange = !java.util.Objects.equals(ancienLibelle, e.getLibelle());
         if (dateChangee || posteChange || libelleChange) prevenirPlanification(e, c, dejaPlanifiee, dateChangee || libelleChange, posteChange || dateChangee);
         return selectionService.dossier(c.getId());

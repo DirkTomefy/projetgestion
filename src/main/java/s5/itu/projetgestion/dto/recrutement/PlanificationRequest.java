@@ -9,7 +9,7 @@ public record PlanificationRequest(
         @NotNull(message = "La date prévue est obligatoire")
         LocalDate datePrevue,
 
-        @NotNull(message = "Le poste responsable est obligatoire")
+        /** Facultatif : à défaut, le poste est celui que la règle du niveau désigne. */
         Integer idPosteResponsable,
 
         @Size(max = 255, message = "255 caractères au maximum")

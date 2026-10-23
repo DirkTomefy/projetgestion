@@ -20,5 +20,11 @@ public record NiveauSelectionRequest(
         @DecimalMax(value = "20", message = "Le score minimum est entre 0 et 20")
         BigDecimal scoreMin,
 
-        Integer idOffreEmploi) {
+        Integer idOffreEmploi,
+
+        /** SUPERIEUR, RESPONSABLE_UNITE, POSTE_FIXE ; absent = choix manuel à la planification. */
+        String responsableRegle,
+
+        /** Poste du niveau quand la règle est POSTE_FIXE. */
+        Integer idPosteResponsable) {
 }

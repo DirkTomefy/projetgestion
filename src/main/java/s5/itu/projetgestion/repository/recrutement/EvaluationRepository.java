@@ -40,6 +40,38 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Integer>
             """)
     List<PosteOptionRow> findPostesActifs();
 
+    /** Poste à pourvoir de l'offre (à défaut, l'unique poste de son besoin). */
+    @Query(nativeQuery = true, value = """
+            SELECT COALESCE(o.id_poste, (SELECT MIN(bp.id_poste) FROM besoin_poste bp WHERE bp.id_besoin = o.id_besoin))
+            FROM offre_emploi o WHERE o.id = :idOffre
+            """)
+    Integer findPosteAPourvoir(@Param("idOffre") Integer idOffre);
+
+    /** Supérieur direct actif d'un poste. */
+    @Query(nativeQuery = true, value = """
+            SELECT s.id FROM poste p JOIN poste s ON s.id = p.id_superieur_direct
+            WHERE p.id = :idPoste AND s.etat = 'ACTIF'
+            """)
+    Integer findSuperieurActif(@Param("idPoste") Integer idPoste);
+
+    /** Poste responsable de l'unité du poste, ou à défaut de la première unité parente qui en a un (autre que le poste lui-même). */
+    @Query(nativeQuery = true, value = """
+            WITH RECURSIVE u AS (
+                SELECT uo.id, uo.id_unite_mere, uo.id_poste_responsable, 0 AS niv
+                FROM unite_orga uo JOIN poste p ON p.id_unite_orga = uo.id WHERE p.id = :idPoste
+                UNION ALL
+                SELECT m.id, m.id_unite_mere, m.id_poste_responsable, u.niv + 1
+                FROM unite_orga m JOIN u ON m.id = u.id_unite_mere
+            )
+            SELECT u.id_poste_responsable FROM u JOIN poste r ON r.id = u.id_poste_responsable
+            WHERE r.etat = 'ACTIF' AND u.id_poste_responsable <> :idPoste
+            ORDER BY u.niv LIMIT 1
+            """)
+    Integer findResponsableUnite(@Param("idPoste") Integer idPoste);
+
+    @Query(nativeQuery = true, value = "SELECT libelle FROM poste WHERE id = :idPoste")
+    String findLibellePoste(@Param("idPoste") Integer idPoste);
+
     @Query(nativeQuery = true, value = "SELECT count(*) > 0 FROM poste WHERE id = :idPoste AND etat = 'ACTIF'")
     boolean existsPosteActif(@Param("idPoste") Integer idPoste);
 

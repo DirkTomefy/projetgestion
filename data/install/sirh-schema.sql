@@ -514,7 +514,10 @@ CREATE TABLE workflow_candidature (
     type_evaluation VARCHAR(100) NOT NULL,
     score_min numeric(5,2),
     id_offre_emploi integer,
+    responsable_regle VARCHAR(30),
+    id_poste_responsable integer,
     CONSTRAINT ck_workflow_candidature_ordre CHECK ((ordre > 0)),
+    CONSTRAINT ck_workflow_candidature_regle CHECK (((responsable_regle IS NULL) OR ((responsable_regle)::text = ANY ((ARRAY['SUPERIEUR', 'RESPONSABLE_UNITE', 'POSTE_FIXE'])::text[])))),
     CONSTRAINT ck_workflow_candidature_score CHECK (((score_min IS NULL) OR ((score_min >= (0)::numeric) AND (score_min <= (20)::numeric)))),
     CONSTRAINT ck_workflow_candidature_type CHECK (((type_evaluation)::text = ANY ((ARRAY['TEST', 'ENTRETIEN_RH', 'ENTRETIEN_CHEF_DEPARTEMENT', 'ENTRETIEN_DIRECTION'])::text[])))
 );
@@ -1112,6 +1115,9 @@ ALTER TABLE validation
 
 ALTER TABLE workflow_candidature
     ADD CONSTRAINT workflow_candidature_id_offre_emploi_fkey FOREIGN KEY (id_offre_emploi) REFERENCES offre_emploi(id) DEFERRABLE;
+
+ALTER TABLE workflow_candidature
+    ADD CONSTRAINT workflow_candidature_id_poste_responsable_fkey FOREIGN KEY (id_poste_responsable) REFERENCES poste(id) DEFERRABLE;
 
 ALTER TABLE workflow_onboarding_details
     ADD CONSTRAINT workflow_onboarding_details_id_poste_responsable_fkey FOREIGN KEY (id_poste_responsable) REFERENCES poste(id) DEFERRABLE;

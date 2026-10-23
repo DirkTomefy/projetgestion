@@ -32,10 +32,12 @@ public class SelectionService {
     private final EvaluationRepository evaluationRepo;
     private final NiveauSelectionService niveauService;
     private final HistoCandidatureService histoService;
+    private final ResponsableNiveauService responsables;
 
     public SelectionService(CandidatureRepository candidatureRepo, TraitementRepository traitementRepo,
                             EvaluationRepository evaluationRepo, NiveauSelectionService niveauService,
-                            HistoCandidatureService histoService) {
+                            HistoCandidatureService histoService, ResponsableNiveauService responsables) {
+        this.responsables = responsables;
         this.candidatureRepo = candidatureRepo;
         this.traitementRepo = traitementRepo;
         this.evaluationRepo = evaluationRepo;
@@ -81,6 +83,8 @@ public class SelectionService {
             Evaluation e = new Evaluation();
             e.setTraitement(t);
             e.setNiveau(n);
+            // poste responsable désigné par la règle du niveau (vide : la RH le choisira à la planification)
+            responsables.resoudre(n, c.getIdOffreEmploi()).ifPresent(e::setIdPosteResponsable);
             evaluationRepo.save(e);
         }
         histoService.changerEtat(c, Candidature.ETAT_PRESELECTIONNER, idUser, commentaire);

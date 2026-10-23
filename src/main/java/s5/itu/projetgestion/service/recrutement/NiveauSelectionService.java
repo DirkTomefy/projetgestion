@@ -22,9 +22,11 @@ public class NiveauSelectionService {
     private final NiveauSelectionRepository niveauRepo;
     private final EvaluationRepository evaluationRepo;
     private final OffreEmploiRepository offreRepo;
+    private final ResponsableNiveauService responsables;
 
     public NiveauSelectionService(NiveauSelectionRepository niveauRepo, EvaluationRepository evaluationRepo,
-                                  OffreEmploiRepository offreRepo) {
+                                  OffreEmploiRepository offreRepo, ResponsableNiveauService responsables) {
+        this.responsables = responsables;
         this.niveauRepo = niveauRepo;
         this.evaluationRepo = evaluationRepo;
         this.offreRepo = offreRepo;
@@ -34,11 +36,11 @@ public class NiveauSelectionService {
     @Transactional(readOnly = true)
     public NiveauxSelectionDto lister(Integer idOffre) {
         if (idOffre == null) {
-            return new NiveauxSelectionDto(null, false, versDto(niveauRepo.findByIdOffreEmploiIsNullOrderByOrdreAsc()));
+            return new NiveauxSelectionDto(null, false, versDto(niveauRepo.findByIdOffreEmploiIsNullOrderByOrdreAsc(), null));
         }
         verifierOffre(idOffre);
         List<NiveauSelection> propres = niveauRepo.findByIdOffreEmploiOrderByOrdreAsc(idOffre);
-        return new NiveauxSelectionDto(idOffre, !propres.isEmpty(), versDto(applicables(idOffre)));
+        return new NiveauxSelectionDto(idOffre, !propres.isEmpty(), versDto(applicables(idOffre), idOffre));
     }
 
     /** Niveaux qui s'appliquent aux candidatures d'une offre, dans l'ordre. */
@@ -60,7 +62,13 @@ public class NiveauSelectionService {
 
     public NiveauSelectionDto modifier(Integer id, NiveauSelectionRequest req) {
         NiveauSelection n = trouver(id);
-        verifierNonUtilise(n);
+        // un niveau déjà utilisé garde son ordre, son type et son score ; seule la règle du poste responsable
+        // peut changer (elle ne vaut que pour les prochaines présélections)
+        boolean memeNiveau = n.getOrdre().equals(req.ordre())
+                && n.getTypeEvaluation().equalsIgnoreCase(req.typeEvaluation() == null ? "" : req.typeEvaluation().trim())
+                && (n.getScoreMin() == null ? req.scoreMin() == null
+                    : req.scoreMin() != null && n.getScoreMin().compareTo(req.scoreMin()) == 0);
+        if (!memeNiveau) verifierNonUtilise(n);
         remplir(n, req);
         return versDto(niveauRepo.save(n));
     }
@@ -83,6 +91,8 @@ public class NiveauSelectionService {
             copie.setOrdre(commun.getOrdre());
             copie.setTypeEvaluation(commun.getTypeEvaluation());
             copie.setScoreMin(commun.getScoreMin());
+            copie.setResponsableRegle(commun.getResponsableRegle());
+            copie.setIdPosteResponsable(commun.getIdPosteResponsable());
             niveauRepo.save(copie);
         }
         return lister(idOffre);
@@ -111,6 +121,21 @@ public class NiveauSelectionService {
         n.setOrdre(req.ordre());
         n.setTypeEvaluation(type);
         n.setScoreMin(req.scoreMin());
+
+        String regle = req.responsableRegle() == null || req.responsableRegle().isBlank() ? null : req.responsableRegle().trim().toUpperCase();
+        if (regle != null && !NiveauSelection.REGLES.contains(regle)) {
+            throw new CandidatureException(400, "Règle inconnue (attendu : " + String.join(", ", NiveauSelection.REGLES) + ")",
+                    "responsableRegle");
+        }
+        Integer fixe = null;
+        if (NiveauSelection.REGLE_POSTE_FIXE.equals(regle)) {
+            fixe = req.idPosteResponsable();
+            if (fixe == null || !evaluationRepo.existsPosteActif(fixe)) {
+                throw new CandidatureException(400, "Choisissez un poste actif pour ce niveau", "idPosteResponsable");
+            }
+        }
+        n.setResponsableRegle(regle);
+        n.setIdPosteResponsable(fixe);
     }
 
     private List<NiveauSelection> groupe(Integer idOffre) {
@@ -136,12 +161,20 @@ public class NiveauSelectionService {
         }
     }
 
-    private List<NiveauSelectionDto> versDto(List<NiveauSelection> niveaux) {
-        return niveaux.stream().map(this::versDto).toList();
+    private List<NiveauSelectionDto> versDto(List<NiveauSelection> niveaux, Integer idOffre) {
+        return niveaux.stream().map(n -> versDto(n, idOffre)).toList();
     }
 
     private NiveauSelectionDto versDto(NiveauSelection n) {
+        return versDto(n, n.getIdOffreEmploi());
+    }
+
+    /** idOffre : offre pour laquelle on affiche le poste que la règle désigne (null pour les niveaux communs). */
+    private NiveauSelectionDto versDto(NiveauSelection n, Integer idOffre) {
         return new NiveauSelectionDto(n.getId(), n.getOrdre(), n.getTypeEvaluation(), n.getScoreMin(),
-                n.getIdOffreEmploi(), evaluationRepo.existsByNiveau_Id(n.getId()));
+                n.getIdOffreEmploi(), evaluationRepo.existsByNiveau_Id(n.getId()),
+                n.getResponsableRegle(), n.getIdPosteResponsable(),
+                n.getIdPosteResponsable() == null ? null : evaluationRepo.findLibellePoste(n.getIdPosteResponsable()),
+                idOffre == null ? null : responsables.apercu(n, idOffre));
     }
 }
