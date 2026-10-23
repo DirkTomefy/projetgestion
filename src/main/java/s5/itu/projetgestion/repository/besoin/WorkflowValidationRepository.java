@@ -15,4 +15,8 @@ public interface WorkflowValidationRepository extends JpaRepository<WorkflowVali
     List<WorkflowValidation> findByOrdre(Integer ordre);
 
 
+
+    List<WorkflowValidation> findAllByOrderByOrdreAscIdAsc();
+
+    boolean existsByPosteIdAndOrdreAndIdNot(Integer idPoste, Integer ordre, Integer id);
 }

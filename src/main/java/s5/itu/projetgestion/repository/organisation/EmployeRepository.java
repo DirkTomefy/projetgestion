@@ -10,4 +10,6 @@ public interface EmployeRepository extends JpaRepository<Employe, Integer> {
     Long getNextSequenceValue();
 
     boolean existsByMatricule(String matricule);
+
+    java.util.Optional<s5.itu.projetgestion.model.organisation.Employe> findByMatriculeIgnoreCase(String matricule);
 }

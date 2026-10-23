@@ -24,4 +24,11 @@ public interface BesoinRepository extends JpaRepository<Besoin, Integer> {
 	long countByReferenceStartingWith(String prefix);
 
 	boolean existsByReference(String reference);
+
+	@Query("""
+			SELECT b FROM Besoin b
+			JOIN FETCH b.motif JOIN FETCH b.uniteOrga JOIN FETCH b.user
+			ORDER BY b.id DESC
+			""")
+	java.util.List<Besoin> findAllAvecRelations();
 }

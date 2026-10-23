@@ -41,8 +41,8 @@ public class EmployeController {
 
     private static void exigerRh(HttpSession session) {
         SessionUser su = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
-        if (su == null || !su.hasRole("RH")) {
-            throw new AccesRefuseException("Consultation du personnel réservée au rôle RH");
+        if (su == null || !(su.hasRole("RH") || su.hasRole("DG") || su.hasRole("ADMIN"))) {
+            throw new AccesRefuseException("Consultation du personnel réservée à la RH, au DG et à l'administrateur");
         }
     }
 }

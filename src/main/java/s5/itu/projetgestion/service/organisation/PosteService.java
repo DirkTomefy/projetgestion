@@ -32,12 +32,15 @@ public class PosteService {
     private final CategorieMetierRepository categorieRepository;
     private final EchelonMetierRepository echelonRepository;
     private final UniteOrgaRepository uniteRepository;
+    private final s5.itu.projetgestion.repository.besoin.BesoinPosteRepository besoinPosteRepository;
 
     public PosteService(PosteRepository posteRepository,
             MetierRepository metierRepository,
             CategorieMetierRepository categorieRepository,
             EchelonMetierRepository echelonRepository,
-            UniteOrgaRepository uniteRepository) {
+            UniteOrgaRepository uniteRepository,
+            s5.itu.projetgestion.repository.besoin.BesoinPosteRepository besoinPosteRepository) {
+        this.besoinPosteRepository = besoinPosteRepository;
         this.posteRepository = posteRepository;
         this.metierRepository = metierRepository;
         this.categorieRepository = categorieRepository;
@@ -73,6 +76,11 @@ public class PosteService {
         if (!"PROPOSE".equals(poste.getEtat())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Le poste n'est plus à l'état PROPOSE (état actuel : " + poste.getEtat() + ").");
+        }
+        // un poste proposé dans un besoin est validé (ou refusé) avec ce besoin, par son circuit de validation
+        if (besoinPosteRepository.existsByPosteIdAndEtatIn(id, java.util.List.of("EN_ATTENTE"))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ce poste a été demandé dans un besoin : il sera activé ou refusé avec la décision sur ce besoin.");
         }
 
         poste.setEtat(nouvelEtat);

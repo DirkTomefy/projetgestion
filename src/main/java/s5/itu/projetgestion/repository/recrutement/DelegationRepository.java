@@ -13,4 +13,11 @@ public interface DelegationRepository extends JpaRepository<Delegation, Integer>
 
     List<Delegation> findByUserDelegueAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
             User userDelegue, LocalDate date, LocalDate sameDate);
+
+    @org.springframework.data.jpa.repository.Query("""
+        select d from Delegation d join fetch d.userDelegant join fetch d.userDelegue
+        where (:idUser = 0 or d.userDelegant.id = :idUser or d.userDelegue.id = :idUser)
+        order by d.dateDebut desc, d.id desc
+        """)
+    List<Delegation> rechercher(@org.springframework.data.repository.query.Param("idUser") Integer idUser);
 }
