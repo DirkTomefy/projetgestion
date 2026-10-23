@@ -31,20 +31,28 @@ public interface BesoinOffreRepository extends Repository<Besoin, Integer> {
         String getEchelon();
         BigDecimal getMontantMin();
         BigDecimal getMontantMax();
+        Integer getIdPoste();
+        Integer getAPourvoir();
     }
 
+    /**
+     * Une ligne par poste demandé dans le besoin : effectif = nombre de places pour ce poste,
+     * aPourvoir = places encore ouvertes ; fourchette de la grille validée en vigueur.
+     */
     String SELECT = """
-        SELECT b.id AS "id", b.reference AS "reference", b.type_besoin AS "typeBesoin", b.effectif AS "effectif",
+        SELECT b.id AS "id", b.reference AS "reference", b.type_besoin AS "typeBesoin", cast(bp.nb AS integer) AS "effectif",
                b.date_souhaitee AS "dateSouhaitee", b.etat_actuel AS "etatActuel", b.precision_motif AS "precisionMotif",
                m.libelle AS "motif", u.libelle AS "unite", u.type AS "uniteType",
                p.libelle AS "poste", me.libelle AS "metier", c.libelle AS "categorie", e.libelle AS "echelon",
-               gd.montant_min AS "montantMin", gd.montant_max AS "montantMax"
+               gd.montant_min AS "montantMin", gd.montant_max AS "montantMax",
+               p.id AS "idPoste", cast(bp.ouverts AS integer) AS "aPourvoir"
         FROM besoin b
         JOIN motif m      ON m.id = b.id_motif
         JOIN unite_orga u ON u.id = b.id_unite_orga
-        LEFT JOIN LATERAL (SELECT bp.id_poste FROM besoin_poste bp
-                           WHERE bp.id_besoin = b.id ORDER BY bp.id LIMIT 1) bp ON TRUE
-        LEFT JOIN poste p            ON p.id = bp.id_poste
+        JOIN (SELECT id_besoin, id_poste, count(*) AS nb, MIN(id) AS ordre,
+                     count(*) FILTER (WHERE etat NOT IN ('POURVU', 'ANNULE')) AS ouverts
+              FROM besoin_poste GROUP BY id_besoin, id_poste) bp ON bp.id_besoin = b.id
+        JOIN poste p                 ON p.id = bp.id_poste
         LEFT JOIN metier me          ON me.id = p.id_metier
         LEFT JOIN categorie_metier c ON c.id = me.id_categorie
         LEFT JOIN echelon_metier e   ON e.id = p.id_echelon
@@ -58,9 +66,17 @@ public interface BesoinOffreRepository extends Repository<Besoin, Integer> {
             ORDER BY g.date_effectif DESC LIMIT 1) gd ON TRUE
         """;
 
-    @Query(value = SELECT + " WHERE b.id = :id", nativeQuery = true)
-    Optional<BesoinOffreRow> findInfo(@Param("id") Integer id);
+    /** Postes demandés par un besoin, dans l'ordre de la demande. */
+    @Query(value = SELECT + " WHERE b.id = :id ORDER BY bp.ordre", nativeQuery = true)
+    List<BesoinOffreRow> findPostes(@Param("id") Integer id);
 
-    @Query(value = SELECT + " WHERE b.etat_actuel IN ('RECRUTEMENT_OUVERT', 'OUVERT') ORDER BY b.id DESC", nativeQuery = true)
+    /** Postes de besoins ouverts qui ont encore des places à pourvoir et pas d'offre en cours. */
+    @Query(value = SELECT + """
+         WHERE b.etat_actuel IN ('RECRUTEMENT_OUVERT', 'OUVERT') AND bp.ouverts > 0
+           AND NOT EXISTS (SELECT 1 FROM offre_emploi o
+                           WHERE o.id_besoin = b.id AND o.etat IN ('BROUILLON', 'PUBLIEE')
+                             AND (o.id_poste IS NULL OR o.id_poste = bp.id_poste))
+         ORDER BY b.id DESC, bp.ordre
+        """, nativeQuery = true)
     List<BesoinOffreRow> findRecrutementOuvert();
 }

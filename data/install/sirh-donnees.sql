@@ -116,15 +116,15 @@ INSERT INTO affectation (id, id_poste, id_employe, date_debut, date_fin) VALUES 
 INSERT INTO motif (id, libelle) VALUES (1, 'Test P5 - Surcroit d''activite');
 
 -- user (9)
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (1, 'manager.dev', 'hash_demo_manager_dev', 8, 'ACTIF', NULL, 'Mamy Razafimalala', '2026-10-23 06:21:03.996657', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (2, 'manager.compta', 'hash_demo_manager_compta', 5, 'ACTIF', NULL, 'Tojo Rakotondrabe', '2026-10-23 06:21:03.996657', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (3, 'rh.drh', 'hash_demo_rh', 18, 'ACTIF', NULL, 'Hasina Andrianjafy', '2026-10-23 06:21:03.996657', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (4, 'finance.daf', 'hash_demo_finance', 2, 'ACTIF', NULL, 'Sarah Randriamampianina', '2026-10-23 06:21:03.996657', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (5, 'dg', 'hash_demo_dg', 1, 'ACTIF', NULL, 'Jean Michel Rakoto', '2026-10-23 06:21:03.996657', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (6, 'admin', 'hash_demo_admin', NULL, 'ACTIF', NULL, 'Administrateur SIRH', '2026-10-23 06:21:04.001422', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (7, 'systeme', '!', NULL, 'DESACTIVE', NULL, 'Contrôle automatique', '2026-10-23 06:21:04.002796', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (8, 'paie', 'hash_demo_paie', 17, 'ACTIF', NULL, 'Lanto Rakotoniaina', '2026-10-23 06:21:04.003276', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (9, 'support', 'hash_demo_support', 15, 'ACTIF', NULL, 'Aina Razanadrakoto', '2026-10-23 06:21:04.004449', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (1, 'manager.dev', 'hash_demo_manager_dev', 8, 'ACTIF', NULL, 'Mamy Razafimalala', '2026-10-23 09:53:22.262488', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (2, 'manager.compta', 'hash_demo_manager_compta', 5, 'ACTIF', NULL, 'Tojo Rakotondrabe', '2026-10-23 09:53:22.262488', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (3, 'rh.drh', 'hash_demo_rh', 18, 'ACTIF', NULL, 'Hasina Andrianjafy', '2026-10-23 09:53:22.262488', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (4, 'finance.daf', 'hash_demo_finance', 2, 'ACTIF', NULL, 'Sarah Randriamampianina', '2026-10-23 09:53:22.262488', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (5, 'dg', 'hash_demo_dg', 1, 'ACTIF', NULL, 'Jean Michel Rakoto', '2026-10-23 09:53:22.262488', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (6, 'admin', 'hash_demo_admin', NULL, 'ACTIF', NULL, 'Administrateur SIRH', '2026-10-23 09:53:22.26813', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (7, 'systeme', '!', NULL, 'DESACTIVE', NULL, 'Contrôle automatique', '2026-10-23 09:53:22.269629', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (8, 'paie', 'hash_demo_paie', 17, 'ACTIF', NULL, 'Lanto Rakotoniaina', '2026-10-23 09:53:22.270084', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (9, 'support', 'hash_demo_support', 15, 'ACTIF', NULL, 'Aina Razanadrakoto', '2026-10-23 09:53:22.271665', NULL);
 
 -- besoin (5)
 INSERT INTO besoin (id, reference, type_besoin, id_motif, id_unite_orga, date_souhaitee, id_user, effectif, etat_actuel, budget_estime, precision_motif) VALUES (1, 'BES-TEST-P5-1', 'CREATION', 1, 4, '2026-12-07', 3, 2, 'OUVERT', NULL, NULL);
@@ -157,12 +157,13 @@ INSERT INTO type_contrat (id, libelle, duree_max, renouvellement_max) VALUES (2,
 INSERT INTO type_contrat (id, libelle, duree_max, renouvellement_max) VALUES (1, 'CE', 6, 2);
 INSERT INTO type_contrat (id, libelle, duree_max, renouvellement_max) VALUES (3, 'CDD', 24, 1);
 
--- offre_emploi (5)
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture) VALUES (1, 1, 'OFF-TEST-P5-1', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture) VALUES (2, 2, 'OFF-TEST-P5-2', NULL, '2026-10-21', '2026-10-23', NULL, 'PUBLIEE', NULL, NULL, NULL);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture) VALUES (3, 3, 'OFF-TEST-P5-3', 2, '2026-09-23', '2026-10-22', NULL, 'PUBLIEE', NULL, NULL, NULL);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture) VALUES (4, 4, 'OFF-TEST-P5-4', 3, NULL, '2026-11-02', NULL, 'BROUILLON', NULL, NULL, NULL);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture) VALUES (5, 5, 'OFF-TEST-P5-5', 3, '2026-10-26', '2026-11-22', NULL, 'PUBLIEE', NULL, NULL, NULL);
+-- offre_emploi (6)
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (2, 2, 'OFF-TEST-P5-2', NULL, '2026-10-21', '2026-10-23', NULL, 'PUBLIEE', NULL, NULL, NULL, 9);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (3, 3, 'OFF-TEST-P5-3', 2, '2026-09-23', '2026-10-22', NULL, 'PUBLIEE', NULL, NULL, NULL, 14);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (4, 4, 'OFF-TEST-P5-4', 3, NULL, '2026-11-02', NULL, 'BROUILLON', NULL, NULL, NULL, 17);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (5, 5, 'OFF-TEST-P5-5', 3, '2026-10-26', '2026-11-22', NULL, 'PUBLIEE', NULL, NULL, NULL, 10);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (6, 1, 'OFF-TEST-P5-1-2', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL, 7);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (1, 1, 'OFF-TEST-P5-1', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL, 6);
 
 -- candidatures (3)
 INSERT INTO candidatures (id, id_candidat, id_offre_emploi, date_depot, etat) VALUES (1, 1, 1, '2026-10-21', 'DEPOSEE');
@@ -179,20 +180,40 @@ INSERT INTO besoin_poste (id, id_besoin, id_poste, etat, id_candidature_retenue,
 
 -- budget_unite (10)
 INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (1, 1, 2026, 500000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (2, 2, 2026, 120000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (3, 3, 2026, 90000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (4, 4, 2026, 60000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
 INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (5, 5, 2026, 200000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (6, 6, 2026, 110000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (7, 7, 2026, 70000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (8, 8, 2026, 40000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
 INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (9, 9, 2026, 25000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
-INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (10, 10, 2026, 35000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (2, 2, 2026, 130000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (3, 3, 2026, 180000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (4, 4, 2026, 130000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (6, 6, 2026, 260000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (7, 7, 2026, 130000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (8, 8, 2026, 90000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
+INSERT INTO budget_unite (id, id_unite_orga, exercice, montant, montant_propose, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (10, 10, 2026, 100000000.00, NULL, 'VALIDE', NULL, NULL, NULL, NULL);
 
 -- type_information (3)
 INSERT INTO type_information (id, libelle) VALUES (1, 'EXPERIENCE PRO');
 INSERT INTO type_information (id, libelle) VALUES (2, 'EDUCATION');
 INSERT INTO type_information (id, libelle) VALUES (3, 'QUALITE');
+
+-- contrat (18)
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (1, 'CTR-REP-EMP-2026-001', 1, NULL, 2, '2026-01-02', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (2, 'CTR-REP-EMP-2026-002', 2, NULL, 2, '2026-01-05', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (3, 'CTR-REP-EMP-2026-003', 3, NULL, 2, '2026-01-05', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (4, 'CTR-REP-EMP-2026-004', 4, NULL, 2, '2026-01-10', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (5, 'CTR-REP-EMP-2026-005', 5, NULL, 2, '2026-01-12', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (6, 'CTR-REP-EMP-2026-006', 6, NULL, 3, '2026-01-15', '2028-01-14', NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (7, 'CTR-REP-EMP-2026-007', 7, NULL, 2, '2026-01-15', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (8, 'CTR-REP-EMP-2026-008', 8, NULL, 2, '2026-01-20', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (9, 'CTR-REP-EMP-2026-009', 9, NULL, 3, '2026-01-22', '2028-01-21', NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (10, 'CTR-REP-EMP-2026-010', 10, NULL, 2, '2026-01-22', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (11, 'CTR-REP-EMP-2026-011', 11, NULL, 2, '2026-01-25', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (12, 'CTR-REP-EMP-2026-012', 12, NULL, 2, '2026-01-25', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (13, 'CTR-REP-EMP-2026-013', 13, NULL, 2, '2026-02-01', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (14, 'CTR-REP-EMP-2026-014', 14, NULL, 2, '2026-02-03', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (15, 'CTR-REP-EMP-2026-015', 15, NULL, 3, '2026-02-03', '2028-02-02', NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (16, 'CTR-REP-EMP-2026-016', 16, NULL, 2, '2026-02-05', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (17, 'CTR-REP-EMP-2026-017', 17, NULL, 2, '2026-02-05', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
+INSERT INTO contrat (id, reference, id_affectation, id_proposition, id_type, date_debut, date_fin_prevue, date_fin_effective, statut_actuel, id_contrat_precedent, id_document, motif_fin) VALUES (18, 'CTR-REP-EMP-2026-018', 18, NULL, 2, '2026-02-10', NULL, NULL, 'SIGNE', NULL, NULL, NULL);
 
 -- point_condition (6)
 INSERT INTO point_condition (id, libelle) VALUES (1, 'SALAIRE');
@@ -201,6 +222,82 @@ INSERT INTO point_condition (id, libelle) VALUES (3, 'HORAIRE');
 INSERT INTO point_condition (id, libelle) VALUES (4, 'LIEU');
 INSERT INTO point_condition (id, libelle) VALUES (5, 'CONDITIONS');
 INSERT INTO point_condition (id, libelle) VALUES (6, 'TYPE_CONTRAT');
+
+-- contrat_remuneration (18)
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (1, 11, '2026-01-25', 3400000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (2, 17, '2026-02-05', 2500000.00, 2);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (3, 12, '2026-01-25', 8000000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (4, 10, '2026-01-22', 2300000.00, 2);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (5, 18, '2026-02-10', 2600000.00, 2);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (6, 2, '2026-01-05', 8000000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (7, 15, '2026-02-03', 850000.00, 1);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (8, 13, '2026-02-01', 2600000.00, 2);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (9, 5, '2026-01-12', 3300000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (10, 8, '2026-01-20', 8400000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (11, 6, '2026-01-15', 1700000.00, 1);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (12, 16, '2026-02-05', 3400000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (13, 4, '2026-01-10', 8800000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (14, 1, '2026-01-02', 7600000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (15, 3, '2026-01-05', 8400000.00, 3);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (16, 14, '2026-02-03', 2700000.00, 2);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (17, 9, '2026-01-22', 1850000.00, 1);
+INSERT INTO contrat_remuneration (id, id_contrat, date_effet, salaire, id_echelon) VALUES (18, 7, '2026-01-15', 2500000.00, 2);
+
+-- etat_contrat (54)
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (1, 11, 'CREE', '2026-01-25 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (2, 11, 'VALIDE', '2026-01-25 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (3, 11, 'SIGNE', '2026-01-25 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (4, 17, 'CREE', '2026-02-05 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (5, 17, 'VALIDE', '2026-02-05 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (6, 17, 'SIGNE', '2026-02-05 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (7, 12, 'CREE', '2026-01-25 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (8, 12, 'VALIDE', '2026-01-25 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (9, 12, 'SIGNE', '2026-01-25 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (10, 10, 'CREE', '2026-01-22 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (11, 10, 'VALIDE', '2026-01-22 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (12, 10, 'SIGNE', '2026-01-22 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (13, 18, 'CREE', '2026-02-10 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (14, 18, 'VALIDE', '2026-02-10 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (15, 18, 'SIGNE', '2026-02-10 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (16, 2, 'CREE', '2026-01-05 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (17, 2, 'VALIDE', '2026-01-05 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (18, 2, 'SIGNE', '2026-01-05 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (19, 15, 'CREE', '2026-02-03 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (20, 15, 'VALIDE', '2026-02-03 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (21, 15, 'SIGNE', '2026-02-03 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (22, 13, 'CREE', '2026-02-01 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (23, 13, 'VALIDE', '2026-02-01 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (24, 13, 'SIGNE', '2026-02-01 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (25, 5, 'CREE', '2026-01-12 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (26, 5, 'VALIDE', '2026-01-12 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (27, 5, 'SIGNE', '2026-01-12 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (28, 8, 'CREE', '2026-01-20 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (29, 8, 'VALIDE', '2026-01-20 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (30, 8, 'SIGNE', '2026-01-20 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (31, 6, 'CREE', '2026-01-15 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (32, 6, 'VALIDE', '2026-01-15 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (33, 6, 'SIGNE', '2026-01-15 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (34, 16, 'CREE', '2026-02-05 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (35, 16, 'VALIDE', '2026-02-05 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (36, 16, 'SIGNE', '2026-02-05 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (37, 4, 'CREE', '2026-01-10 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (38, 4, 'VALIDE', '2026-01-10 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (39, 4, 'SIGNE', '2026-01-10 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (40, 1, 'CREE', '2026-01-02 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (41, 1, 'VALIDE', '2026-01-02 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (42, 1, 'SIGNE', '2026-01-02 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (43, 3, 'CREE', '2026-01-05 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (44, 3, 'VALIDE', '2026-01-05 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (45, 3, 'SIGNE', '2026-01-05 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (46, 14, 'CREE', '2026-02-03 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (47, 14, 'VALIDE', '2026-02-03 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (48, 14, 'SIGNE', '2026-02-03 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (49, 9, 'CREE', '2026-01-22 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (50, 9, 'VALIDE', '2026-01-22 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (51, 9, 'SIGNE', '2026-01-22 10:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (52, 7, 'CREE', '2026-01-15 08:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (53, 7, 'VALIDE', '2026-01-15 09:00:00');
+INSERT INTO etat_contrat (id, id_contrat, statut, date) VALUES (54, 7, 'SIGNE', '2026-01-15 10:00:00');
 
 -- grille_salariale (1)
 INSERT INTO grille_salariale (id, date_effectif, date_fin, statut, id_user_propose, id_user_decision, date_decision, commentaire) VALUES (1, '2026-01-01', NULL, 'VALIDEE', NULL, NULL, NULL, NULL);
@@ -217,11 +314,11 @@ INSERT INTO grille_salariale_details (id, id_grille, id_categorie, id_echelon, m
 INSERT INTO grille_salariale_details (id, id_grille, id_categorie, id_echelon, montant_min, montant_max) VALUES (9, 1, 3, 3, 1300000.00, 1800000.00);
 
 -- histo_besoin (5)
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (1, 2, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 06:21:04.013697', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (2, 5, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 06:21:04.013697', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (3, 4, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 06:21:04.013697', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (4, 1, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 06:21:04.013697', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (5, 3, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 06:21:04.013697', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (1, 2, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (2, 5, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (3, 4, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (4, 1, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (5, 3, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
 
 -- histo_candidature (3)
 INSERT INTO histo_candidature (id, id_candidature, etat_avant, etat_apres, id_user, date_changement, commentaire) VALUES (1, 2, NULL, 'DEPOSEE', NULL, '2026-10-21 00:00:00', 'Dépôt de la candidature (données de test)');
@@ -280,15 +377,16 @@ SELECT setval('candidat_id_seq', 3, true);
 SELECT setval('candidatures_id_seq', 3, true);
 SELECT setval('categorie_metier_id_seq', 3, true);
 SELECT setval('contrat_details_id_seq', 1, false);
-SELECT setval('contrat_id_seq', 1, false);
-SELECT setval('contrat_remuneration_id_seq', 1, false);
+SELECT setval('contrat_id_seq', 18, true);
+SELECT setval('contrat_remuneration_id_seq', 18, true);
 SELECT setval('coordonnees_bancaires_id_seq', 1, false);
 SELECT setval('delegation_id_seq', 1, false);
+SELECT setval('demande_contrat_id_seq', 1, false);
 SELECT setval('document_candidat_id_seq', 1, false);
 SELECT setval('document_id_seq', 1, false);
 SELECT setval('echelon_metier_id_seq', 3, true);
 SELECT setval('employe_id_seq', 18, true);
-SELECT setval('etat_contrat_id_seq', 1, false);
+SELECT setval('etat_contrat_id_seq', 54, true);
 SELECT setval('grille_salariale_details_id_seq', 9, true);
 SELECT setval('grille_salariale_id_seq', 1, true);
 SELECT setval('histo_besoin_id_seq', 5, true);
@@ -298,7 +396,7 @@ SELECT setval('journal_audit_id_seq', 1, false);
 SELECT setval('metier_id_seq', 10, true);
 SELECT setval('motif_id_seq', 1, true);
 SELECT setval('notification_id_seq', 1, false);
-SELECT setval('offre_emploi_id_seq', 5, true);
+SELECT setval('offre_emploi_id_seq', 6, true);
 SELECT setval('onboarding_details_id_seq', 1, false);
 SELECT setval('onboarding_id_seq', 1, false);
 SELECT setval('personne_id_seq', 3, true);

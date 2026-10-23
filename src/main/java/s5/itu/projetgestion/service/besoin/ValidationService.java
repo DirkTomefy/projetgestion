@@ -130,14 +130,15 @@ public class ValidationService {
                 User systeme = userRepository.findByLogin(LOGIN_SYSTEME).orElse(null);
                 if (systeme == null) break;
                 enregistrerValidation(b, systeme, budget,
-                        "Validation automatique : coût annuel estimé " + format(cb.coutAnnuel()) + " ≤ budget " + format(cb.budget())
-                                + " (" + b.getUniteOrga().getLibelle() + ", " + cb.exercice() + ")",
+                        "Validation automatique : coût annuel estimé " + format(cb.coutAnnuel()) + " ≤ disponible " + format(cb.disponible())
+                                + " (" + b.getUniteOrga().getLibelle() + ", " + cb.exercice() + " : budget " + format(cb.budget())
+                                + ", masse salariale " + format(cb.masseSalariale()) + ", autres besoins " + format(cb.autresBesoins()) + ")",
                         HistoBesoinService.VALIDATION_AUTO);
                 continue;
             }
             for (WorkflowValidation e : etapes) {
                 String detail = "BUDGET".equals(e.getControle()) && cb.budget() != null
-                        ? " (hors budget : " + format(cb.coutAnnuel()) + " pour " + format(cb.budget()) + ")" : "";
+                        ? " (hors budget : " + format(cb.coutAnnuel()) + " pour un disponible de " + format(cb.disponible()) + ")" : "";
                 notificationService.notifierPoste(e.getPoste().getId(), NotificationService.VALIDATION_EN_ATTENTE,
                         "Le besoin " + b.getReference() + " (" + b.getUniteOrga().getLibelle() + ") attend votre validation" + detail,
                         "/besoins/" + b.getId());
@@ -173,7 +174,7 @@ public class ValidationService {
                 "Votre besoin " + b.getReference() + " est validé : le recrutement est ouvert.", "/besoins/" + b.getId());
         notificationService.notifierRole("RH", "BESOIN_VALIDE",
                 "Le besoin " + b.getReference() + " (" + b.getUniteOrga().getLibelle() + ") est validé : l'offre d'emploi peut être publiée.",
-                "/offres/nouvelle?idBesoin=" + b.getId());
+                "/offres/besoins");
     }
 
     // ------------------------------------------------------------------ consultation
@@ -200,16 +201,22 @@ public class ValidationService {
         }
     }
 
-    /** Coût annuel estimé du besoin comparé au budget de l'unité pour l'exercice de la date souhaitée. */
+    /**
+     * Coût annuel estimé du besoin comparé au disponible de l'unité pour l'exercice de la date souhaitée :
+     * budget validé − masse salariale annuelle des contrats en cours − coût des autres besoins en cours.
+     */
     @Transactional(readOnly = true)
     public ControleBudget controleBudget(Besoin b) {
         int exercice = (b.getDateSouhaitee() != null ? b.getDateSouhaitee() : LocalDate.now()).getYear();
         BigDecimal cout = b.getBudgetEstime() == null ? null : BigDecimal.valueOf(b.getBudgetEstime());
-        BigDecimal budget = budgetService.budget(b.getUniteOrga().getId(), exercice);
-        return new ControleBudget(exercice, cout, budget, cout != null && budget != null && cout.compareTo(budget) <= 0);
+        boolean compte = "EN_ATTENTE".equals(b.getEtatActuel()) || "OUVERT".equals(b.getEtatActuel());   // déjà dans les besoins en cours
+        BudgetService.Engagement eg = budgetService.engagement(b.getUniteOrga().getId(), exercice, compte ? cout : null);
+        return new ControleBudget(exercice, cout, eg.budget(), eg.masseSalariale(), eg.autresBesoins(), eg.disponible(),
+                cout != null && eg.disponible() != null && cout.compareTo(eg.disponible()) <= 0);
     }
 
-    public record ControleBudget(int exercice, BigDecimal coutAnnuel, BigDecimal budget, boolean dansLeBudget) { }
+    public record ControleBudget(int exercice, BigDecimal coutAnnuel, BigDecimal budget, BigDecimal masseSalariale,
+                                 BigDecimal autresBesoins, BigDecimal disponible, boolean dansLeBudget) { }
 
     // ------------------------------------------------------------------ autorisation
 

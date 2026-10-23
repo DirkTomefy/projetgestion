@@ -27,9 +27,12 @@ public class EvaluationService {
     private final EvaluationRepository evaluationRepo;
     private final SelectionService selectionService;
     private final HistoCandidatureService histoService;
+    private final s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur;
 
     public EvaluationService(EvaluationRepository evaluationRepo, SelectionService selectionService,
-                             HistoCandidatureService histoService) {
+                             HistoCandidatureService histoService,
+                             s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur) {
+        this.postesUtilisateur = postesUtilisateur;
         this.evaluationRepo = evaluationRepo;
         this.selectionService = selectionService;
         this.histoService = histoService;
@@ -45,10 +48,10 @@ public class EvaluationService {
     /** Évaluations à venir pour le poste actuel de l'utilisateur connecté. */
     @Transactional(readOnly = true)
     public MesEvaluationsDto mesEvaluations(SessionUser user) {
-        if (user.getIdEmploye() == null) {
+        List<Integer> postes = List.copyOf(postesUtilisateur.postesDe(user.getId()));   // postes occupés et délégués
+        if (user.getIdEmploye() == null && postes.isEmpty()) {
             return new MesEvaluationsDto(false, List.of());
         }
-        List<Integer> postes = evaluationRepo.findPostesActuels(user.getIdEmploye());
         if (postes.isEmpty()) {
             return new MesEvaluationsDto(true, List.of());
         }
@@ -80,7 +83,16 @@ public class EvaluationService {
         return selectionService.dossier(c.getId());
     }
 
-    /** Saisie du résultat par la RH ou par le titulaire du poste responsable. */
+    /** Postes au nom desquels l'utilisateur peut saisir des résultats (occupés ou délégués). */
+    @Transactional(readOnly = true)
+    public List<Integer> mesPostes(SessionUser user) {
+        return List.copyOf(postesUtilisateur.postesDe(user.getId()));
+    }
+
+    /**
+     * Saisie du résultat par le titulaire du poste responsable de l'évaluation (ou son délégué).
+     * La RH planifie mais ne saisit pas à la place de l'évaluateur, sauf quand l'évaluation est confiée à son poste.
+     */
     public SelectionDto saisirResultat(Integer idEvaluation, ResultatRequest req, SessionUser user) {
         Evaluation e = trouver(idEvaluation);
         Candidature c = e.getTraitement().getCandidature();
@@ -150,13 +162,11 @@ public class EvaluationService {
     }
 
     private void verifierDroitSaisie(Evaluation e, SessionUser user) {
-        if (user.hasRole(OffreEmploiService.ROLE_RH)) {
-            return;
+        if (e.getIdPosteResponsable() == null) {
+            throw new CandidatureException(409, "Planifiez d'abord cette évaluation : choisissez le poste qui la fera passer");
         }
-        boolean responsable = e.getIdPosteResponsable() != null && user.getIdEmploye() != null
-                && evaluationRepo.findPostesActuels(user.getIdEmploye()).contains(e.getIdPosteResponsable());
-        if (!responsable) {
-            throw new AccesRefuseException("Seuls la RH et le responsable de cette évaluation peuvent saisir le résultat");
+        if (!postesUtilisateur.postesDe(user.getId()).contains(e.getIdPosteResponsable())) {
+            throw new AccesRefuseException("Seul le titulaire du poste responsable de cette évaluation (ou son délégué) peut saisir le résultat");
         }
     }
 

@@ -48,7 +48,7 @@ public interface PropositionEmbaucheRepository extends JpaRepository<Proposition
             """)
     List<PropositionEmbauche> findAExpirer(@Param("aujourdhui") LocalDate aujourdhui);
 
-    /** Sièges d'un besoin, avec le poste, sa catégorie et son échelon. */
+    /** Sièges d'un besoin (d'un de ses postes si idPoste n'est pas 0), avec le poste, sa catégorie et son échelon. */
     @Query("""
             SELECT bp FROM BesoinPoste bp
             JOIN FETCH bp.poste p
@@ -56,10 +56,10 @@ public interface PropositionEmbaucheRepository extends JpaRepository<Proposition
             JOIN FETCH m.categorie
             JOIN FETCH p.echelon
             JOIN FETCH p.uniteOrga
-            WHERE bp.besoin.id = :idBesoin
+            WHERE bp.besoin.id = :idBesoin AND (:idPoste = 0 OR p.id = :idPoste)
             ORDER BY bp.id
             """)
-    List<BesoinPoste> findSiegesDuBesoin(@Param("idBesoin") Integer idBesoin);
+    List<BesoinPoste> findSiegesDuBesoin(@Param("idBesoin") Integer idBesoin, @Param("idPoste") Integer idPoste);
 
     @Query(nativeQuery = true, value = """
             SELECT pe.id AS "id", pe.id_statut_actuel AS "statut", pe.date_limite_reponse AS "dateLimiteReponse",

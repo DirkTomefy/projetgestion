@@ -29,6 +29,8 @@ public class AccueilService {
     private final EvaluationService evaluationService;
     private final OnboardingService onboardingService;
     private final NotificationService notificationService;
+    private final s5.itu.projetgestion.repository.organisation.PosteRepository posteRepo;
+    private final s5.itu.projetgestion.service.service.DemandeContratService demandeContrat;
     private final s5.itu.projetgestion.service.finance.BudgetService budgetService;
     private final s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService;
 
@@ -36,7 +38,11 @@ public class AccueilService {
                           BesoinSuiviService besoinSuivi, EvaluationService evaluationService,
                           OnboardingService onboardingService, NotificationService notificationService,
                           s5.itu.projetgestion.service.finance.BudgetService budgetService,
-                          s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService) {
+                          s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService,
+                          s5.itu.projetgestion.repository.organisation.PosteRepository posteRepo,
+                          s5.itu.projetgestion.service.service.DemandeContratService demandeContrat) {
+        this.posteRepo = posteRepo;
+        this.demandeContrat = demandeContrat;
         this.budgetService = budgetService;
         this.grilleService = grilleService;
         this.userRepo = userRepo;
@@ -71,6 +77,8 @@ public class AccueilService {
                 a == null ? null : a.getPoste().getLibelle(), a == null ? null : a.getPoste().getUniteOrga().getLibelle(),
                 aValider, evaluations, onboardingService.mesTaches(su).size(), notificationService.compterNonLues(su.getId()),
                 mesBesoins, inscriptions, delegations,
-                su.hasRole("DG") ? budgetService.aValider() : 0, su.hasRole("DG") ? grilleService.aValider() : 0);
+                su.hasRole("DG") ? budgetService.aValider() : 0, su.hasRole("DG") ? grilleService.aValider() : 0,
+                su.hasRole("DG") ? posteRepo.countProposesAValider() : 0,
+                demandeContrat.aTraiter(su));
     }
 }

@@ -18,6 +18,14 @@ public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Intege
 
     boolean existsByIdBesoinAndEtatIn(Integer idBesoin, Collection<String> etats);
 
+    /** Offre en brouillon ou publiée qui couvre déjà ce poste du besoin (ou tout le besoin). */
+    @Query(nativeQuery = true, value = """
+            SELECT count(*) > 0 FROM offre_emploi o
+            WHERE o.id_besoin = :idBesoin AND o.etat IN ('BROUILLON', 'PUBLIEE')
+              AND (o.id_poste IS NULL OR o.id_poste = :idPoste)
+            """)
+    boolean existeOffreEnCours(@Param("idBesoin") Integer idBesoin, @Param("idPoste") Integer idPoste);
+
     List<OffreEmploi> findAllByOrderByIdDesc();
 
     List<OffreEmploi> findByIdBesoinOrderByIdDesc(Integer idBesoin);
@@ -34,9 +42,11 @@ public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Intege
             SELECT o.* FROM offre_emploi o
             WHERE o.etat <> 'CLOTUREE'
               AND (cast(:idBesoin AS integer) IS NULL OR o.id_besoin = :idBesoin)
-              AND EXISTS (SELECT 1 FROM besoin_poste bp WHERE bp.id_besoin = o.id_besoin AND bp.etat = 'POURVU')
+              AND EXISTS (SELECT 1 FROM besoin_poste bp WHERE bp.id_besoin = o.id_besoin AND bp.etat = 'POURVU'
+                            AND (o.id_poste IS NULL OR bp.id_poste = o.id_poste))
               AND NOT EXISTS (SELECT 1 FROM besoin_poste bp
-                              WHERE bp.id_besoin = o.id_besoin AND bp.etat NOT IN ('POURVU', 'ANNULE'))
+                              WHERE bp.id_besoin = o.id_besoin AND bp.etat NOT IN ('POURVU', 'ANNULE')
+                                AND (o.id_poste IS NULL OR bp.id_poste = o.id_poste))
             """)
     List<OffreEmploi> findACloturerPostesPourvus(@Param("idBesoin") Integer idBesoin);
 
@@ -45,7 +55,7 @@ public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Intege
                    o.date_limite_candidature AS dateLimiteCandidature, u.libelle AS unite,
                    (SELECT string_agg(DISTINCT p.libelle, ', ' ORDER BY p.libelle)
                       FROM besoin_poste bp JOIN poste p ON p.id = bp.id_poste
-                     WHERE bp.id_besoin = o.id_besoin) AS postes,
+                     WHERE bp.id_besoin = o.id_besoin AND (o.id_poste IS NULL OR bp.id_poste = o.id_poste)) AS postes,
                    (SELECT count(*) FROM candidatures c WHERE c.id_offre_emploi = o.id) AS nbCandidatures,
                    (SELECT count(*) FROM candidatures c
                      WHERE c.id_offre_emploi = o.id AND c.etat = 'DEPOSEE') AS nbNouvelles
@@ -71,6 +81,7 @@ public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Intege
             JOIN unite_orga u         ON u.id = b.id_unite_orga
             LEFT JOIN type_contrat tc ON tc.id = o.id_type_contrat
             LEFT JOIN besoin_poste bp ON bp.id_besoin = b.id AND bp.etat NOT IN ('POURVU', 'ANNULE')
+                                     AND (o.id_poste IS NULL OR bp.id_poste = o.id_poste)
             LEFT JOIN poste p         ON p.id = bp.id_poste
             LEFT JOIN LATERAL (
                 WITH RECURSIVE ancetres AS (

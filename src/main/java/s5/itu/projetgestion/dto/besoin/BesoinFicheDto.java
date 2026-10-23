@@ -22,11 +22,15 @@ public record BesoinFicheDto(
     public record Etape(Integer ordre, String poste, String statut, String decideur, LocalDateTime date,
                         String commentaire, boolean controleBudget) { }
 
-    public record Budget(int exercice, BigDecimal coutAnnuel, BigDecimal budgetUnite, boolean dansLeBudget) { }
+    /** disponible = budget de l'unité − masse salariale annuelle − autres besoins en cours. */
+    public record Budget(int exercice, BigDecimal coutAnnuel, BigDecimal budgetUnite, BigDecimal masseSalariale,
+                         BigDecimal autresBesoins, BigDecimal disponible, boolean dansLeBudget) { }
 
     public record Evenement(LocalDateTime date, String action, String etatAvant, String etatApres, String auteur, String commentaire) { }
 
-    public record Offre(Integer id, String reference, String etat, LocalDate datePublication, LocalDate dateLimite) { }
+    /** Offre d'emploi du besoin ; poste NULL pour une offre qui couvre tout le besoin. */
+    public record Offre(Integer id, String reference, String etat, LocalDate datePublication, LocalDate dateLimite, String poste) { }
 
-    public record Actions(boolean valider, boolean refuser, boolean annuler, boolean creerOffre) { }
+    /** postesSansOffre : postes du besoin ouvert qui ont encore des places à pourvoir et pas d'offre en cours. */
+    public record Actions(boolean valider, boolean refuser, boolean annuler, boolean creerOffre, List<Integer> postesSansOffre) { }
 }

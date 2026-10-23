@@ -32,8 +32,11 @@ public class BesoinController {
     
     private final BesoinService besoinService;
     private final UserRepository userRepository;
+    private final s5.itu.projetgestion.service.organisation.PerimetreService perimetre;
 
-    public BesoinController(BesoinService besoinService, UserRepository userRepository){
+    public BesoinController(BesoinService besoinService, UserRepository userRepository,
+                            s5.itu.projetgestion.service.organisation.PerimetreService perimetre){
+        this.perimetre = perimetre;
         this.besoinService = besoinService;
         this.userRepository = userRepository;
     } 
@@ -70,8 +73,9 @@ public class BesoinController {
 
     @PostMapping("/api/rh/besoins")
     public ResponseEntity<BesoinDto> creer(@RequestBody BesoinRequest request, HttpSession session) {
-        SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeys.CURRENT_USER);
-        if (sessionUser == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Aucun utilisateur connecté.");
+        SessionUser sessionUser = s5.itu.projetgestion.config.Acces.exiger(session, s5.itu.projetgestion.config.Acces.MANAGER,
+                s5.itu.projetgestion.config.Acces.RH, s5.itu.projetgestion.config.Acces.DG);
+        perimetre.verifierUnite(sessionUser, request.idUniteOrga());   // manager : son unité et ses sous-unités
         User user = userRepository.findById(sessionUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur introuvable."));
         return ResponseEntity.status(HttpStatus.CREATED).body(besoinService.creerBesoin(request, user));

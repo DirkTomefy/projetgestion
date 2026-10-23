@@ -26,6 +26,12 @@ public class EvaluationController {
         return service.postesResponsables();
     }
 
+    /** Postes au nom desquels l'utilisateur connecté peut saisir un résultat (occupés ou délégués). */
+    @GetMapping("/api/selection/mes-postes")
+    public List<Integer> mesPostes(HttpSession session) {
+        return service.mesPostes(SessionRh.connecte(session));
+    }
+
     @PutMapping("/api/rh/evaluations/{id}/planification")
     public SelectionDto planifier(@PathVariable Integer id, @Valid @RequestBody PlanificationRequest req,
                                   HttpSession session) {

@@ -18,7 +18,7 @@ public interface TraitementRepository extends JpaRepository<Traitement, Integer>
                    o.id AS "idOffre", o.ref AS "referenceOffre", o.id_besoin AS "idBesoin",
                    (SELECT string_agg(DISTINCT p.libelle, ', ' ORDER BY p.libelle)
                       FROM besoin_poste bp JOIN poste p ON p.id = bp.id_poste
-                     WHERE bp.id_besoin = o.id_besoin) AS "postes",
+                     WHERE bp.id_besoin = o.id_besoin AND (o.id_poste IS NULL OR bp.id_poste = o.id_poste)) AS "postes",
                    ca.id AS "idCandidat", ca.nom AS "nom", ca.prenom AS "prenom",
                    ca.email AS "email", ca.numero AS "telephone"
             FROM candidatures c

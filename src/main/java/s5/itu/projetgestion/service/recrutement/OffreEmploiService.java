@@ -70,9 +70,23 @@ public class OffreEmploiService {
         return typeContratRepo.findAll();
     }
 
-    public BesoinOffreInfo getBesoinOuvert(Integer idBesoin) {
-        BesoinOffreInfo b = besoinLookup.findById(idBesoin)
-                .orElseThrow(() -> new ProjetgestionException("Besoin introuvable : " + idBesoin));
+    /**
+     * Besoin ouvert, vu pour un de ses postes : une offre par poste demandé.
+     * idPoste peut être omis quand le besoin ne porte que sur un poste.
+     */
+    public BesoinOffreInfo getBesoinOuvert(Integer idBesoin, Integer idPoste) {
+        List<BesoinOffreInfo> postes = besoinLookup.postes(idBesoin);
+        if (postes.isEmpty()) throw new ProjetgestionException("Besoin introuvable : " + idBesoin);
+        BesoinOffreInfo b;
+        if (idPoste == null) {
+            if (postes.size() > 1)
+                throw new ProjetgestionException("Le besoin " + postes.get(0).reference()
+                        + " demande plusieurs postes : choisissez le poste de l'offre");
+            b = postes.get(0);
+        } else {
+            b = postes.stream().filter(x -> idPoste.equals(x.idPoste())).findFirst()
+                    .orElseThrow(() -> new ProjetgestionException("Ce poste n'est pas demandé par le besoin " + postes.get(0).reference()));
+        }
         if (!BesoinOffreLookupService.ETATS_RECRUTEMENT.contains(b.etatActuel())) {
             throw new ProjetgestionException("Le recrutement n'est pas ouvert pour le besoin "
                     + b.reference() + " (état : " + b.etatActuel() + ")");
@@ -80,10 +94,11 @@ public class OffreEmploiService {
         return b;
     }
 
-    public OffreEmploiForm nouveauFormulaire(Integer idBesoin) {
-        BesoinOffreInfo b = getBesoinOuvert(idBesoin);
+    public OffreEmploiForm nouveauFormulaire(Integer idBesoin, Integer idPoste) {
+        BesoinOffreInfo b = getBesoinOuvert(idBesoin, idPoste);
         OffreEmploiForm f = new OffreEmploiForm();
         f.setIdBesoin(b.id());
+        f.setIdPoste(b.idPoste());
         f.setDatePublication(LocalDate.now());
         f.setDateLimiteCandidature(LocalDate.now().plusDays(30));
         f.setReference(proposerReference(b));
@@ -104,7 +119,7 @@ public class OffreEmploiService {
     @Transactional
     public OffreEmploi creer(OffreEmploiForm form, SessionUser user) {
         verifierRh(user);
-        BesoinOffreInfo besoin = getBesoinOuvert(form.getIdBesoin());
+        BesoinOffreInfo besoin = getBesoinOuvert(form.getIdBesoin(), form.getIdPoste());
 
         String ref = form.getReference() == null ? "" : form.getReference().trim();
         if (ref.isEmpty()) throw new ProjetgestionException("La référence est obligatoire");
@@ -120,9 +135,12 @@ public class OffreEmploiService {
         String etat = OffreEmploi.ETAT_BROUILLON.equals(form.getEtat())
                 ? OffreEmploi.ETAT_BROUILLON : OffreEmploi.ETAT_PUBLIEE;
 
-        if (offreRepo.existsByIdBesoinAndEtatIn(besoin.id(),
-                List.of(OffreEmploi.ETAT_BROUILLON, OffreEmploi.ETAT_PUBLIEE))) {
-            throw new ProjetgestionException("Une offre est déjà en cours pour le besoin " + besoin.reference());
+        if (offreRepo.existeOffreEnCours(besoin.id(), besoin.idPoste())) {
+            throw new ProjetgestionException("Une offre est déjà en cours pour le poste " + besoin.poste()
+                    + " du besoin " + besoin.reference());
+        }
+        if (besoin.aPourvoir() == null || besoin.aPourvoir() == 0) {
+            throw new ProjetgestionException("Toutes les places du poste " + besoin.poste() + " sont déjà pourvues");
         }
 
         TypeContrat typeContrat = null;   // facultatif
@@ -144,6 +162,7 @@ public class OffreEmploiService {
 
         OffreEmploi o = new OffreEmploi();
         o.setIdBesoin(besoin.id());
+        o.setIdPoste(besoin.idPoste());
         o.setRef(ref);
         o.setTypeContrat(typeContrat);
         o.setDatePublication(datePub);

@@ -24,6 +24,27 @@ public class ReferentielController {
         this.service = service;
     }
 
+    /**
+     * Référentiels d'organisation (métiers, catégories, échelons, types de contrat) : modifiés par le DG.
+     * Référentiels du recrutement (motifs, types de document, types d'information du CV) : RH, DG ou administrateur.
+     */
+    public static final java.util.Set<String> ORGANISATION = java.util.Set.of("categories", "echelons", "metiers", "types-contrat");
+
+    private static void ecriture(String ref, HttpSession session) {
+        if (ORGANISATION.contains(ref)) Acces.exiger(session, Acces.DG);
+        else Acces.exiger(session, Acces.RH, Acces.DG, Acces.ADMIN);
+    }
+
+    /** Référentiels que l'utilisateur connecté peut modifier. */
+    @GetMapping("/modifiables")
+    public List<String> modifiables(HttpSession session) {
+        var su = Acces.connecte(session);
+        return ReferentielService.REFERENTIELS.keySet().stream().sorted()
+                .filter(r -> ORGANISATION.contains(r) ? su.hasRole(Acces.DG)
+                        : su.hasRole(Acces.RH) || su.hasRole(Acces.DG) || su.hasRole(Acces.ADMIN))
+                .toList();
+    }
+
     @GetMapping
     public Map<String, String> referentiels(HttpSession session) {
         Acces.connecte(session);
@@ -38,19 +59,19 @@ public class ReferentielController {
 
     @PostMapping("/{ref}")
     public ResponseEntity<ReferentielDto> creer(@PathVariable String ref, @RequestBody ReferentielRequest req, HttpSession session) {
-        Acces.exiger(session, Acces.ADMIN, Acces.RH);
+        ecriture(ref, session);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.creer(ref, req));
     }
 
     @PutMapping("/{ref}/{id}")
     public ReferentielDto modifier(@PathVariable String ref, @PathVariable Integer id, @RequestBody ReferentielRequest req, HttpSession session) {
-        Acces.exiger(session, Acces.ADMIN, Acces.RH);
+        ecriture(ref, session);
         return service.modifier(ref, id, req);
     }
 
     @DeleteMapping("/{ref}/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable String ref, @PathVariable Integer id, HttpSession session) {
-        Acces.exiger(session, Acces.ADMIN, Acces.RH);
+        ecriture(ref, session);
         service.supprimer(ref, id);
         return ResponseEntity.noContent().build();
     }

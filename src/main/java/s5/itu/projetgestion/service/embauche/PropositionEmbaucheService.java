@@ -128,7 +128,8 @@ public class PropositionEmbaucheService {
     public FormulairePropositionDto formulaire(Integer idCandidature) {
         Candidature c = candidatureRetenue(idCandidature);
         OffreEmploi offre = offreDe(c);
-        List<BesoinPoste> sieges = propositionRepo.findSiegesDuBesoin(offre.getIdBesoin());
+        List<BesoinPoste> sieges = propositionRepo.findSiegesDuBesoin(offre.getIdBesoin(),
+                offre.getIdPoste() == null ? 0 : offre.getIdPoste());   // l'offre porte sur un poste du besoin
 
         LocalDate aujourdhui = LocalDate.now();
         LocalDate dateLimite = aujourdhui.plusDays(7);
@@ -164,9 +165,10 @@ public class PropositionEmbaucheService {
 
         BesoinPoste siege = besoinPosteRepo.findById(req.idBesoinPoste())
                 .orElseThrow(() -> PropositionException.introuvable("Poste (siège) introuvable : " + req.idBesoinPoste()));
-        if (!Objects.equals(siege.getBesoin().getId(), offre.getIdBesoin())) {
+        if (!Objects.equals(siege.getBesoin().getId(), offre.getIdBesoin())
+                || (offre.getIdPoste() != null && !Objects.equals(siege.getPoste().getId(), offre.getIdPoste()))) {
             throw PropositionException.invalide("idBesoinPoste",
-                    "Ce poste n'appartient pas au besoin de l'offre " + offre.getRef());
+                    "Ce poste n'est pas celui de l'offre " + offre.getRef());
         }
         String raison = raisonIndisponible(siege);
         if (raison != null) throw new PropositionException(409, raison, "idBesoinPoste");

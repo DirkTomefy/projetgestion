@@ -19,5 +19,7 @@ public record BesoinOffreInfo(
         String categorie,
         String echelon,
         BigDecimal salaireMin,
-        BigDecimal salaireMax
+        BigDecimal salaireMax,
+        Integer idPoste,
+        Integer aPourvoir
 ) { }
