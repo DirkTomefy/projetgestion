@@ -116,15 +116,15 @@ INSERT INTO affectation (id, id_poste, id_employe, date_debut, date_fin) VALUES 
 INSERT INTO motif (id, libelle) VALUES (1, 'Test P5 - Surcroit d''activite');
 
 -- user (9)
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (1, 'manager.dev', 'hash_demo_manager_dev', 8, 'ACTIF', NULL, 'Mamy Razafimalala', '2026-10-23 09:53:22.262488', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (2, 'manager.compta', 'hash_demo_manager_compta', 5, 'ACTIF', NULL, 'Tojo Rakotondrabe', '2026-10-23 09:53:22.262488', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (3, 'rh.drh', 'hash_demo_rh', 18, 'ACTIF', NULL, 'Hasina Andrianjafy', '2026-10-23 09:53:22.262488', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (4, 'finance.daf', 'hash_demo_finance', 2, 'ACTIF', NULL, 'Sarah Randriamampianina', '2026-10-23 09:53:22.262488', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (5, 'dg', 'hash_demo_dg', 1, 'ACTIF', NULL, 'Jean Michel Rakoto', '2026-10-23 09:53:22.262488', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (6, 'admin', 'hash_demo_admin', NULL, 'ACTIF', NULL, 'Administrateur SIRH', '2026-10-23 09:53:22.26813', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (7, 'systeme', '!', NULL, 'DESACTIVE', NULL, 'Contrôle automatique', '2026-10-23 09:53:22.269629', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (8, 'paie', 'hash_demo_paie', 17, 'ACTIF', NULL, 'Lanto Rakotoniaina', '2026-10-23 09:53:22.270084', NULL);
-INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (9, 'support', 'hash_demo_support', 15, 'ACTIF', NULL, 'Aina Razanadrakoto', '2026-10-23 09:53:22.271665', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (1, 'manager.dev', 'hash_demo_manager_dev', 8, 'ACTIF', NULL, 'Mamy Razafimalala', '2026-10-23 11:26:21.422157', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (2, 'manager.compta', 'hash_demo_manager_compta', 5, 'ACTIF', NULL, 'Tojo Rakotondrabe', '2026-10-23 11:26:21.422157', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (3, 'rh.drh', 'hash_demo_rh', 18, 'ACTIF', NULL, 'Hasina Andrianjafy', '2026-10-23 11:26:21.422157', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (4, 'finance.daf', 'hash_demo_finance', 2, 'ACTIF', NULL, 'Sarah Randriamampianina', '2026-10-23 11:26:21.422157', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (5, 'dg', 'hash_demo_dg', 1, 'ACTIF', NULL, 'Jean Michel Rakoto', '2026-10-23 11:26:21.422157', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (6, 'admin', 'hash_demo_admin', NULL, 'ACTIF', NULL, 'Administrateur SIRH', '2026-10-23 11:26:21.428326', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (7, 'systeme', '!', NULL, 'DESACTIVE', NULL, 'Contrôle automatique', '2026-10-23 11:26:21.430412', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (8, 'paie', 'hash_demo_paie', 17, 'ACTIF', NULL, 'Lanto Rakotoniaina', '2026-10-23 11:26:21.431284', NULL);
+INSERT INTO "user" (id, login, mot_de_passe, id_employe, statut, email, nom_complet, date_creation, derniere_connexion) VALUES (9, 'support', 'hash_demo_support', 15, 'ACTIF', NULL, 'Aina Razanadrakoto', '2026-10-23 11:26:21.432879', NULL);
 
 -- besoin (5)
 INSERT INTO besoin (id, reference, type_besoin, id_motif, id_unite_orga, date_souhaitee, id_user, effectif, etat_actuel, budget_estime, precision_motif) VALUES (1, 'BES-TEST-P5-1', 'CREATION', 1, 4, '2026-12-07', 3, 2, 'OUVERT', NULL, NULL);
@@ -152,18 +152,90 @@ INSERT INTO type_document (id, libelle) VALUES (10, 'RAPPORT');
 INSERT INTO type_document (id, libelle) VALUES (11, 'AUTRE');
 INSERT INTO type_document (id, libelle) VALUES (12, 'CONTRAT_SIGNE');
 
+-- fiche_poste (10)
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (1, 1, NULL, 'Contribuer, en tant que Directeur general, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Directeur general.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Directeur general.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (2, 2, NULL, 'Contribuer, en tant que Directeur, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Directeur.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Directeur.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (3, 3, NULL, 'Contribuer, en tant que Chef de departement, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Chef de departement.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Chef de departement.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (4, 4, NULL, 'Contribuer, en tant que Chef de service, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Chef de service.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Chef de service.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (5, 5, NULL, 'Contribuer, en tant que Comptable, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Comptable.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Comptable.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (6, 6, NULL, 'Contribuer, en tant que Developpeur, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Developpeur.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Developpeur.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (7, 7, NULL, 'Contribuer, en tant que Administrateur reseau, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Administrateur reseau.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Administrateur reseau.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (8, 8, NULL, 'Contribuer, en tant que Technicien support, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Technicien support.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Technicien support.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (9, 9, NULL, 'Contribuer, en tant que Gestionnaire de paie, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Gestionnaire de paie.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Gestionnaire de paie.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+INSERT INTO fiche_poste (id, id_metier, id_poste, mission, activites, formation, experience, competences, conditions, version, date_maj, id_auteur) VALUES (10, 10, NULL, 'Contribuer, en tant que Charge de recrutement, aux objectifs de son unité et de l''entreprise, dans le respect des procédures et des délais fixés.', 'Réaliser les tâches propres au métier de Charge de recrutement.
+Rendre compte régulièrement de son activité à son supérieur direct.
+Respecter les procédures internes, la confidentialité et les règles de sécurité.
+Collaborer avec les autres équipes et partager l''information utile.', 'Diplôme ou qualification en rapport avec le métier de Charge de recrutement.', 'Expérience adaptée au niveau du poste (voir l''échelon).', 'Maîtrise des techniques du métier.
+Sens de l''organisation et de la rigueur.
+Capacité de travail en équipe et bonne communication.', 'Temps plein, 40 heures par semaine.
+Lieu de travail : siège de l''entreprise.', 1, '2026-10-23 11:26:21.999728', NULL);
+
 -- type_contrat (3)
 INSERT INTO type_contrat (id, libelle, duree_max, renouvellement_max) VALUES (2, 'CDI', NULL, NULL);
 INSERT INTO type_contrat (id, libelle, duree_max, renouvellement_max) VALUES (1, 'CE', 6, 2);
 INSERT INTO type_contrat (id, libelle, duree_max, renouvellement_max) VALUES (3, 'CDD', 24, 1);
 
 -- offre_emploi (6)
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (2, 2, 'OFF-TEST-P5-2', NULL, '2026-10-21', '2026-10-23', NULL, 'PUBLIEE', NULL, NULL, NULL, 9);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (3, 3, 'OFF-TEST-P5-3', 2, '2026-09-23', '2026-10-22', NULL, 'PUBLIEE', NULL, NULL, NULL, 14);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (4, 4, 'OFF-TEST-P5-4', 3, NULL, '2026-11-02', NULL, 'BROUILLON', NULL, NULL, NULL, 17);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (5, 5, 'OFF-TEST-P5-5', 3, '2026-10-26', '2026-11-22', NULL, 'PUBLIEE', NULL, NULL, NULL, 10);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (6, 1, 'OFF-TEST-P5-1-2', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL, 7);
-INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste) VALUES (1, 1, 'OFF-TEST-P5-1', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL, 6);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste, id_fiche_poste) VALUES (2, 2, 'OFF-TEST-P5-2', NULL, '2026-10-21', '2026-10-23', NULL, 'PUBLIEE', NULL, NULL, NULL, 9, NULL);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste, id_fiche_poste) VALUES (3, 3, 'OFF-TEST-P5-3', 2, '2026-09-23', '2026-10-22', NULL, 'PUBLIEE', NULL, NULL, NULL, 14, NULL);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste, id_fiche_poste) VALUES (4, 4, 'OFF-TEST-P5-4', 3, NULL, '2026-11-02', NULL, 'BROUILLON', NULL, NULL, NULL, 17, NULL);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste, id_fiche_poste) VALUES (5, 5, 'OFF-TEST-P5-5', 3, '2026-10-26', '2026-11-22', NULL, 'PUBLIEE', NULL, NULL, NULL, 10, NULL);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste, id_fiche_poste) VALUES (6, 1, 'OFF-TEST-P5-1-2', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL, 7, NULL);
+INSERT INTO offre_emploi (id, id_besoin, ref, id_type_contrat, date_publication, date_limite_candidature, id_document, etat, date_cloture, motif_cloture, id_user_cloture, id_poste, id_fiche_poste) VALUES (1, 1, 'OFF-TEST-P5-1', 1, '2026-10-18', '2026-11-12', NULL, 'PUBLIEE', NULL, NULL, NULL, 6, NULL);
 
 -- candidatures (3)
 INSERT INTO candidatures (id, id_candidat, id_offre_emploi, date_depot, etat) VALUES (1, 1, 1, '2026-10-21', 'DEPOSEE');
@@ -314,11 +386,11 @@ INSERT INTO grille_salariale_details (id, id_grille, id_categorie, id_echelon, m
 INSERT INTO grille_salariale_details (id, id_grille, id_categorie, id_echelon, montant_min, montant_max) VALUES (9, 1, 3, 3, 1300000.00, 1800000.00);
 
 -- histo_besoin (5)
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (1, 2, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (2, 5, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (3, 4, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (4, 1, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
-INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (5, 3, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 09:53:22.280954', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (1, 2, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 11:26:21.442357', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (2, 5, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 11:26:21.442357', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (3, 4, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 11:26:21.442357', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (4, 1, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 11:26:21.442357', 'Demande soumise (reprise des données)');
+INSERT INTO histo_besoin (id, id_besoin, etat_avant, etat_apres, action, id_user, date_action, commentaire) VALUES (5, 3, NULL, 'EN_ATTENTE', 'CREATION', 3, '2026-10-23 11:26:21.442357', 'Demande soumise (reprise des données)');
 
 -- histo_candidature (3)
 INSERT INTO histo_candidature (id, id_candidature, etat_avant, etat_apres, id_user, date_changement, commentaire) VALUES (1, 2, NULL, 'DEPOSEE', NULL, '2026-10-21 00:00:00', 'Dépôt de la candidature (données de test)');
@@ -387,6 +459,7 @@ SELECT setval('document_id_seq', 1, false);
 SELECT setval('echelon_metier_id_seq', 3, true);
 SELECT setval('employe_id_seq', 18, true);
 SELECT setval('etat_contrat_id_seq', 54, true);
+SELECT setval('fiche_poste_id_seq', 10, true);
 SELECT setval('grille_salariale_details_id_seq', 9, true);
 SELECT setval('grille_salariale_id_seq', 1, true);
 SELECT setval('histo_besoin_id_seq', 5, true);

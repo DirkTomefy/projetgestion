@@ -68,6 +68,21 @@ public class CommunicationCandidatService {
         });
     }
 
+    /** Convocation à un test ou entretien (ou nouvelle date en cas de replanification). */
+    public void evaluationPlanifiee(Candidature c, String typeEvaluation, LocalDate date, String libelle, boolean replanification) {
+        securise("convocation", () -> {
+            Map<String, Object> v = base(c.getCandidat());
+            ajouterOffre(v, c.getIdOffreEmploi());
+            v.put("typeEvaluation", typeEvaluation);
+            v.put("date", date == null ? null : ConditionsProposition.date(date));
+            v.put("libelle", libelle);
+            v.put("replanification", replanification);
+            emailService.envoyer(c.getCandidat().getEmail(),
+                    (replanification ? "Nouvelle date : " : "Convocation : ") + typeEvaluation + suffixeOffre(v),
+                    "emails/evaluation-planifiee", v);
+        });
+    }
+
     public void propositionEnvoyee(PropositionEmbauche p, boolean contreProposition) {
         securise("proposition", () -> {
             Map<String, Object> v = proposition(p);

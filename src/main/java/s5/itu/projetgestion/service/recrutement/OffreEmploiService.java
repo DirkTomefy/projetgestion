@@ -41,13 +41,16 @@ public class OffreEmploiService {
     private final BesoinOffreLookupService besoinLookup;
     private final OffrePdfService pdfService;
     private final FileStorageService fileStorageService;
+    private final s5.itu.projetgestion.service.organisation.FichePosteService fichePosteService;
 
     public OffreEmploiService(OffreEmploiRepository offreRepo,
                               TypeContratRepository typeContratRepo,
                               TypeDocumentRepository typeDocumentRepo,
                               BesoinOffreLookupService besoinLookup,
                               OffrePdfService pdfService,
-                              FileStorageService fileStorageService) {
+                              FileStorageService fileStorageService,
+                              s5.itu.projetgestion.service.organisation.FichePosteService fichePosteService) {
+        this.fichePosteService = fichePosteService;
         this.offreRepo = offreRepo;
         this.typeContratRepo = typeContratRepo;
         this.typeDocumentRepo = typeDocumentRepo;
@@ -102,6 +105,11 @@ public class OffreEmploiService {
         f.setDatePublication(LocalDate.now());
         f.setDateLimiteCandidature(LocalDate.now().plusDays(30));
         f.setReference(proposerReference(b));
+        // missions et profil de la fiche de poste (modifiables avant publication)
+        fichePosteService.texteOffre(b.idPoste()).ifPresent(t -> {
+            f.setDescription(t.description());
+            f.setProfil(t.profil());
+        });
         return f;
     }
 
@@ -149,8 +157,12 @@ public class OffreEmploiService {
                     .orElseThrow(() -> new ProjetgestionException("Type de contrat introuvable"));
         }
 
-        Map<String, Object> vars = variablesModele(besoin, ref, datePub, dateLimite, typeContrat,
-                form.getDescription(), form.getProfil());
+        var fiche = fichePosteService.texteOffre(besoin.idPoste());
+        String description = blankToNull(form.getDescription()) != null ? form.getDescription()
+                : fiche.map(t -> t.description()).orElse(null);
+        String profil = blankToNull(form.getProfil()) != null ? form.getProfil()
+                : fiche.map(t -> t.profil()).orElse(null);
+        Map<String, Object> vars = variablesModele(besoin, ref, datePub, dateLimite, typeContrat, description, profil);
         byte[] pdf = pdfService.renderPdf(vars);
 
         TypeDocument typeOffre = typeDocumentRepo.findByLibelle(TYPE_DOCUMENT_OFFRE)
@@ -168,6 +180,7 @@ public class OffreEmploiService {
         o.setDatePublication(datePub);
         o.setDateLimiteCandidature(dateLimite);
         o.setDocument(doc);
+        o.setIdFichePoste(fiche.map(t -> t.idFiche()).orElse(null));
         o.setEtat(etat);
         return offreRepo.save(o);
     }
