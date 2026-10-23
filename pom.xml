@@ -61,6 +61,19 @@
         <scope>runtime</scope>
     </dependency>
 
+    <!-- P4 : génération PDF des offres d'emploi (HTML/Thymeleaf -> PDF) -->
+    <dependency>
+        <groupId>io.github.openhtmltopdf</groupId>
+        <artifactId>openhtmltopdf-pdfbox</artifactId>
+        <version>1.1.22</version>
+    </dependency>
+
+    <!-- P4 sprint 3 : emails aux candidats (SMTP de test : Mailpit / MailHog) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
     <!-- Tests -->
     <dependency>
         <groupId>org.springframework.boot</groupId>

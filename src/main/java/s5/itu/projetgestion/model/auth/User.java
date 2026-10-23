@@ -1,0 +1,79 @@
+package s5.itu.projetgestion.model.auth;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "\"user\"") // "user" est un mot réservé PostgreSQL
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String login;
+
+    @Column(name = "mot_de_passe", nullable = false, length = 255)
+    private String motDePasse;
+
+    @Column(name = "id_employe")
+    private Integer idEmploye;
+
+    /** ACTIF (peut se connecter), EN_ATTENTE (inscription à valider), DESACTIVE. */
+    @Column(nullable = false, length = 20)
+    private String statut = "ACTIF";
+
+    @Column(length = 150)
+    private String email;
+
+    @Column(name = "nom_complet", length = 200)
+    private String nomComplet;
+
+    @Column(name = "date_creation", nullable = false)
+    private LocalDateTime dateCreation = LocalDateTime.now();
+
+    @Column(name = "derniere_connexion")
+    private LocalDateTime derniereConnexion;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_role",
+        joinColumns = @JoinColumn(name = "id_user"),
+        inverseJoinColumns = @JoinColumn(name = "id_role")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    // --- Getters / Setters ---
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getLogin() { return login; }
+    public void setLogin(String login) { this.login = login; }
+
+    public String getMotDePasse() { return motDePasse; }
+    public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
+
+    public Integer getIdEmploye() { return idEmploye; }
+    public void setIdEmploye(Integer idEmploye) { this.idEmploye = idEmploye; }
+
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getNomComplet() { return nomComplet; }
+    public void setNomComplet(String nomComplet) { this.nomComplet = nomComplet; }
+
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+    public LocalDateTime getDerniereConnexion() { return derniereConnexion; }
+    public void setDerniereConnexion(LocalDateTime derniereConnexion) { this.derniereConnexion = derniereConnexion; }
+
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
+}
