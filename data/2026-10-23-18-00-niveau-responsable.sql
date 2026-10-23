@@ -12,15 +12,15 @@ ALTER TABLE workflow_candidature DROP CONSTRAINT IF EXISTS ck_workflow_candidatu
 ALTER TABLE workflow_candidature ADD CONSTRAINT ck_workflow_candidature_regle
     CHECK (responsable_regle IS NULL OR responsable_regle IN ('SUPERIEUR', 'RESPONSABLE_UNITE', 'POSTE_FIXE'));
 
--- Réglage de départ des niveaux communs (modifiable dans l'écran Niveaux de sélection)
+-- Réglage de départ des niveaux communs (entretien RH : chargé de recrutement, POST-018) (modifiable dans l'écran Niveaux de sélection)
 UPDATE workflow_candidature SET responsable_regle = 'SUPERIEUR'
  WHERE id_offre_emploi IS NULL AND responsable_regle IS NULL AND type_evaluation = 'TEST';
 UPDATE workflow_candidature SET responsable_regle = 'RESPONSABLE_UNITE'
  WHERE id_offre_emploi IS NULL AND responsable_regle IS NULL AND type_evaluation = 'ENTRETIEN_CHEF_DEPARTEMENT';
 UPDATE workflow_candidature w SET responsable_regle = 'POSTE_FIXE',
-       id_poste_responsable = (SELECT id FROM poste WHERE libelle = 'Directeur des ressources humaines' AND etat = 'ACTIF' ORDER BY id LIMIT 1)
+       id_poste_responsable = (SELECT id FROM poste WHERE code = 'POST-018' AND etat = 'ACTIF')
  WHERE w.id_offre_emploi IS NULL AND w.responsable_regle IS NULL AND w.type_evaluation = 'ENTRETIEN_RH'
-   AND EXISTS (SELECT 1 FROM poste WHERE libelle = 'Directeur des ressources humaines' AND etat = 'ACTIF');
+   AND EXISTS (SELECT 1 FROM poste WHERE code = 'POST-018' AND etat = 'ACTIF');
 UPDATE workflow_candidature w SET responsable_regle = 'POSTE_FIXE',
        id_poste_responsable = (SELECT id FROM poste WHERE libelle = 'Directeur general' AND etat = 'ACTIF' ORDER BY id LIMIT 1)
  WHERE w.id_offre_emploi IS NULL AND w.responsable_regle IS NULL AND w.type_evaluation = 'ENTRETIEN_DIRECTION'
