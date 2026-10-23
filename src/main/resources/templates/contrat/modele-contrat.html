@@ -166,7 +166,7 @@
   <div class="parties">
     <div class="party">
       <h3>L'Employeur</h3>
-      <p><span class="label">Raison sociale :</span> Gestion RH</p>
+      <p><span class="label">Raison sociale :</span> <span th:text="${raisonSociale}">Gestion RH</span></p>
       <p><span class="label">Unité :</span> <span th:text="${unite.libelle}">Unité</span></p>
       <p><span class="label">Poste :</span> <span th:text="${poste.libelle}">Poste</span></p>
     </div>
@@ -179,77 +179,97 @@
   </div>
 
   <p class="mention">
-    Il a été convenu ce qui suit, conformément aux dispositions du Code du travail et de la convention collective applicable.
+    Il a été convenu ce qui suit, conformément aux dispositions du Code du travail.
   </p>
 
   <!-- ARTICLE 1 : ENGAGEMENT -->
-  <h2>Article 1 — Engagement et objet</h2>
+  <h2>Article 1 — Engagement et durée</h2>
   <p>
     Le Salarié est engagé par l'Employeur en qualité de
     <strong th:text="${poste.libelle}">Poste</strong>, au sein de
     <strong th:text="${unite.libelle}">Unité</strong>.
   </p>
-  <p>
-    Le présent contrat prend effet le <strong th:text="${dateDebut}">01/01/2026</strong>.
-    Il est conclu selon le type <strong th:text="${typeContrat}">CE</strong>.
+  <p th:if="${typeCode == 'CE'}">
+    Le présent contrat est un <strong>contrat d'essai</strong>. Il prend effet le
+    <strong th:text="${dateDebut}">01/01/2026</strong> et prend fin le
+    <strong th:text="${dateFinPrevue}">-</strong>.
+  </p>
+  <p th:if="${typeCode == 'CDD'}">
+    Le présent contrat est un <strong>contrat à durée déterminée</strong>. Il prend effet le
+    <strong th:text="${dateDebut}">01/01/2026</strong> et prend fin le
+    <strong th:text="${dateFinPrevue}">-</strong>, sans autre formalité à son terme.
+    <span th:if="${dureeMax != null}">La durée cumulée des contrats à durée déterminée successifs ne peut excéder
+    <strong th:text="${dureeMax + ' mois'}">24 mois</strong><span th:if="${renouvMax != null}">
+    et le contrat n'est renouvelable que <strong th:text="${renouvMax + ' fois'}">1 fois</strong></span>.</span>
+  </p>
+  <p th:if="${typeCode == 'CDI'}">
+    Le présent contrat est un <strong>contrat à durée indéterminée</strong>. Il prend effet le
+    <strong th:text="${dateDebut}">01/01/2026</strong>.
+  </p>
+  <p th:if="${typeCode != 'CE' and typeCode != 'CDD' and typeCode != 'CDI'}">
+    Le présent contrat est conclu selon le type <strong th:text="${typeContrat}">CE</strong>.
+    Il prend effet le <strong th:text="${dateDebut}">01/01/2026</strong>.
     <span th:if="${dateFinPrevue != '-'}">La date de fin prévue est le <strong th:text="${dateFinPrevue}">-</strong>.</span>
+  </p>
+  <p th:if="${precedent != null}" class="mention">
+    Il fait suite au contrat <span th:text="${precedent}">CTR-2025-0001</span>, dont il reprend l'ancienneté.
   </p>
 
   <!-- ARTICLE 2 : FONCTIONS -->
   <h2>Article 2 — Fonctions et attributions</h2>
   <p>
-    Le Salarié exercera les fonctions de <strong>[intitulé du poste]</strong>.
-    Ses attributions principales sont les suivantes :
+    Le Salarié exercera les fonctions de <strong th:text="${poste.libelle}">Poste</strong>
+    (<span th:text="${poste.code}">POS-001</span>)<span th:if="${metier != null}">, métier
+    <span th:text="${metier}">Métier</span></span><span th:if="${superieur != null}">, sous l'autorité de
+    <span th:text="${superieur}">Poste supérieur</span></span>.
+    Ses missions et attributions sont détaillées dans la fiche de poste remise avec le présent contrat.
   </p>
-  <ul>
-    <li th:if="${details.isEmpty()}">Les missions correspondent aux fonctions attachées au poste.</li>
-    <li th:each="detail : ${details}" th:text="${detail.pointCondition.libelle + ' : ' + detail.valeur}">Condition</li>
+  <ul th:if="${!autres.isEmpty()}">
+    <li th:each="detail : ${autres}" th:text="${detail}">Condition</li>
   </ul>
   <p>
-    Cette liste n'est pas exhaustive. Le Salarié pourra se voir confier toute autre tâche
-    compatible avec sa qualification et relevant de son niveau de responsabilité.
+    Le Salarié pourra se voir confier toute autre tâche compatible avec sa qualification
+    et relevant de son niveau de responsabilité.
   </p>
 
   <!-- ARTICLE 3 : LIEU DE TRAVAIL -->
   <h2>Article 3 — Lieu de travail</h2>
   <p>
     Le Salarié exercera ses fonctions au sein de l'unité
-    <strong th:text="${unite.libelle}">Unité</strong>.
-  </p>
-  <p class="mention">
-    Le cas échéant : Dans le cadre de ses fonctions, le Salarié pourra être amené à effectuer
-    des déplacements professionnels ponctuels en France ou à l'étranger.
+    <strong th:text="${unite.libelle}">Unité</strong><span th:if="${lieu != null}"> (lieu convenu :
+    <strong th:text="${lieu}">Antananarivo</strong>)</span>.
+    Tout changement durable de lieu de travail fera l'objet d'un avenant.
   </p>
 
   <!-- ARTICLE 4 : PÉRIODE D'ESSAI -->
   <h2>Article 4 — Période d'essai</h2>
-  <p>
-    Le présent contrat comporte une période d'essai de <strong th:text="${dureeMax != null ? dureeMax + ' mois maximum' : 'selon les dispositions applicables'}">selon les dispositions applicables</strong>
-    (renouvelable selon les conditions prévues par le type de contrat,
-    avec l'accord écrit du Salarié).
-  </p>
-  <p>
-    Durant cette période, chacune des parties pourra rompre le contrat sans indemnité,
-    dans le respect des délais de prévenance prévus par le Code du travail.
+  <div th:if="${typeCode == 'CE'}">
+    <p>
+      Le présent contrat tient lieu de période d'essai. Sa durée ne peut excéder
+      <strong th:text="${dureeMax != null ? dureeMax + ' mois' : 'la durée légale'}">6 mois</strong><span th:if="${renouvMax != null}">
+      et il peut être renouvelé au plus <strong th:text="${renouvMax + ' fois'}">2 fois</strong></span>,
+      avec l'accord écrit du Salarié.
+    </p>
+    <p>
+      Durant cette période, chacune des parties peut y mettre fin sans indemnité,
+      dans le respect du délai de prévenance prévu par le Code du travail.
+    </p>
+  </div>
+  <p th:if="${typeCode != 'CE'}">
+    Le présent contrat ne comporte pas de nouvelle période d'essai.
   </p>
 
   <!-- ARTICLE 5 : DURÉE DU TRAVAIL -->
-  <h2>Article 5 — Durée du travail</h2>
+  <h2>Article 5 — Durée et horaires de travail</h2>
   <p>
-    Le Salarié est engagé dans le cadre d'un contrat à <strong>[temps plein / temps partiel]</strong>.
+    Le Salarié est engagé à <strong>temps plein</strong>.
+    <span th:if="${horaire != null}">Horaire convenu : <strong th:text="${horaire}">8h-17h</strong>.</span>
+    <span th:if="${horaire == null}">La durée hebdomadaire de travail est de <strong>40 heures</strong>,
+    répartie selon l'horaire collectif en vigueur au sein de l'entreprise.</span>
   </p>
   <p>
-    <strong>Pour un temps plein :</strong> La durée hebdomadaire de travail est fixée à
-    <strong>[35 / autre]</strong> heures, réparties selon l'horaire collectif en vigueur
-    au sein de l'entreprise.
-  </p>
-  <p>
-    <strong>Pour un temps partiel :</strong> La durée hebdomadaire de travail est fixée à
-    <strong>[XX]</strong> heures, selon la répartition suivante : <strong>[jours et horaires]</strong>.
-  </p>
-  <p class="mention">
-    Le cas échéant (forfait jours) : Le Salarié bénéficie d'une convention de forfait annuel
-    en jours fixée à <strong>[XXX]</strong> jours par an, conformément à l'accord collectif applicable.
+    Les heures supplémentaires, demandées par l'Employeur, sont rémunérées ou récupérées
+    conformément à la législation en vigueur.
   </p>
 
   <!-- ARTICLE 6 : RÉMUNÉRATION -->
@@ -265,41 +285,35 @@
     <tbody>
       <tr>
         <td>Salaire de base</td>
-        <td class="amount" th:text="${remunerations.isEmpty() ? '-' : remunerations[0].salaire}">-</td>
+        <td class="amount" th:text="${salaire}">1 200 000 Ar</td>
         <td>Mensuel</td>
       </tr>
       <tr>
-        <td>Prime / variable (le cas échéant)</td>
-        <td class="amount">[0 000,00 €]</td>
-        <td>[Mensuel / annuel]</td>
-      </tr>
-      <tr>
         <td><strong>Total brut mensuel</strong></td>
-        <td class="amount"><strong th:text="${remunerations.isEmpty() ? '-' : remunerations[0].salaire}">-</strong></td>
-        <td>—</td>
+        <td class="amount"><strong th:text="${salaire}">1 200 000 Ar</strong></td>
+        <td>Mensuel</td>
       </tr>
     </tbody>
   </table>
   <p>
-    Le salaire est versé mensuellement, à date fixe, par virement bancaire.
-    Il est soumis aux cotisations sociales et fiscales en vigueur.
+    Le salaire est exprimé en ariary (Ar) ; il est versé mensuellement, à date fixe, par virement bancaire,
+    et soumis aux cotisations sociales et à l'impôt sur les revenus salariaux en vigueur.
+    Toute prime ou élément variable fait l'objet d'une décision écrite de l'Employeur.
   </p>
 
   <!-- ARTICLE 7 : CONGÉS PAYÉS -->
   <h2>Article 7 — Congés payés</h2>
   <p>
-    Le Salarié bénéficie des congés payés annuels légaux, soit <strong>5 semaines</strong>
-    par année de référence, ainsi que des congés conventionnels éventuels prévus par la
-    convention collective applicable.
+    Le Salarié acquiert <strong>2,5 jours ouvrables de congé par mois</strong> de service effectif,
+    soit 30 jours ouvrables par an, ainsi que les congés prévus par la convention collective ou le
+    règlement intérieur applicable.
   </p>
 
   <!-- ARTICLE 8 : PROTECTION SOCIALE -->
-  <h2>Article 8 — Retraite et prévoyance</h2>
+  <h2>Article 8 — Protection sociale</h2>
   <p>
-    Le Salarié est affilié à la caisse de retraite complémentaire
-    <strong>[nom de la caisse]</strong> et à l'organisme de prévoyance
-    <strong>[nom de l'organisme]</strong>, conformément aux dispositions légales et
-    conventionnelles en vigueur.
+    Le Salarié est déclaré et affilié, dès son entrée en fonction, à la Caisse nationale de prévoyance
+    sociale (CNaPS) et à l'organisme de santé au travail de l'entreprise, conformément à la réglementation.
   </p>
 
   <!-- ARTICLE 9 : CONFIDENTIALITÉ -->
@@ -311,22 +325,27 @@
   </p>
 
   <!-- ARTICLE 10 : RUPTURE -->
-  <h2>Article 10 — Rupture du contrat</h2>
-  <p>
-    Le contrat pourra être rompu dans les conditions prévues par le Code du travail et la
-    convention collective applicable : démission, rupture conventionnelle, licenciement
-    pour motif personnel ou économique, ou tout autre mode légal de rupture.
+  <h2>Article 10 — Fin du contrat</h2>
+  <p th:if="${typeCode == 'CE'}">
+    Le contrat prend fin à son terme. Il peut être rompu avant ce terme par l'une ou l'autre
+    des parties dans les conditions de l'article 4, ou renouvelé ou transformé en contrat à durée
+    déterminée ou indéterminée par écrit.
   </p>
-  <p>
-    Les délais de préavis applicables sont ceux prévus par la loi et la convention collective.
+  <p th:if="${typeCode == 'CDD'}">
+    Le contrat prend fin à son terme. Avant ce terme, il ne peut être rompu que d'un commun accord,
+    pour faute grave ou en cas de force majeure, dans les conditions prévues par le Code du travail.
+  </p>
+  <p th:if="${typeCode != 'CE' and typeCode != 'CDD'}">
+    Le contrat peut être rompu par démission, licenciement ou accord des parties, dans le respect du
+    préavis et des procédures prévus par le Code du travail et la convention collective applicable.
   </p>
 
   <!-- ARTICLE 11 : LITIGES -->
   <h2>Article 11 — Droit applicable et litiges</h2>
   <p>
-    Le présent contrat est régi par le droit français. En cas de litige relatif à son
-    interprétation ou à son exécution, les parties s'efforceront de trouver une solution
-    amiable. À défaut, le litige sera porté devant le Conseil de prud'hommes compétent.
+    Le présent contrat est régi par la législation du travail applicable à Madagascar. En cas de litige
+    relatif à son interprétation ou à son exécution, les parties s'efforceront de trouver une solution
+    amiable. À défaut, le litige sera porté devant le tribunal du travail compétent.
   </p>
 
   <!-- SIGNATURES -->

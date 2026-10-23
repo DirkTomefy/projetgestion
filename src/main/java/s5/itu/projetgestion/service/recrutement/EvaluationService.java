@@ -28,10 +28,15 @@ public class EvaluationService {
     private final SelectionService selectionService;
     private final HistoCandidatureService histoService;
     private final s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur;
+    private final s5.itu.projetgestion.service.notification.NotificationService notifications;
+    private final s5.itu.projetgestion.service.notification.CommunicationCandidatService communication;
 
-    public EvaluationService(EvaluationRepository evaluationRepo, SelectionService selectionService,
+    public EvaluationService(s5.itu.projetgestion.service.notification.NotificationService notifications,
+                             s5.itu.projetgestion.service.notification.CommunicationCandidatService communication,EvaluationRepository evaluationRepo, SelectionService selectionService,
                              HistoCandidatureService histoService,
                              s5.itu.projetgestion.service.organisation.PostesUtilisateurService postesUtilisateur) {
+        this.notifications = notifications;
+        this.communication = communication;
         this.postesUtilisateur = postesUtilisateur;
         this.evaluationRepo = evaluationRepo;
         this.selectionService = selectionService;
@@ -76,11 +81,47 @@ public class EvaluationService {
         if (!evaluationRepo.existsPosteActif(req.idPosteResponsable())) {
             throw new CandidatureException(400, "Poste introuvable ou inactif", "idPosteResponsable");
         }
+        java.time.LocalDate ancienneDate = e.getDatePrevue();
+        Integer ancienPoste = e.getIdPosteResponsable();
+        String ancienLibelle = e.getLibelle();
         e.setDatePrevue(req.datePrevue());
         e.setIdPosteResponsable(req.idPosteResponsable());
         e.setLibelle(req.libelle() == null || req.libelle().isBlank() ? null : req.libelle().trim());
         evaluationRepo.save(e);
+        boolean dejaPlanifiee = ancienPoste != null;
+        boolean dateChangee = !java.util.Objects.equals(ancienneDate, e.getDatePrevue());
+        boolean posteChange = !req.idPosteResponsable().equals(ancienPoste);
+        boolean libelleChange = !java.util.Objects.equals(ancienLibelle, e.getLibelle());
+        if (dateChangee || posteChange || libelleChange) prevenirPlanification(e, c, dejaPlanifiee, dateChangee || libelleChange, posteChange || dateChangee);
         return selectionService.dossier(c.getId());
+    }
+
+    /**
+     * Prévient le candidat (email de convocation, sans effet sur l'enregistrement s'il échoue) et le poste responsable
+     * (notification dans l'application). En cas de replanification, le message le précise.
+     */
+    private void prevenirPlanification(Evaluation e, Candidature c, boolean replanification, boolean prevenirCandidat, boolean prevenirResponsable) {
+        String type = libelleType(e.getNiveau().getTypeEvaluation());
+        var ca = c.getCandidat();
+        String nom = ca.getPrenom() == null ? ca.getNom() : ca.getNom() + " " + ca.getPrenom();
+        String quand = e.getDatePrevue() == null ? "" : " le " + s5.itu.projetgestion.service.embauche.ConditionsProposition.date(e.getDatePrevue());
+        if (prevenirResponsable) {
+            notifications.notifierPoste(e.getIdPosteResponsable(), "EVALUATION_PLANIFIEE",
+                    (replanification ? "Mise à jour : " : "") + type.substring(0, 1).toUpperCase() + type.substring(1)
+                            + " de " + nom + " prévu" + quand + " : vous êtes responsable de son déroulement.",
+                    "/mes-evaluations");
+        }
+        if (prevenirCandidat) communication.evaluationPlanifiee(c, type, e.getDatePrevue(), e.getLibelle(), replanification);
+    }
+
+    private static String libelleType(String t) {
+        return switch (t == null ? "" : t) {
+            case NiveauSelection.TYPE_TEST -> "test";
+            case NiveauSelection.TYPE_ENTRETIEN_RH -> "entretien RH";
+            case NiveauSelection.TYPE_ENTRETIEN_CHEF_DEPARTEMENT -> "entretien avec le chef de département";
+            case NiveauSelection.TYPE_ENTRETIEN_DIRECTION -> "entretien avec la direction";
+            default -> "évaluation";
+        };
     }
 
     /** Postes au nom desquels l'utilisateur peut saisir des résultats (occupés ou délégués). */
@@ -110,6 +151,14 @@ public class EvaluationService {
         evaluationRepo.save(e);
 
         String libelleNiveau = "niveau " + niveau.getOrdre() + " (" + niveau.getTypeEvaluation() + ")";
+        var ca = c.getCandidat();
+        String nomCandidat = ca.getPrenom() == null ? ca.getNom() : ca.getNom() + " " + ca.getPrenom();
+        notifications.notifierRole("RH", "EVALUATION_RESULTAT",
+                "Résultat du " + libelleType(niveau.getTypeEvaluation()) + " de " + nomCandidat + " : "
+                        + switch (decision) { case Evaluation.DECISION_ADMIS -> "admis"; case Evaluation.DECISION_ABSENT -> "absent"; default -> "non admis"; }
+                        + (e.getScore() != null ? " (" + e.getScore().stripTrailingZeros().toPlainString() + "/20)" : "")
+                        + ", saisi par " + (user.getNomComplet() != null ? user.getNomComplet() : user.getLogin()) + ".",
+                "/candidatures");
         if (!Evaluation.DECISION_ADMIS.equals(decision)) {
             String motif = (Evaluation.DECISION_ABSENT.equals(decision) ? "Absent au " : "Non admis au ") + libelleNiveau
                     + (e.getScore() != null ? " : " + e.getScore().stripTrailingZeros().toPlainString() + "/20" : "")

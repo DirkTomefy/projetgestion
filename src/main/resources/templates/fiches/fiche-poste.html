@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="'Fiche de poste ' + ${code}">Fiche de poste</title>
+    <style>
+        @page { size: A4; margin: 18mm 16mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 10.5pt; color: #222; line-height: 1.4; }
+        .bandeau { border-bottom: 3px solid #1f4e79; padding-bottom: 8px; margin-bottom: 14px; }
+        .societe { font-size: 10pt; color: #1f4e79; font-weight: bold; letter-spacing: 1px; }
+        .titre { font-size: 20pt; font-weight: bold; color: #1f4e79; margin: 6px 0 2px 0; }
+        .sous { font-size: 12pt; color: #333; }
+        .ref { font-size: 9pt; color: #666; }
+        h2 { font-size: 11.5pt; color: #1f4e79; border-bottom: 1px solid #ccd; padding-bottom: 3px; margin-top: 16px; }
+        table.infos { width: 100%; border-collapse: collapse; }
+        table.infos td { padding: 4px 6px; vertical-align: top; border-bottom: 1px solid #eee; }
+        table.infos td.label { width: 34%; color: #555; }
+        table.infos td.val { font-weight: bold; }
+        ul { margin: 4px 0; padding-left: 18px; }
+        li { margin-bottom: 3px; }
+        .texte { white-space: pre-line; }
+        .signature { margin-top: 26px; width: 100%; }
+        .signature td { width: 50%; padding-top: 4px; border-top: 1px solid #222; font-size: 9pt; color: #555; }
+        .pied { margin-top: 24px; font-size: 8pt; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="bandeau">
+    <div class="societe">GESTION RH</div>
+    <div class="titre">FICHE DE POSTE</div>
+    <div class="sous" th:text="${poste}">Intitulé du poste</div>
+    <div class="ref">Code : <span th:text="${code}">POS-001</span></div>
+</div>
+
+<table class="infos">
+    <tr>
+        <td class="label">Unité d'affectation</td>
+        <td class="val"><span th:text="${unite}">Unité</span><span th:if="${uniteType}" th:text="' (' + ${uniteType} + ')'"></span></td>
+    </tr>
+    <tr th:if="${metier}">
+        <td class="label">Métier</td>
+        <td class="val" th:text="${metier} + (${categorie} != null ? ' – catégorie ' + ${categorie} : '')">Métier</td>
+    </tr>
+    <tr th:if="${echelon}">
+        <td class="label">Niveau (échelon)</td>
+        <td class="val" th:text="${echelon}">Junior</td>
+    </tr>
+    <tr>
+        <td class="label">Rattachement hiérarchique</td>
+        <td class="val" th:text="${superieur != null ? superieur : 'Direction générale'}">Poste supérieur</td>
+    </tr>
+    <tr th:if="${salaire}">
+        <td class="label">Rémunération (grille)</td>
+        <td class="val" th:text="${salaire}">—</td>
+    </tr>
+</table>
+
+<h2>Mission</h2>
+<div class="texte" th:text="${mission}">Mission</div>
+
+<div th:if="${!activites.isEmpty()}">
+    <h2>Activités principales</h2>
+    <ul><li th:each="a : ${activites}" th:text="${a}">Activité</li></ul>
+</div>
+
+<h2>Profil requis</h2>
+<table class="infos">
+    <tr th:if="${formation}">
+        <td class="label">Formation</td>
+        <td th:text="${formation}">Formation</td>
+    </tr>
+    <tr th:if="${experience}">
+        <td class="label">Expérience</td>
+        <td th:text="${experience}">Expérience</td>
+    </tr>
+</table>
+<div th:if="${!competences.isEmpty()}">
+    <p style="margin-bottom:2px"><strong>Compétences et qualités</strong></p>
+    <ul><li th:each="c : ${competences}" th:text="${c}">Compétence</li></ul>
+</div>
+
+<div th:if="${!conditions.isEmpty()}">
+    <h2>Conditions d'exercice</h2>
+    <ul><li th:each="c : ${conditions}" th:text="${c}">Condition</li></ul>
+</div>
+
+<table class="signature" th:if="${titulaire}">
+    <tr>
+        <td>Titulaire : <span th:text="${titulaire}">Nom</span><br/>Date et signature (pris connaissance)</td>
+        <td>Responsable hiérarchique<br/>Date et signature</td>
+    </tr>
+</table>
+
+<div class="pied">
+    Fiche de poste – version <span th:text="${version}">1</span> du <span th:text="${dateMaj}">--/--/----</span>
+    – document généré automatiquement
+</div>
+
+</body>
+</html>

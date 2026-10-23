@@ -31,6 +31,10 @@ public class OffreEmploi {
     @Column(name = "id_poste")
     private Integer idPoste;
 
+    /** Fiche de poste dont l'offre reprend les missions et le profil (NULL si aucune). */
+    @Column(name = "id_fiche_poste")
+    private Integer idFichePoste;
+
     @Column(name = "ref", nullable = false, unique = true, length = 50)
     private String ref;
 
@@ -61,6 +65,9 @@ public class OffreEmploi {
     /** NULL pour une clôture automatique. */
     @Column(name = "id_user_cloture")
     private Integer idUserCloture;
+
+    public Integer getIdFichePoste() { return idFichePoste; }
+    public void setIdFichePoste(Integer idFichePoste) { this.idFichePoste = idFichePoste; }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

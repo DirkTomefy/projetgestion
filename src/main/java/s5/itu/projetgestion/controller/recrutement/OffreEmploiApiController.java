@@ -33,7 +33,8 @@ public class OffreEmploiApiController {
     public record OffreDto(Integer id, String ref, Integer idBesoin, String besoinRef, String poste,
                            String typeContrat, LocalDate datePublication, LocalDate dateLimiteCandidature,
                            String etat, String pdfUrl,
-                           LocalDateTime dateCloture, String motifCloture, boolean cloturable) { }
+                           LocalDateTime dateCloture, String motifCloture, boolean cloturable,
+                           Integer idFichePoste, String fichePdfUrl) { }
 
     private final OffreEmploiService offreService;
     private final BesoinOffreLookupService besoinLookup;
@@ -146,7 +147,9 @@ public class OffreEmploiApiController {
                 o.getDatePublication(), o.getDateLimiteCandidature(), o.getEtat(),
                 o.getDocument() != null ? "/api/rh/offres/" + o.getId() + "/pdf" : null,
                 o.getDateCloture(), o.getMotifCloture(),
-                !OffreEmploi.ETAT_CLOTUREE.equals(o.getEtat()));
+                !OffreEmploi.ETAT_CLOTUREE.equals(o.getEtat()),
+                o.getIdFichePoste(),
+                o.getIdFichePoste() != null && o.getIdPoste() != null ? "/api/fiches-poste/poste/" + o.getIdPoste() + "/pdf" : null);
     }
 
     private static SessionUser currentUser(HttpSession session) {

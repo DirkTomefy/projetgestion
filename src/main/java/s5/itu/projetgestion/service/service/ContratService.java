@@ -32,6 +32,7 @@ public class ContratService {
     private final EtatContratRepository etatRepo;
     private final OnboardingService onboardingService;
     private final TypeDocumentRepository typeDocumentRepo ;
+    private final s5.itu.projetgestion.service.recrutement.ContratPdfService contratPdfService;
     private final FileStorageService fileStorageService ;
     private  final TypeContratRepository typeRepo ;
     private final UploadProperties uploadProperties;
@@ -43,7 +44,9 @@ public class ContratService {
                           OnboardingService onboardingService , TypeDocumentRepository typeDocumentRepository, FileStorageService fileStorageService , TypeContratRepository typeRepo,
                           UploadProperties uploadProperties,
                           s5.itu.projetgestion.repository.contrat.ContratRemunerationRepository remunerationRepo,
-                          s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService) {
+                          s5.itu.projetgestion.service.finance.GrilleSalarialeService grilleService,
+                          s5.itu.projetgestion.service.recrutement.ContratPdfService contratPdfService) {
+        this.contratPdfService = contratPdfService;
         this.uploadProperties = uploadProperties;
         this.remunerationRepo = remunerationRepo;
         this.grilleService = grilleService;
@@ -191,11 +194,6 @@ public class ContratService {
         return typeRepo.findAll().stream().map(t -> new OptionDto(t.getId(), t.getLibelle())).toList();
     }
 
-    @Transactional
-    public ContratDto renouveler(Integer id, RenouvellementRequest req) {
-        return renouveler(id, req, null, null, false);
-    }
-
     /**
      * Renouvellement / transformation. salaireImpose et dateEffet sont facultatifs (par défaut : salaire en vigueur,
      * lendemain de la fin prévue). En simulation, toutes les règles sont contrôlées mais rien n'est enregistré.
@@ -287,6 +285,9 @@ public class ContratService {
             var salaire = remunerationRepo.findByContratIdOrderByDateEffetDesc(ancien.getId()).stream().findFirst().orElse(null);
             if (salaire != null) remunerer(nouveau, debut, java.math.BigDecimal.valueOf(salaire.getSalaire()));
         }
+        // le contrat à imprimer et faire signer est généré tout de suite (comme à l'embauche)
+        nouveau.setDocument(contratPdfService.generateAndStore(nouveau));
+        contratRepo.save(nouveau);
         return versDto(nouveau, true);
     }
 
@@ -337,7 +338,8 @@ public class ContratService {
         }
         contratRepo.save(c);
         remunerer(c, debut, salaire);
-        return c;
+        c.setDocument(contratPdfService.generateAndStore(c));   // exemplaire du contrat repris, à conserver au dossier
+        return contratRepo.save(c);
     }
 
     /** Salaire mensuel en vigueur sur le contrat (0 si aucun). */
